@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="88">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>src/Cache.hpp</itemPath>
+      <itemPath>src/ContentElement.hpp</itemPath>
+      <itemPath>src/Flow.hpp</itemPath>
+      <itemPath>src/IPTVTopologyOracle.hpp</itemPath>
+      <itemPath>src/PLACeS.hpp</itemPath>
+      <itemPath>src/Scheduler.hpp</itemPath>
+      <itemPath>src/SimTimeInterval.hpp</itemPath>
+      <itemPath>src/Topology.hpp</itemPath>
+      <itemPath>src/TopologyOracle.hpp</itemPath>
+      <itemPath>src/UGCPopularity.hpp</itemPath>
+      <itemPath>src/VoDTopologyOracle.hpp</itemPath>
+      <itemPath>src/zipf_distribution.hpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>topologies/germanTopoNew.txt</itemPath>
+      <itemPath>topologies/germanTopoNewInf.txt</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>src/ContentElement.cpp</itemPath>
+      <itemPath>src/Flow.cpp</itemPath>
+      <itemPath>src/IPTVTopologyOracle.cpp</itemPath>
+      <itemPath>src/PLACeS.cpp</itemPath>
+      <itemPath>src/Scheduler.cpp</itemPath>
+      <itemPath>src/SimTimeInterval.cpp</itemPath>
+      <itemPath>src/Topology.cpp</itemPath>
+      <itemPath>src/TopologyOracle.cpp</itemPath>
+      <itemPath>src/UGCPopularity.cpp</itemPath>
+      <itemPath>src/VoDTopologyOracle.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f1"
+                     displayName="CacheTest"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/CacheTestClass.cpp</itemPath>
+        <itemPath>tests/CacheTestClass.hpp</itemPath>
+        <itemPath>tests/CacheTestRunner.cpp</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>2</developmentMode>
+          <incDir>
+            <pElem>.</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>2</developmentMode>
+          <commandlineTool>g++</commandlineTool>
+          <incDir>
+            <pElem>.</pElem>
+            <pElem>/usr/local/boost_1_53_0</pElem>
+            <pElem>.</pElem>
+            <pElem>tests</pElem>
+          </incDir>
+          <commandLine>--std=c++11</commandLine>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/boost_1_53_0/stage/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
+            <linkerLibLibItem>boost_system</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread</linkerLibLibItem>
+            <linkerLibLibItem>boost_graph</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
+          </linkerLibItems>
+          <commandLine>-static</commandLine>
+        </linkerTool>
+      </compileType>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
+      <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ContentElement.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Flow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Flow.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/IPTVTopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/IPTVTopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Scheduler.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Scheduler.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/SimTimeInterval.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/SimTimeInterval.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Topology.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Topology.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/TopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/TopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/UGCPopularity.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/UGCPopularity.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/VoDTopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/VoDTopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/zipf_distribution.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/CacheTestClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/CacheTestClass.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/CacheTestRunner.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="topologies/germanTopoNew.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="topologies/germanTopoNewInf.txt" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Performance" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <incDir>
+            <pElem>.</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>.</pElem>
+            <pElem>/usr/local/boost_1_53_0</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <commandLine>--std=c++11</commandLine>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/boost_1_53_0/stage/lib</pElem>
+          </linkerAddLib>
+          <stripSymbols>true</stripSymbols>
+          <linkerLibItems>
+            <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
+            <linkerLibLibItem>boost_system</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread</linkerLibLibItem>
+            <linkerLibLibItem>boost_graph</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
+          </linkerLibItems>
+          <commandLine>-static</commandLine>
+        </linkerTool>
+      </compileType>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
+      <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ContentElement.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Flow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Flow.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/IPTVTopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/IPTVTopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Scheduler.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Scheduler.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/SimTimeInterval.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/SimTimeInterval.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Topology.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Topology.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/TopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/TopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/UGCPopularity.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/UGCPopularity.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/VoDTopologyOracle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/VoDTopologyOracle.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/zipf_distribution.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/CacheTestClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/CacheTestClass.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/CacheTestRunner.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="topologies/germanTopoNew.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="topologies/germanTopoNewInf.txt" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

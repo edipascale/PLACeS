@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="asid" for="node" attr.name="asid" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="ponC" for="node" attr.name="ponCustomers" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="nump" for="node" attr.name="numPon" attr.type="int">
+    <default>10</default>
+  </key>
+  <key id="avgu" for="node" attr.name="avgUsers" attr.type="int">
+    <default>128</default>
+  </key>
+  <key id="devu" for="node" attr.name="devUsers" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="upC" for="node" attr.name="upCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="dnC" for="node" attr.name="downCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="cs" for="node" attr.name="centralServer" attr.type="boolean">
+    <default>0</default>
+  </key>
+  <key id="bw" for="edge" attr.name="maxCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="len" for="edge" attr.name="length" attr.type="int">
+    <default>1</default>
+  </key>
+  <graph id="topo" edgedefault="directed" parse.nodes="14" parse.edges="42" parse.order="nodesfirst">
+    <node id="mc0">
+      <data key="asid">0</data>
+      <data key="avgu">64</data>
+    </node>
+    <node id="mc1">
+      <data key="asid">1</data>
+      <data key="devu">16</data>
+    </node>
+    <node id="mc2">
+      <data key="asid">2</data>
+    </node>
+    <node id="mc3">
+      <data key="asid">3</data>
+    </node>
+    <node id="mc4">
+      <data key="asid">4</data>
+    </node>
+    <node id="mc5">
+      <data key="asid">5</data>
+    </node>
+    <node id="mc6">
+      <data key="asid">6</data>
+    </node>
+    <node id="mc7">
+      <data key="asid">7</data>
+    </node>
+    <node id="mc8">
+      <data key="asid">8</data>
+    </node>
+    <node id="mc9">
+      <data key="asid">9</data>
+      <data key="cs">1</data>
+    </node>
+    <node id="mc10">
+      <data key="asid">10</data>
+    </node>
+    <node id="mc11">
+      <data key="asid">11</data>
+    </node>
+    <node id="mc12">
+      <data key="asid">12</data>
+    </node>
+    <node id="mc13">
+      <data key="asid">13</data>
+    </node>
+    <edge source="mc0" target="mc1">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc1" target="mc0">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc0" target="mc2">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc2" target="mc0">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc1" target="mc3">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc3" target="mc1">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc1" target="mc4">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc4" target="mc1">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc2" target="mc3">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc3" target="mc2">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc2" target="mc6">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc6" target="mc2">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc3" target="mc5">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc5" target="mc3">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc3" target="mc6">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc6" target="mc3">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc4" target="mc5">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc5" target="mc4">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc4" target="mc7">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc7" target="mc4">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc5" target="mc8">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc8" target="mc5">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc6" target="mc9">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc9" target="mc6">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc6" target="mc10">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc10" target="mc6">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc7" target="mc8">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc8" target="mc7">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc8" target="mc9">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc9" target="mc8">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc9" target="mc10">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc10" target="mc9">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc9" target="mc11">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc11" target="mc9">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc10" target="mc11">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc11" target="mc10">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc10" target="mc13">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc13" target="mc10">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc11" target="mc12">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc12" target="mc11">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc12" target="mc13">
+      <data key="bw">-1</data>
+    </edge>
+    <edge source="mc13" target="mc12">
+      <data key="bw">-1</data>
+    </edge>
+  </graph>
+</graphml>

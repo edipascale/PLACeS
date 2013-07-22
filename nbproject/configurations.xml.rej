@@ -1,0 +1,10 @@
+--- nbproject/configurations.xml
++++ nbproject/configurations.xml
+@@ -20,6 +20,7 @@
+                    displayName="Resource Files"
+                    projectFiles="true">
+       <itemPath>tests/germanTopo.txt</itemPath>
++      <itemPath>tests/germanTopoNew.txt</itemPath>
+       <itemPath>tests/toyTopo.txt</itemPath>
+     </logicalFolder>
+     <logicalFolder name="SourceFiles"

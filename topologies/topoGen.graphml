@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="asid" for="node" attr.name="asid" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="ponC" for="node" attr.name="ponCustomers" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="nump" for="node" attr.name="numPon" attr.type="int">
+    <default>10</default>
+  </key>
+  <key id="avgu" for="node" attr.name="avgUsers" attr.type="int">
+    <default>512</default>
+  </key>
+  <key id="devu" for="node" attr.name="devUsers" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lat" for="node" attr.name="latitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lon" for="node" attr.name="longitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="upC" for="node" attr.name="upCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="dnC" for="node" attr.name="downCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="cs" for="node" attr.name="centralServer" attr.type="boolean">
+    <default>0</default>
+  </key>
+  <key id="bw" for="edge" attr.name="maxCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="len" for="edge" attr.name="length" attr.type="double">
+    <default>1</default>
+  </key>
+  <graph id="topo" edgedefault="directed" parse.order="nodesfirst">
+      <node id="mc0">
+      <data key="asid">0</data>
+      <data key="nump">528</data>
+      <data key="lat">53.8389162316</data>
+      <data key="lon">-6.3031378146</data>
+    </node>
+    <node id="mc1">
+      <data key="asid">1</data>
+      <data key="nump">64</data>
+      <data key="lat">54.5484003314</data>
+      <data key="lon">-7.8342127307</data>
+    </node>
+    <node id="mc2">
+      <data key="asid">2</data>
+      <data key="nump">152</data>
+      <data key="lat">53.920798422</data>
+      <data key="lon">-7.8677638998</data>
+    </node>
+    <node id="mc3">
+      <data key="asid">3</data>
+      <data key="nump">227</data>
+      <data key="lat">52.3663113824</data>
+      <data key="lon">-7.1726937861</data>
+    </node>
+    <node id="mc4">
+      <data key="asid">4</data>
+      <data key="nump">225</data>
+      <data key="lat">52.7537950578</data>
+      <data key="lon">-6.7062594408</data>
+    </node>
+    <node id="mc5">
+      <data key="asid">5</data>
+      <data key="nump">151</data>
+      <data key="lat">53.4283242351</data>
+      <data key="lon">-9.3172553016</data>
+    </node>
+    <node id="mc6">
+      <data key="asid">6</data>
+      <data key="nump">100</data>
+      <data key="lat">55.1832119315</data>
+      <data key="lon">-7.9747743234</data>
+    </node>
+    <node id="mc7">
+      <data key="asid">7</data>
+      <data key="nump">95</data>
+      <data key="lat">51.9063971121</data>
+      <data key="lon">-9.4409511674</data>
+    </node>
+    <node id="mc8">
+      <data key="asid">8</data>
+      <data key="nump">301</data>
+      <data key="lat">52.1679976432</data>
+      <data key="lon">-8.743099789</data>
+    </node>
+    <node id="mc9">
+      <data key="asid">9</data>
+      <data key="nump">575</data>
+      <data key="lat">53.6610768983</data>
+      <data key="lon">-6.8963416109</data>
+    </node>
+    <node id="mc10">
+      <data key="asid">10</data>
+      <data key="nump">152</data>
+      <data key="lat">53.432569538</data>
+      <data key="lon">-7.6372015527</data>
+    </node>
+    <node id="mc11">
+      <data key="asid">11</data>
+      <data key="nump">91</data>
+      <data key="lat">53.80035074</data>
+      <data key="lon">-9.5193976603</data>
+    </node>
+    <node id="mc12">
+      <data key="asid">12</data>
+      <data key="nump">301</data>
+      <data key="lat">52.148117534</data>
+      <data key="lon">-7.8526856877</data>
+    </node>
+    <node id="mc13">
+      <data key="asid">13</data>
+      <data key="nump">219</data>
+      <data key="lat">52.8183833933</data>
+      <data key="lon">-8.8679197455</data>
+    </node>
+    <node id="mc14">
+      <data key="asid">14</data>
+      <data key="cs">1</data>
+      <data key="nump">610</data>
+      <data key="lat">52.9241688887</data>
+      <data key="lon">-6.1158906331</data>
+    </node>
+    <node id="mc15">
+      <data key="asid">15</data>
+      <data key="nump">121</data>
+      <data key="lat">52.3580909005</data>
+      <data key="lon">-9.4918093024</data>
+    </node>
+    <node id="mc16">
+      <data key="asid">16</data>
+      <data key="nump">95</data>
+      <data key="lat">54.2111049993</data>
+      <data key="lon">-9.2155783969</data>
+    </node>
+    <node id="mc17">
+      <data key="asid">17</data>
+      <data key="nump">122</data>
+      <data key="lat">53.1657952639</data>
+      <data key="lon">-8.2941477964</data>
+    </node>
+    <node id="mc18">
+      <data key="asid">18</data>
+      <data key="nump">100</data>
+      <data key="lat">54.8344857195</data>
+      <data key="lon">-7.4820392102</data>
+    </node>
+    <node id="mc19">
+      <data key="asid">19</data>
+      <data key="nump">77</data>
+      <data key="lat">51.7689252296</data>
+      <data key="lon">-9.7689027971</data>
+    </node>
+    <edge source="mc0" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">102.406215389</data>
+    </edge>
+    <edge source="mc14" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">102.406215389</data>
+    </edge>
+    <edge source="mc4" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">43.9192018845</data>
+    </edge>
+    <edge source="mc14" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">43.9192018845</data>
+    </edge>
+    <edge source="mc10" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">116.002767596</data>
+    </edge>
+    <edge source="mc14" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">116.002767596</data>
+    </edge>
+    <edge source="mc0" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">43.702423329</data>
+    </edge>
+    <edge source="mc9" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">43.702423329</data>
+    </edge>
+    <edge source="mc9" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">55.1143088283</data>
+    </edge>
+    <edge source="mc10" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">55.1143088283</data>
+    </edge>
+    <edge source="mc0" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">102.89349793</data>
+    </edge>
+    <edge source="mc2" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">102.89349793</data>
+    </edge>
+    <edge source="mc3" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">53.3571000642</data>
+    </edge>
+    <edge source="mc4" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">53.3571000642</data>
+    </edge>
+    <edge source="mc4" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">115.729397309</data>
+    </edge>
+    <edge source="mc17" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">115.729397309</data>
+    </edge>
+    <edge source="mc5" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">73.9474674968</data>
+    </edge>
+    <edge source="mc17" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">73.9474674968</data>
+    </edge>
+    <edge source="mc13" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">54.4366786566</data>
+    </edge>
+    <edge source="mc17" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">54.4366786566</data>
+    </edge>
+    <edge source="mc2" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">56.33708736</data>
+    </edge>
+    <edge source="mc10" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">56.33708736</data>
+    </edge>
+    <edge source="mc11" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">49.771189478</data>
+    </edge>
+    <edge source="mc16" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">49.771189478</data>
+    </edge>
+    <edge source="mc5" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">43.4359680104</data>
+    </edge>
+    <edge source="mc11" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">43.4359680104</data>
+    </edge>
+    <edge source="mc6" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">134.229983761</data>
+    </edge>
+    <edge source="mc16" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">134.229983761</data>
+    </edge>
+    <edge source="mc6" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">49.8761675966</data>
+    </edge>
+    <edge source="mc18" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">49.8761675966</data>
+    </edge>
+    <edge source="mc1" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">39.0168468358</data>
+    </edge>
+    <edge source="mc18" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">39.0168468358</data>
+    </edge>
+    <edge source="mc1" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">69.7763663048</data>
+    </edge>
+    <edge source="mc2" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">69.7763663048</data>
+    </edge>
+    <edge source="mc5" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">111.231663264</data>
+    </edge>
+    <edge source="mc10" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">111.231663264</data>
+    </edge>
+    <edge source="mc2" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">93.6279875442</data>
+    </edge>
+    <edge source="mc16" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">93.6279875442</data>
+    </edge>
+    <edge source="mc3" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">52.2237995482</data>
+    </edge>
+    <edge source="mc12" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">52.2237995482</data>
+    </edge>
+    <edge source="mc8" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">60.7425606169</data>
+    </edge>
+    <edge source="mc12" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">60.7425606169</data>
+    </edge>
+    <edge source="mc7" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">50.3142636064</data>
+    </edge>
+    <edge source="mc15" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">50.3142636064</data>
+    </edge>
+    <edge source="mc7" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">27.2110740777</data>
+    </edge>
+    <edge source="mc19" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">27.2110740777</data>
+    </edge>
+    <edge source="mc8" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">55.1290991646</data>
+    </edge>
+    <edge source="mc15" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">55.1290991646</data>
+    </edge>
+    <edge source="mc13" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">66.260089225</data>
+    </edge>
+    <edge source="mc15" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">66.260089225</data>
+    </edge>
+    <edge source="mc3" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">124.975694389</data>
+    </edge>
+    <edge source="mc13" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">124.975694389</data>
+    </edge>
+    <edge source="mc12" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">137.815071725</data>
+    </edge>
+    <edge source="mc19" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">137.815071725</data>
+    </edge>
+  </graph>
+</graphml>
