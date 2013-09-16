@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="88">
+<configurationDescriptor version="89">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -76,18 +76,17 @@
         </cTool>
         <ccTool>
           <developmentMode>2</developmentMode>
+          <standard>8</standard>
           <commandlineTool>g++</commandlineTool>
           <incDir>
             <pElem>.</pElem>
-            <pElem>/usr/local/boost_1_53_0</pElem>
-            <pElem>.</pElem>
             <pElem>tests</pElem>
+            <pElem>/usr/local/boost_1_54_0</pElem>
           </incDir>
-          <commandLine>--std=c++11</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/local/boost_1_53_0/stage/lib</pElem>
+            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
@@ -101,7 +100,7 @@
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
           </linkerLibItems>
-          <commandLine>-static</commandLine>
+          <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
       <folder path="TestFiles/f1">
@@ -192,16 +191,16 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <standard>8</standard>
           <incDir>
             <pElem>.</pElem>
-            <pElem>/usr/local/boost_1_53_0</pElem>
-            <pElem>.</pElem>
+            <pElem>tests</pElem>
+            <pElem>/usr/local/boost_1_54_0</pElem>
           </incDir>
-          <commandLine>--std=c++11</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/local/boost_1_53_0/stage/lib</pElem>
+            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
           </linkerAddLib>
           <stripSymbols>true</stripSymbols>
           <linkerLibItems>
@@ -216,7 +215,7 @@
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
           </linkerLibItems>
-          <commandLine>-static</commandLine>
+          <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
       <folder path="TestFiles/f1">
