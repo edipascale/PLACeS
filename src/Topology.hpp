@@ -28,7 +28,7 @@ using std::string;
  * note that this is not assigned to the edge, but rather computed through the
  * values of ponCustomers of the two vertices connected by the edge. 
  */
-enum EdgeType {UPSTREAM, DOWNSTREAM, CORE};
+enum EdgeType {UPSTREAM, DOWNSTREAM, METRO, CORE, UNKNOWN_TYPE};
 
 // Create structs to define bundled properties for the graph
 struct NetworkNode {
@@ -47,6 +47,7 @@ struct NetworkEdge {
     Capacity spareCapacity;
     std::set<Flow*> activeFlows;
     Capacity peakCapacity;
+    EdgeType type;
 };
 
 // Our graph template
@@ -67,7 +68,7 @@ typedef std::map<Edge, Capacity> LoadMap;
 struct NetworkStats {
   std::vector<Capacity> avgTot, avgCore, avgAccessUp, avgAccessDown, peakCore,
       peakAccessUp, peakAccessDown, avgPeakCore, avgPeakAccessUp, 
-      avgPeakAccessDown;
+      avgPeakAccessDown, avgMetro, peakMetro, avgPeakMetro;
 };
 
 class Topology {
@@ -75,6 +76,7 @@ protected:
     DGraph topology;
     uint numVertices;
     uint numEdges;
+    uint numMetroEdges;
     uint numCoreEdges;
     uint numCustomers;
     uint numASes;
@@ -131,7 +133,7 @@ public:
     Vertex getLocalCache(Vertex node);
     VertexVec getLocalCacheNodes();
     bool isCongested(PonUser source, PonUser destination);
-    bool addEdge(Vertex src, Vertex dest, Capacity cap);
+    bool addEdge(Vertex src, Vertex dest, Capacity cap, EdgeType type);
     void printTopology(SimTime time, uint round);
     uint getAsid(PonUser node) {
       return topology[node.first].asid;

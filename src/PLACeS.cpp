@@ -59,17 +59,20 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
   // print network stats for each round
-  outputF << "Rnd AvgTot AvgCore AvgUp AvgDown AvgPeakCore AvgPeakUp AvgPeakDown "
-          "PeakCore PeakUp PeakDown" << endl;
+  outputF << "Rnd AvgTot AvgCore AvgMetro AvgUp AvgDown AvgPeakCore AvgPeakMetro AvgPeakUp AvgPeakDown "
+          "PeakCore PeakMetro PeakUp PeakDown" << endl;
   for (uint i = 0; i < rounds; i++) {
     outputF << i << " " << stats.avgTot.at(i) << " "
           << stats.avgCore.at(i) << " "
+          << stats.avgMetro.at(i) << " "
           << stats.avgAccessUp.at(i) << " "
           << stats.avgAccessDown.at(i) << " "
           << stats.avgPeakCore.at(i) << " "
+          << stats.avgPeakMetro.at(i) << " "
           << stats.avgPeakAccessUp.at(i) << " "
           << stats.avgPeakAccessDown.at(i) << " "
           << stats.peakCore.at(i) << " " 
+          << stats.peakMetro.at(i) << " " 
           << stats.peakAccessUp.at(i) << " " 
           << stats.peakAccessDown.at(i) << endl;
   }
@@ -77,12 +80,15 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
     // Print the aggregate stats over all rounds
     outputF << "a " << (Capacity) accumulate(stats.avgTot.begin(), stats.avgTot.end(), 0.0) / rounds << " "
             << (Capacity) (accumulate(stats.avgCore.begin(), stats.avgCore.end(), 0.0) / rounds) << " "
+            << (Capacity) (accumulate(stats.avgMetro.begin(), stats.avgMetro.end(), 0.0) / rounds) << " "
             << (Capacity) (accumulate(stats.avgAccessUp.begin(), stats.avgAccessUp.end(), 0.0) / rounds) << " "
             << (Capacity) (accumulate(stats.avgAccessDown.begin(), stats.avgAccessDown.end(), 0.0) / rounds) << " "
             << (Capacity) (accumulate(stats.avgPeakCore.begin(), stats.avgPeakCore.end(), 0.0) / rounds) << " "
+            << (Capacity) (accumulate(stats.avgPeakMetro.begin(), stats.avgPeakMetro.end(), 0.0) / rounds) << " "
             << (Capacity) (accumulate(stats.avgPeakAccessUp.begin(), stats.avgPeakAccessUp.end(), 0.0) / rounds) << " "
             << (Capacity) (accumulate(stats.avgPeakAccessDown.begin(), stats.avgPeakAccessDown.end(), 0.0) / rounds) << " "
             << *max_element(stats.peakCore.begin(), stats.peakCore.end()) << " "
+            << *max_element(stats.peakMetro.begin(), stats.peakMetro.end()) << " "
             << *max_element(stats.peakAccessUp.begin(), stats.peakAccessUp.end()) << " "
             << *max_element(stats.peakAccessDown.begin(), stats.peakAccessDown.end()) << " "
             << endl << endl;

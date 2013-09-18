@@ -15,7 +15,7 @@ extern boost::mt19937 gen;
 
 /* Utility method to add a PON link to the network
  */
-bool Topology::addEdge(Vertex src, Vertex dest, Capacity cap) {
+bool Topology::addEdge(Vertex src, Vertex dest, Capacity cap, EdgeType type = CORE) {
   auto result = boost::add_edge(src, dest, this->topology);
   if (result.second) {
     if (cap < 0) {
@@ -27,7 +27,7 @@ bool Topology::addEdge(Vertex src, Vertex dest, Capacity cap) {
       topology[result.first].spareCapacity = cap;
     }
     topology[result.first].peakCapacity = 0;
-    topology[result.first].activeFlows.clear();
+    topology[result.first].type = type;    
   } else {
     BOOST_LOG_TRIVIAL(warning) << "Topology::Topology() - could not add edge between vertices "
             << src << " and " << dest << std::endl;
@@ -69,6 +69,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
   uint ponCardinality = vm["pon-cardinality"].as<uint>();
   using namespace std;
   centralServer = std::numeric_limits<unsigned int>::max();
+  numMetroEdges = 0;
   numCoreEdges = 0;
   numCustomers = 0;
   // initialize dynamic_properties for the network snapshot if needed
@@ -104,6 +105,12 @@ Topology::Topology(string fileName, po::variables_map vm) {
     dp.property("maxCapacity", boost::get(&NetworkEdge::maxCapacity, topology));
     dp.property("spareCapacity", boost::get(&NetworkEdge::spareCapacity, topology));
     dp.property("peakCapacity", boost::get(&NetworkEdge::peakCapacity, topology));
+    // trying to read EdgeType as we did above generates errors with boost::lexical_cast
+    // hence I create an int map and I then assign the values manually
+    std::map<Edge, int> edgeTypeMap;
+    boost::associative_property_map<std::map<Edge, int> > 
+        edgeTypePMap(edgeTypeMap);
+    dp.property("type", edgeTypePMap);
     /* then define property maps for those attributes which won't be stored in
      * vertices or edges, but that are required to properly build the topology
      */
@@ -150,10 +157,22 @@ Topology::Topology(string fileName, po::variables_map vm) {
     } catch (boost::undirected_graph_error uge) {
       BOOST_LOG_TRIVIAL(error) << uge.what();
       abort();
-    } 
-    this->numCoreEdges = boost::num_edges(topology);
-    // if capacity of some edge is negative, make it unlimited
+    }
     BOOST_FOREACH(Edge e, boost::edges(topology)) {
+      // assign edge types manually
+      EdgeType type = (EdgeType) edgeTypeMap.at(e);
+      if (type >= UNKNOWN_TYPE) {
+        BOOST_LOG_TRIVIAL(warning) << "Unknown edge type " << type << " at edge "
+                << e.m_source << "-" << e.m_target << ", defaulting to CORE";
+        type = CORE;
+      }
+      topology[e].type = type;
+      
+      if (topology[e].type == CORE)
+        numCoreEdges++;
+      else if (topology[e].type == METRO)
+        numMetroEdges++;
+      // if capacity of some edge is negative, make it unlimited  
       if (topology[e].maxCapacity < 0) {
         topology[e].maxCapacity = UNLIMITED;
         topology[e].spareCapacity = UNLIMITED;
@@ -193,10 +212,10 @@ Topology::Topology(string fileName, po::variables_map vm) {
         //add this to the PON Nodes list
         ponNodes.push_back(pon);
         // create the downstream PON link
-        auto result = this->addEdge(v, pon, downCapacity);
+        auto result = this->addEdge(v, pon, downCapacity, DOWNSTREAM);
         assert(result);
         // create the upstream PON link
-        result = this->addEdge(pon, v, upCapacity);
+        result = this->addEdge(pon, v, upCapacity, UPSTREAM);
         assert(result);
       }
     }
@@ -253,10 +272,10 @@ Topology::Topology(string fileName, po::variables_map vm) {
         //add this to the PON Nodes list
         ponNodes.push_back(pon);
         // create the downstream PON link
-        auto result = this->addEdge(i, pon, capacity);
+        auto result = this->addEdge(i, pon, capacity, DOWNSTREAM);
         assert(result);
         // create the upstream PON link
-        result = this->addEdge(pon, i, revCapacity);
+        result = this->addEdge(pon, i, revCapacity, UPSTREAM);
         assert(result);
       }
     }
@@ -267,13 +286,13 @@ Topology::Topology(string fileName, po::variables_map vm) {
       getline(stream,line);
       lineBuffer.str(line);            
       lineBuffer >> sourceId >> destId >> capacity >> revCapacity;
-      auto result = this->addEdge(sourceId, destId, capacity);
+      auto result = this->addEdge(sourceId, destId, capacity, CORE);
       if (result) {
         numCoreEdges++;
       }
       assert(result);
       // Reverse link
-      result = this->addEdge(destId, sourceId, revCapacity);
+      result = this->addEdge(destId, sourceId, revCapacity, CORE);
       if (result) {
         numCoreEdges++;
       }
@@ -310,12 +329,15 @@ Topology::Topology(string fileName, po::variables_map vm) {
   uint numRounds = vm.at("rounds").as<uint>();
   stats.avgTot.assign(numRounds, 0);
   stats.avgCore.assign(numRounds, 0);
+  stats.avgMetro.assign(numRounds, 0);
   stats.avgAccessDown.assign(numRounds, 0);
   stats.avgAccessUp.assign(numRounds, 0);
   stats.avgPeakCore.assign(numRounds, 0);
+  stats.avgPeakMetro.assign(numRounds, 0);
   stats.avgPeakAccessDown.assign(numRounds, 0);
   stats.avgPeakAccessUp.assign(numRounds, 0);
   stats.peakCore.assign(numRounds, 0);
+  stats.peakMetro.assign(numRounds, 0);
   stats.peakAccessDown.assign(numRounds, 0);
   stats.peakAccessUp.assign(numRounds, 0);
   
@@ -510,14 +532,16 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
   Capacity averageTot(0), averageCore(0), averageAccessUp(0), temp(0), max(0);
   Capacity peakAccessUp(0), peakCore(0), avgPeakAccessUp(0), avgPeakCore(0);
   Capacity averageAccessDown(0), avgPeakAccessDown(0), peakAccessDown(0), tempPeak(0);
+  Capacity averageMetro(0), peakMetro(0), avgPeakMetro(0);
   /* Take the first edge of the graph and use it to initialize the following 
    * variables; this is required because, if all the core edges have unlimited 
    * capacity, peakCoreEdge would otherwise be returned as an undefined variable
    * in the previous implementation.
    */
   Edge nullE = *(boost::edges(topology).first) ;
-  Edge maxEdge(nullE), peakAccessUpEdge(nullE), peakAccessDownEdge(nullE), peakCoreEdge(nullE);
-  uint numAccessEdges = (this->numEdges - this->numCoreEdges) / 2;
+  Edge maxEdge(nullE), peakAccessUpEdge(nullE), peakAccessDownEdge(nullE), 
+          peakCoreEdge(nullE), peakMetroEdge(nullE);
+  uint numAccessEdges = (numEdges - (numCoreEdges + numMetroEdges)) / 2;
   BOOST_FOREACH (Edge e, boost::edges(topology)) {
     if (loadMap[e] > 0) {
       temp = loadMap[e] / roundDuration;
@@ -531,6 +555,14 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
           peakCoreEdge = e;
         }
       }
+      else if (this->getEdgeType(e) == METRO) {
+        averageMetro += temp;
+        avgPeakMetro += tempPeak;
+        if (tempPeak > peakMetro) {
+          peakMetro = tempPeak;
+          peakMetroEdge = e;
+        }
+      }
       else if (this->getEdgeType(e) == UPSTREAM) {
         averageAccessUp += temp;
         avgPeakAccessUp += tempPeak;
@@ -539,7 +571,7 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
           peakAccessUpEdge = e;
         }
       }
-      else { // DOWNSTREAM
+      else if (this->getEdgeType(e) == DOWNSTREAM) {
         averageAccessDown += temp;
         avgPeakAccessDown += tempPeak;
         if (tempPeak > peakAccessDown) {
@@ -554,20 +586,24 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
     }
   }
   // store the values in the stats vectors for future access or manipulation
-  stats.avgTot.at(currentRound) = (Capacity)(averageTot / this->numEdges);
-  stats.avgCore.at(currentRound) = (Capacity)(averageCore / this->numCoreEdges);
+  stats.avgTot.at(currentRound) = (Capacity)(averageTot / numEdges);
+  stats.avgCore.at(currentRound) = (Capacity)(averageCore / numCoreEdges);
+  stats.avgMetro.at(currentRound) = (Capacity)(averageMetro / numMetroEdges);
   stats.avgAccessUp.at(currentRound) = (Capacity)(averageAccessUp / numAccessEdges);
   stats.avgAccessDown.at(currentRound) = (Capacity)(averageAccessDown / numAccessEdges);
   stats.peakCore.at(currentRound) = peakCore;
+  stats.peakMetro.at(currentRound) = peakMetro;
   stats.peakAccessUp.at(currentRound) = peakAccessUp;
   stats.peakAccessDown.at(currentRound) = peakAccessDown;
-  stats.avgPeakCore.at(currentRound) = (Capacity)(avgPeakCore / this->numCoreEdges);
+  stats.avgPeakCore.at(currentRound) = (Capacity)(avgPeakCore / numCoreEdges);
+  stats.avgPeakMetro.at(currentRound) = (Capacity)(avgPeakMetro / numMetroEdges);
   stats.avgPeakAccessUp.at(currentRound) = (Capacity)(avgPeakAccessUp / numAccessEdges);
   stats.avgPeakAccessDown.at(currentRound) = (Capacity)(avgPeakAccessDown / numAccessEdges);
   // Print stats on the screen for human visualization
   std::cout << "Average load: " 
           << stats.avgTot.at(currentRound)
           << " (core: " << stats.avgCore.at(currentRound)
+          << "; metro: " << stats.avgMetro.at(currentRound)
           << "; access_up: " << stats.avgAccessUp.at(currentRound)
           << "; access_down: " << stats.avgAccessDown.at(currentRound)
           << "); maximum average load on edge " << maxEdge.m_source
@@ -578,6 +614,11 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
           << ", maximum peak core load on edge " << peakCoreEdge.m_source
           << "-" << peakCoreEdge.m_target << " (" 
           << stats.peakCore.at(currentRound) << ")" << std::endl;
+  std::cout << "Average peak metro load: " 
+          << stats.avgPeakMetro.at(currentRound)
+          << ", maximum peak metro load on edge " << peakMetroEdge.m_source
+          << "-" << peakMetroEdge.m_target << " (" 
+          << stats.peakMetro.at(currentRound) << ")" << std::endl;
   std::cout << "Average peak upstream access load: " 
           << stats.avgPeakAccessUp.at(currentRound)
           << ", maximum peak upstream access load on edge " << peakAccessUpEdge.m_source
@@ -648,14 +689,9 @@ bool Topology::isCongested(PonUser source, PonUser destination) {
   return congested;
 }
 
-// checks whether this is an upstream PON link, downstream PON link or core link
+// checks what kind of link this is (see EdgeType definition)
 EdgeType Topology::getEdgeType(Edge e) const{
-  if (topology[e.m_source].ponCustomers > 0)
-    return UPSTREAM;
-  else if (topology[e.m_target].ponCustomers > 0)
-    return DOWNSTREAM;
-  else
-    return CORE;
+    return topology[e].type;
 }
 
 void Topology::updateRouteCapacity(std::vector<Edge> route, Capacity toAdd) {

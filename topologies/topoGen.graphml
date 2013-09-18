@@ -39,6 +39,9 @@
   <key id="len" for="edge" attr.name="length" attr.type="double">
     <default>1</default>
   </key>
+  <key id="type" for="edge" attr.name="type" attr.type="int">
+    <default>3</default>
+  </key>
   <graph id="topo" edgedefault="directed" parse.order="nodesfirst">
       <node id="mc0">
       <data key="asid">0</data>
