@@ -588,17 +588,24 @@ void Topology::printNetworkStats(uint currentRound, uint roundDuration) {
   // store the values in the stats vectors for future access or manipulation
   stats.avgTot.at(currentRound) = (Capacity)(averageTot / numEdges);
   stats.avgCore.at(currentRound) = (Capacity)(averageCore / numCoreEdges);
-  stats.avgMetro.at(currentRound) = (Capacity)(averageMetro / numMetroEdges);
   stats.avgAccessUp.at(currentRound) = (Capacity)(averageAccessUp / numAccessEdges);
   stats.avgAccessDown.at(currentRound) = (Capacity)(averageAccessDown / numAccessEdges);
   stats.peakCore.at(currentRound) = peakCore;
-  stats.peakMetro.at(currentRound) = peakMetro;
   stats.peakAccessUp.at(currentRound) = peakAccessUp;
   stats.peakAccessDown.at(currentRound) = peakAccessDown;
   stats.avgPeakCore.at(currentRound) = (Capacity)(avgPeakCore / numCoreEdges);
-  stats.avgPeakMetro.at(currentRound) = (Capacity)(avgPeakMetro / numMetroEdges);
   stats.avgPeakAccessUp.at(currentRound) = (Capacity)(avgPeakAccessUp / numAccessEdges);
   stats.avgPeakAccessDown.at(currentRound) = (Capacity)(avgPeakAccessDown / numAccessEdges);
+  if (numMetroEdges == 0) {
+    stats.avgMetro.at(currentRound) = 0;
+    stats.avgPeakMetro.at(currentRound) = 0;
+    stats.peakMetro.at(currentRound) = 0;
+  }
+  else {
+    stats.avgMetro.at(currentRound) = (Capacity)(averageMetro / numMetroEdges);
+    stats.avgPeakMetro.at(currentRound) = (Capacity)(avgPeakMetro / numMetroEdges);
+    stats.peakMetro.at(currentRound) = peakMetro;
+  }
   // Print stats on the screen for human visualization
   std::cout << "Average load: " 
           << stats.avgTot.at(currentRound)
