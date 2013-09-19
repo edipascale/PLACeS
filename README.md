@@ -12,7 +12,7 @@ Video on Demand and time-shifted IPTV over a PON-based network.
 It was written for academic purposes and it's most likely
 unfit for usage in any production environment. 
 
-The project requires Boost libraries version 1.53.0 and BOOST.LOG.
+The project requires Boost libraries version 1.54.0.
 It was tested only Ubuntu and Debian, both 32 and 64 bit.
 
 The source is currently being released mainly as a proof of concept;
