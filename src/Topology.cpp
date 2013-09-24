@@ -191,7 +191,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
       /* FIXME: if multiple core nodes belong to the same AS, the insertion will
        * fail; each asid should be associated to a set, not to a single vertex.
        */
-      if (asCacheMap.insert(std::pair<Vertex, int>(v,asid)).second == true)
+      if (asCacheMap.insert(std::pair<uint, Vertex>(asid,v)).second == true)
         this->numASes++;
       if (csMap.at(v) == true)
         centralServer = boost::vertex(v, topology);
@@ -221,6 +221,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
     }
     this->numEdges = boost::num_edges(topology);
     this->numVertices = boost::num_vertices(topology);
+    BOOST_LOG_TRIVIAL(warning) << "numASes = " << this->numASes;
     // end of graphml topology import
   } else {
     // read it as a text file with our custom-defined schema
@@ -303,7 +304,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
   }
   stream.close();
   // Finds shortest path distances between all pairs of vertices
-  for ( unsigned int vIt = 0; vIt < numASes; vIt++) {
+  for ( unsigned int vIt = 0; getPonCustomers(vIt) == 0; vIt++) {
     Vertex v = boost::vertex(vIt, topology);
     /* new approach: you don't actually need pMaps for ONU nodes, you know 
      you have to go into the core node (the only outEdge you have) and from
