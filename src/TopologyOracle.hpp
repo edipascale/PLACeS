@@ -87,6 +87,7 @@ protected:
   FlowStats flowStats;
   bool reducedCaching; // if true, use only a single CDN in the core;
                        // if false, one CDN micro cache in each AS
+  bool preCaching;  // if true, AS caches are pre-filled with popular content and never updated
 public:
   TopologyOracle(Topology* topo, po::variables_map vm);
   ~TopologyOracle();
@@ -128,13 +129,18 @@ public:
    * a round (e.g. removing expired content, generating new one etc.)
    */
   virtual void updateCatalog(uint currentRound) = 0;
-  /* generateNewRequest is a legacy method that generates a single request for
+  /* generateNewRequest() is a legacy method that generates a single request for
    * a specific user. It's only used in the IPTV model and it's being kept
    * for "backward compatibility". It should be removed in the future.
    */
   virtual void generateNewRequest(PonUser user, SimTime time, 
                                       Scheduler* scheduler) = 0;
+  /* preCache() pushes the most popular content in the AS caches. It must be
+   * ovveridden by the specialized classes as determining the most popular 
+   * elements of the catalog depends on the simulation mode
+   */
+  virtual void preCache() = 0;
 };
-
+       
 #endif	/* TOPOLOGYORACLE_HPP */
 

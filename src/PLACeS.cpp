@@ -259,6 +259,8 @@ int main(int argc, char** argv) {
       oracle = new VoDTopologyOracle(topo, vm);
     }
     oracle->populateCatalog();
+    if (vm["pre-caching"].as<bool>() && !vm["reduced-caching"].as<bool>())
+      oracle->preCache();
     Scheduler* scheduler = new Scheduler(oracle, vm);    
     for (unsigned int currentRound = 0; currentRound < vm["rounds"].as<uint>(); currentRound++) {            
       std::cout << "Starting round " << currentRound << std::endl;

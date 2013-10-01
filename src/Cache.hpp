@@ -61,6 +61,13 @@ public:
   unsigned int getMaxSize() const {
     return maxSize;
   }
+  
+  bool fitsInCache(Size size) const {
+    if (maxSize - currentSize >= size)
+      return true;
+    else
+      return false;
+  }
 
 };
 

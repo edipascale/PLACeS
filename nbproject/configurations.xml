@@ -9,6 +9,7 @@
       <itemPath>src/Flow.hpp</itemPath>
       <itemPath>src/IPTVTopologyOracle.hpp</itemPath>
       <itemPath>src/PLACeS.hpp</itemPath>
+      <itemPath>src/RunningAvg.hpp</itemPath>
       <itemPath>src/Scheduler.hpp</itemPath>
       <itemPath>src/SimTimeInterval.hpp</itemPath>
       <itemPath>src/Topology.hpp</itemPath>
@@ -72,16 +73,17 @@
           <incDir>
             <pElem>.</pElem>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
         </cTool>
         <ccTool>
-          <developmentMode>2</developmentMode>
           <standard>8</standard>
           <commandlineTool>g++</commandlineTool>
           <incDir>
             <pElem>.</pElem>
             <pElem>tests</pElem>
             <pElem>/usr/local/boost_1_54_0</pElem>
+            <pElem>.</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -103,18 +105,40 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
+      <folder path="TestFiles">
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>../../CUnit</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>cunit</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
       <folder path="TestFiles/f1">
         <cTool>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </cTool>
-        <ccTool>
-          <commandLine>`cppunit-config --cflags`</commandLine>
-        </ccTool>
         <linkerTool>
           <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerAddLib>
+            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>../../CUnit/lib</pElem>
+          </linkerAddLib>
           <linkerLibItems>
-            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
-            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>cunit</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
+            <linkerLibLibItem>boost_graph</linkerLibLibItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
+            <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options</linkerLibLibItem>
+            <linkerLibLibItem>boost_system</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </folder>
@@ -135,6 +159,8 @@
       <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/RunningAvg.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/Scheduler.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -187,6 +213,7 @@
           <incDir>
             <pElem>.</pElem>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
         </cTool>
         <ccTool>
@@ -196,6 +223,7 @@
             <pElem>.</pElem>
             <pElem>tests</pElem>
             <pElem>/usr/local/boost_1_54_0</pElem>
+            <pElem>.</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -250,6 +278,8 @@
       <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/RunningAvg.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/Scheduler.cpp" ex="false" tool="1" flavor2="0">
       </item>

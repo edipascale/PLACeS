@@ -1,0 +1,16 @@
+% 2013-Sep-03 16:07:59 - Simulation on Topology: ./topologies/topoGen.graphml with seed: 5489
+% Parameters: -s 1 -p 0 -c 30 -C 100 -a 5 -b 8 -u 0 -l 163840 -P 1 -L 45 -D 5 -R 1 -m 0
+Rnd AvgTot AvgCore AvgUp AvgDown AvgPeakCore AvgPeakUp AvgPeakDown PeakCore PeakUp PeakDown
+0 1881.23 205364 0 1210.65 0 0 10240 0 0 10240
+
+Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% AvgTime AvgP2PTime AvgASTime
+0 21781106 21781106 0 0 0 0 0 0 21781106 100 0 0 20.6056 0 20.6056
+
+% 2013-Sep-03 16:49:18 - Simulation on Topology: ./topologies/topoGen100Gbps.graphml with seed: 5489
+% Parameters: -s 1 -p 0 -c 30 -C 100 -a 5 -b 8 -u 0 -l 163840 -P 1 -L 45 -D 5 -R 1 -m 0
+Rnd AvgTot AvgCore AvgUp AvgDown AvgPeakCore AvgPeakUp AvgPeakDown PeakCore PeakUp PeakDown
+0 208.167 14048.9 0 242.762 24613.2 0 2765.89 102400 0 10240
+
+Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% AvgTime AvgP2PTime AvgASTime
+0 4819383 4819383 0 0 0 0 0 0 4819383 100 1777452 26.944 690.355 0 690.355
+

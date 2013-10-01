@@ -167,3 +167,31 @@ void IPTVTopologyOracle::notifyEndRound(uint endingRound) {
   }
   this->userViewMap.clear();
 }
+
+void IPTVTopologyOracle::preCache() {
+  bool isFull = false;
+  uint i(0), day(0), index(0);
+  ContentElement* content = nullptr;
+  while (!isFull) {
+    day = std::floor(i / dailyCatalog.at(0).size()); // all the same size
+    if (day >= dailyCatalog.size())
+      break;
+    index = i % dailyCatalog.at(day).size();
+    content = dailyCatalog.at(day).at(index);
+    for (uint as = 0; as < topo->getNumASes(); as++) {
+      if (localCacheMap->at(as).fitsInCache(content->getSize())) {
+        std::pair<bool, std::set<ContentElement*> > result;
+        result = localCacheMap->at(as).addToCache(content, content->getSize(),0);
+        assert(result.first == true);
+        assert(result.second.empty() == true);
+        assert(localCacheMap->at(as).isCached(content, content->getSize() == true));
+      }
+      else {
+        isFull = true;
+        break;
+      }        
+    }
+    i++;
+  }
+  BOOST_LOG_TRIVIAL(warning) << "cached " << i << " elements in AS caches";
+}

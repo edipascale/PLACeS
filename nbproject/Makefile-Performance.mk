@@ -80,52 +80,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/places: ${OBJECTFILES}
 ${OBJECTDIR}/src/ContentElement.o: src/ContentElement.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
 
 ${OBJECTDIR}/src/Flow.o: src/Flow.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
 
 ${OBJECTDIR}/src/IPTVTopologyOracle.o: src/IPTVTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
 
 ${OBJECTDIR}/src/PLACeS.o: src/PLACeS.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
 
 ${OBJECTDIR}/src/Scheduler.o: src/Scheduler.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
 
 ${OBJECTDIR}/src/SimTimeInterval.o: src/SimTimeInterval.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
 
 ${OBJECTDIR}/src/Topology.o: src/Topology.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
 
 ${OBJECTDIR}/src/TopologyOracle.o: src/TopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
 
 ${OBJECTDIR}/src/UGCPopularity.o: src/UGCPopularity.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
 
 ${OBJECTDIR}/src/VoDTopologyOracle.o: src/VoDTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
 
 # Subprojects
 .build-subprojects:
@@ -140,13 +140,13 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/CacheTestClass.o ${TESTDIR}/tests/Cach
 ${TESTDIR}/tests/CacheTestClass.o: tests/CacheTestClass.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/CacheTestClass.o tests/CacheTestClass.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/CacheTestClass.o tests/CacheTestClass.cpp
 
 
 ${TESTDIR}/tests/CacheTestRunner.o: tests/CacheTestRunner.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/CacheTestRunner.o tests/CacheTestRunner.cpp
+	$(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/CacheTestRunner.o tests/CacheTestRunner.cpp
 
 
 ${OBJECTDIR}/src/ContentElement_nomain.o: ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp 
@@ -157,7 +157,7 @@ ${OBJECTDIR}/src/ContentElement_nomain.o: ${OBJECTDIR}/src/ContentElement.o src/
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement_nomain.o src/ContentElement.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement_nomain.o src/ContentElement.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/ContentElement.o ${OBJECTDIR}/src/ContentElement_nomain.o;\
 	fi
@@ -170,7 +170,7 @@ ${OBJECTDIR}/src/Flow_nomain.o: ${OBJECTDIR}/src/Flow.o src/Flow.cpp
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow_nomain.o src/Flow.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow_nomain.o src/Flow.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/Flow.o ${OBJECTDIR}/src/Flow_nomain.o;\
 	fi
@@ -183,7 +183,7 @@ ${OBJECTDIR}/src/IPTVTopologyOracle_nomain.o: ${OBJECTDIR}/src/IPTVTopologyOracl
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle_nomain.o src/IPTVTopologyOracle.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle_nomain.o src/IPTVTopologyOracle.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/IPTVTopologyOracle.o ${OBJECTDIR}/src/IPTVTopologyOracle_nomain.o;\
 	fi
@@ -196,7 +196,7 @@ ${OBJECTDIR}/src/PLACeS_nomain.o: ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS_nomain.o src/PLACeS.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS_nomain.o src/PLACeS.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/PLACeS.o ${OBJECTDIR}/src/PLACeS_nomain.o;\
 	fi
@@ -209,7 +209,7 @@ ${OBJECTDIR}/src/Scheduler_nomain.o: ${OBJECTDIR}/src/Scheduler.o src/Scheduler.
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler_nomain.o src/Scheduler.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler_nomain.o src/Scheduler.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/Scheduler.o ${OBJECTDIR}/src/Scheduler_nomain.o;\
 	fi
@@ -222,7 +222,7 @@ ${OBJECTDIR}/src/SimTimeInterval_nomain.o: ${OBJECTDIR}/src/SimTimeInterval.o sr
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval_nomain.o src/SimTimeInterval.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval_nomain.o src/SimTimeInterval.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/SimTimeInterval.o ${OBJECTDIR}/src/SimTimeInterval_nomain.o;\
 	fi
@@ -235,7 +235,7 @@ ${OBJECTDIR}/src/Topology_nomain.o: ${OBJECTDIR}/src/Topology.o src/Topology.cpp
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology_nomain.o src/Topology.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology_nomain.o src/Topology.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/Topology.o ${OBJECTDIR}/src/Topology_nomain.o;\
 	fi
@@ -248,7 +248,7 @@ ${OBJECTDIR}/src/TopologyOracle_nomain.o: ${OBJECTDIR}/src/TopologyOracle.o src/
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle_nomain.o src/TopologyOracle.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle_nomain.o src/TopologyOracle.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/TopologyOracle.o ${OBJECTDIR}/src/TopologyOracle_nomain.o;\
 	fi
@@ -261,7 +261,7 @@ ${OBJECTDIR}/src/UGCPopularity_nomain.o: ${OBJECTDIR}/src/UGCPopularity.o src/UG
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity_nomain.o src/UGCPopularity.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity_nomain.o src/UGCPopularity.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/UGCPopularity.o ${OBJECTDIR}/src/UGCPopularity_nomain.o;\
 	fi
@@ -274,7 +274,7 @@ ${OBJECTDIR}/src/VoDTopologyOracle_nomain.o: ${OBJECTDIR}/src/VoDTopologyOracle.
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} $@.d;\
-	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle_nomain.o src/VoDTopologyOracle.cpp;\
+	    $(COMPILE.cc) -O2 -I. -Itests -I/usr/local/boost_1_54_0 -I. -std=c++11 -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle_nomain.o src/VoDTopologyOracle.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/VoDTopologyOracle.o ${OBJECTDIR}/src/VoDTopologyOracle_nomain.o;\
 	fi

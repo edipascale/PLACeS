@@ -21,6 +21,7 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->avgContentLength = vm["content-length"].as<double>();
   this->devContentLength = vm["content-dev"].as<double>();
   this->bitrate = vm["bitrate"].as<uint>();
+  this->preCaching = vm["pre-caching"].as<bool>();
   uint rounds = vm["rounds"].as<uint>();
   flowStats.avgFlowDuration.assign(rounds, 0);
   flowStats.avgPeerFlowDuration.assign(rounds, 0);
@@ -120,7 +121,7 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
     this->removeFromCMap(e, user);
   }
  
-  if (!reducedCaching) {
+  if (!reducedCaching && !preCaching) {
     // also update the local Cache associated to this user ASID
     // (the flow is not simulated as it is assumed it was cached as it transited
     // towards the user)

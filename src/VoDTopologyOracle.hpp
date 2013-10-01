@@ -33,6 +33,7 @@ public:
   void populateCatalog();
   void updateCatalog(uint currentRound);
   void generateNewRequest(PonUser user, SimTime time, Scheduler* scheduler);
+  void preCache() {/*FIXME: null implementation*/};
 };
 
 #endif	/* VODTOPOLOGYORACLE_HPP */
