@@ -212,6 +212,8 @@ int main(int argc, char** argv) {
               "Name of the output file with the results")
           ("snapshot-freq,f", po::value<uint>()->default_value(0),
               "Frequency at which to take graphml snapshots of the network")
+          ("pre-caching,M", po::value<bool>()->default_value(false),
+              "if true stores most popular content in AS caches (reduced-caching must be false)")
           ;
   
   po::variables_map vm;
