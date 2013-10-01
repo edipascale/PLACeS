@@ -221,7 +221,6 @@ Topology::Topology(string fileName, po::variables_map vm) {
     }
     this->numEdges = boost::num_edges(topology);
     this->numVertices = boost::num_vertices(topology);
-    BOOST_LOG_TRIVIAL(warning) << "numASes = " << this->numASes;
     // end of graphml topology import
   } else {
     // read it as a text file with our custom-defined schema
