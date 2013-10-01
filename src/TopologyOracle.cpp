@@ -12,8 +12,8 @@ extern boost::mt19937 gen;
 TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->ponCardinality = vm["pon-cardinality"].as<uint>();
   this->policy = (CachePolicy) vm["ucache-policy"].as<uint>();
-  this->maxCacheSize = vm["ucache-size"].as<uint>() * 8192; // input is in GB, variable in Mb
-  this->maxLocCacheSize = vm["lcache-size"].as<uint>()  * 8192; // input is in GB, variable in Mb;
+  this->maxCacheSize = vm["ucache-size"].as<uint>() * 8000; // input is in GB, variable in Mb
+  this->maxLocCacheSize = vm["lcache-size"].as<uint>()  * 8000; // input is in GB, variable in Mb;
   this->reducedCaching = vm["reduced-caching"].as<bool>();
   this->topo = topo;
   this->mode = (SimMode) vm["sim-mode"].as<uint>();
@@ -165,7 +165,8 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   PonUser destination = flow->getDestination();
   PonUser closestSource = UNKNOWN;
   SimTime time = scheduler->getSimTime();
-  BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << flow->getContent()->getName()
+  std::string contentName = flow->getContent()->getName();
+  BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << contentName
             << " to user " << destination.first << "," << destination.second;
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
@@ -185,7 +186,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // debug info
     BOOST_LOG_TRIVIAL(trace) << time << ": user " << destination.first
             << "," << destination.second 
-            << " had a local copy of content " << flow->getContent()->getName();
+            << " had a local copy of content " << contentName;
     return true;
   }
   // try to find a local peer first
@@ -226,7 +227,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
         // debug info
         BOOST_LOG_TRIVIAL(trace) << time << ": user " << destination.first
                 << "," << destination.second
-                << " downloading content " << flow->getContent()->getName()
+                << " downloading content " << contentName
                 << " from AS cache node " << lCache
                 << " (closestSource=" << closestSource.first
                 << "," << closestSource.second << ")";
@@ -242,7 +243,8 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       }
     }
     // no local peer and no micro cache, look for non local peer
-    BOOST_LOG_TRIVIAL(trace) << "No local source found, searching for non-local P2P sources";
+    BOOST_LOG_TRIVIAL(trace) << "No local source found for content "+
+            contentName+" , searching for non-local P2P sources";
     uint minDistance, distance, asIndex;
     ContentMap::iterator cIt;
     // vector of ASes which have already explored for viable sources
@@ -260,7 +262,8 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
         if (cIt == asidContentMap->at(i).end() || cIt->second.empty()) {
           // this AS has no source with the required content, mark it as explored
           // to save time at a future iteration
-          BOOST_LOG_TRIVIAL(trace) << "No viable source in asid " << i;
+          BOOST_LOG_TRIVIAL(trace) << "No viable source for " + contentName + 
+                  " in asid " << i;
           exploredASes[i] = true;
         } else {
           distance = topo->getRoute(*(cIt->second.begin()), destination).size();
@@ -309,7 +312,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
      BOOST_LOG_TRIVIAL(trace) << time << ": user " << destination.first
             << "," << destination.second 
             << " could not find an uncongested route to content "
-            << flow->getContent()->getName();
+            << contentName;
       return false;
     }
     // If we're in reducedCaching mode, check if the content is stored on the 
@@ -329,7 +332,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // debug info
     BOOST_LOG_TRIVIAL(trace) << time << ": user " << destination.first
             << "," << destination.second 
-            << " downloading content " << flow->getContent()->getName()
+            << " downloading content " << contentName
             << " from central server";
   } else {
     // p2p flow, update user cache statistics (for LFU/LRU purposes)
@@ -344,7 +347,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // debug info
     BOOST_LOG_TRIVIAL(trace) << time << ": user " << destination.first
             << "," << destination.second << " (asid " << topo->getAsid(destination) 
-            << ") downloading content " << flow->getContent()->getName()
+            << ") downloading content " << contentName
             << " from peer " << closestSource.first << ","
             << closestSource.second << " (asid " << topo->getAsid(destination) 
             << ")";

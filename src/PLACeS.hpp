@@ -29,7 +29,7 @@ enum SimMode {VoD, IPTV};
 const SimTime INF_TIME = std::numeric_limits<int>::max();
 const PonUser UNKNOWN = std::make_pair(std::numeric_limits<uint>::max(),
         std::numeric_limits<uint>::max());
-const Capacity MAX_FLOW_SPEED = 1024; // 1Gbps
+const Capacity MAX_FLOW_SPEED = 1000; // 1Gbps
 // const Capacity MIN_FLOW_SPEED = 3; // Minimal bitrate for mid-tier streaming
 const Capacity UNLIMITED = std::numeric_limits<double>::max();
 
