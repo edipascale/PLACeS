@@ -33,7 +33,16 @@ public:
   void populateCatalog();
   void updateCatalog(uint currentRound);
   void generateNewRequest(PonUser user, SimTime time, Scheduler* scheduler);
-  void preCache() {/*FIXME: null implementation*/};
+  /* FIXME: Implement pre-caching for VoD. It requires changing the moment it is 
+   * invoked to after the requests are scheduled (so that we can figure out
+   * which contents will be popular) but in that case it should be called at the
+   * beginning of every round and I still haven't decided what to do with it
+   */
+  void preCache() {
+    BOOST_LOG_TRIVIAL(error) << "Pre-caching currently not implemented for VoD "
+            "simulations, aborting";
+    abort();
+  };
 };
 
 #endif	/* VODTOPOLOGYORACLE_HPP */
