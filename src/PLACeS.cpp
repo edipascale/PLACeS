@@ -98,7 +98,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   // Print flow stats for each round
   FlowStats flowStats = oracle->getFlowStats();
   outputF << "Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
-          "AvgTime AvgP2PTime AvgASTime" << endl;
+          "AvgTime AvgP2PTime AvgASTime AvgUsrCache% AvgASCache%" << endl;
   std::vector<double> localPctg, ASPctg, P2PPctg, CSPctg, blockPctg;
   localPctg.assign(rounds, 0);
   ASPctg.assign(rounds, 0);
@@ -126,7 +126,10 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             << flowStats.congestionBlocked.at(i) << " " << blockPctg.at(i) << " "
             << flowStats.avgFlowDuration.at(i) << " "
             << flowStats.avgPeerFlowDuration.at(i) << " "
-            << flowStats.avgCacheFlowDuration.at(i) << std::endl;
+            << flowStats.avgCacheFlowDuration.at(i) << " "
+            << flowStats.avgUserCacheOccupancy.at(i) << " "
+            << flowStats.avgASCacheOccupancy.at(i) 
+            << std::endl;
   }
   if (rounds > 1) {
     // print aggregate flow stats over all rounds
@@ -145,7 +148,9 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             << (double) (accumulate(blockPctg.begin(), blockPctg.end(), 0.0) / rounds) << " "
             << (double) (accumulate(flowStats.avgFlowDuration.begin(), flowStats.avgFlowDuration.end(), 0.0) / rounds) << " "
             << (double) (accumulate(flowStats.avgPeerFlowDuration.begin(), flowStats.avgPeerFlowDuration.end(), 0.0) / rounds) << " "
-            << (double) (accumulate(flowStats.avgCacheFlowDuration.begin(), flowStats.avgCacheFlowDuration.end(), 0.0) / rounds)
+            << (double) (accumulate(flowStats.avgCacheFlowDuration.begin(), flowStats.avgCacheFlowDuration.end(), 0.0) / rounds) << " "
+            << (float) (accumulate(flowStats.avgUserCacheOccupancy.begin(), flowStats.avgUserCacheOccupancy.end(), 0.0) / rounds) << " "
+            << (float) (accumulate(flowStats.avgASCacheOccupancy.begin(), flowStats.avgASCacheOccupancy.end(), 0.0) / rounds)
             << endl << endl;
   } else {
     outputF << endl;

@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include <initializer_list>
 #include <boost/random/mersenne_twister.hpp>
+#include <cmath>
 
 // random generator
 extern boost::mt19937 gen;
@@ -26,6 +27,8 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   flowStats.avgFlowDuration.assign(rounds, 0);
   flowStats.avgPeerFlowDuration.assign(rounds, 0);
   flowStats.avgCacheFlowDuration.assign(rounds, 0);
+  flowStats.avgUserCacheOccupancy.assign(rounds, 0);
+  flowStats.avgASCacheOccupancy.assign(rounds, 0);
   flowStats.completedRequests.assign(rounds, 0);
   flowStats.localRequests.assign(rounds, 0);
   flowStats.servedRequests.assign(rounds, 0);
@@ -444,6 +447,26 @@ void TopologyOracle::printStats(uint currentRound) {
   blockPctg = (flowStats.congestionBlocked.at(currentRound) * 100) /
           (double) (flowStats.servedRequests.at(currentRound) +
           flowStats.congestionBlocked.at(currentRound));
+  // check how much caching space is used on average in user caches
+  float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0);
+  uint numCaches = 0;
+  for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end(); uIt++) {
+    avgUserCacheOccupancy += (100* uIt->second.getCurrentSize() 
+            / uIt->second.getMaxSize());
+    numCaches++;
+  }
+  avgUserCacheOccupancy = avgUserCacheOccupancy / numCaches;
+  this->flowStats.avgUserCacheOccupancy.at(currentRound) = avgUserCacheOccupancy;
+  // check how much caching space is used on average in metro/core caches
+  numCaches = 0;
+  for (auto uIt = localCacheMap->begin(); uIt != localCacheMap->end(); uIt++) {
+    avgMetroCacheOccupancy += (100 * uIt->second.getCurrentSize() 
+            / uIt->second.getMaxSize());
+    numCaches++;
+  }
+  avgMetroCacheOccupancy = avgMetroCacheOccupancy / numCaches;
+  this->flowStats.avgASCacheOccupancy.at(currentRound) = avgMetroCacheOccupancy;
+  
   // print stats to screen for human visualization
   std::cout << "Completed " << flowStats.completedRequests.at(currentRound)
           << " out of " << flowStats.servedRequests.at(currentRound)
@@ -461,7 +484,10 @@ void TopologyOracle::printStats(uint currentRound) {
   std::cout << "Average flow duration: " << flowStats.avgFlowDuration.at(currentRound)
             << "; Average P2P flow duration: " << flowStats.avgPeerFlowDuration.at(currentRound)
             << "; Average Cache flow duration: " << flowStats.avgCacheFlowDuration.at(currentRound)
-            << std::endl << std::endl;  
+            << std::endl;
+  std::cout << "Average User Cache Occupancy: " << flowStats.avgUserCacheOccupancy.at(currentRound)
+            << "%; Average AS Cache Occupancy: " <<flowStats.avgASCacheOccupancy.at(currentRound)
+            << "%" << std::endl << std::endl;  
 }
 
 void TopologyOracle::addContent(ContentElement* content) {

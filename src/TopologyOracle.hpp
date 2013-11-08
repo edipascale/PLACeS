@@ -52,6 +52,8 @@ struct FlowStats {
   std::vector<double> avgFlowDuration;
   std::vector<double> avgPeerFlowDuration;
   std::vector<double> avgCacheFlowDuration;
+  std::vector<float> avgUserCacheOccupancy;
+  std::vector<float> avgASCacheOccupancy;
   std::vector<uint> servedRequests;
   std::vector<uint> localRequests;
   std::vector<uint> completedRequests;
