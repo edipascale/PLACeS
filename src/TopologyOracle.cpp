@@ -44,14 +44,14 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   }
   
   // Initialize user cache map
-  VertexVec ponNodes = topo->getPonNodes();
-  BOOST_FOREACH(Vertex v, ponNodes) {
+    VertexVec ponNodes = topo->getPonNodes();
+    BOOST_FOREACH(Vertex v, ponNodes) {
     for(uint i = 0; i < topo->getPonCustomers(v); i++) {
-      PonUser user = std::make_pair(v, i);
-      ContentCache cache(maxCacheSize, policy);
-      userCacheMap->insert(std::make_pair(user, cache));
+        PonUser user = std::make_pair(v, i);
+        ContentCache cache(maxCacheSize, policy);
+        userCacheMap->insert(std::make_pair(user, cache));
+      }
     }
-  }
   // Initialize local cache nodes
   if (!reducedCaching) {
     this->localCacheMap = new LocalCacheMap;
@@ -450,7 +450,8 @@ void TopologyOracle::printStats(uint currentRound) {
   // check how much caching space is used on average in user caches
   float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0);
   uint numCaches = 0;
-  for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end(); uIt++) {
+  for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
+          this->maxCacheSize > 0; uIt++) {
     avgUserCacheOccupancy += (100* uIt->second.getCurrentSize() 
             / uIt->second.getMaxSize());
     numCaches++;
@@ -462,7 +463,8 @@ void TopologyOracle::printStats(uint currentRound) {
   this->flowStats.avgUserCacheOccupancy.at(currentRound) = avgUserCacheOccupancy;
   // check how much caching space is used on average in metro/core caches
   numCaches = 0;
-  for (auto uIt = localCacheMap->begin(); uIt != localCacheMap->end(); uIt++) {
+  for (auto uIt = localCacheMap->begin(); uIt != localCacheMap->end() && 
+          this->maxLocCacheSize > 0; uIt++) {
     // central server cache should not be included in the average computation
     if (uIt->first != topo->getCentralServer()) {
       avgMetroCacheOccupancy += (100 * uIt->second.getCurrentSize() 
