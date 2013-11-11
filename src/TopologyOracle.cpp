@@ -455,16 +455,25 @@ void TopologyOracle::printStats(uint currentRound) {
             / uIt->second.getMaxSize());
     numCaches++;
   }
-  avgUserCacheOccupancy = avgUserCacheOccupancy / numCaches;
+  if (numCaches != 0)
+    avgUserCacheOccupancy = avgUserCacheOccupancy / numCaches;
+  else
+    avgUserCacheOccupancy = 0.0;
   this->flowStats.avgUserCacheOccupancy.at(currentRound) = avgUserCacheOccupancy;
   // check how much caching space is used on average in metro/core caches
   numCaches = 0;
   for (auto uIt = localCacheMap->begin(); uIt != localCacheMap->end(); uIt++) {
-    avgMetroCacheOccupancy += (100 * uIt->second.getCurrentSize() 
+    // central server cache should not be included in the average computation
+    if (uIt->first != topo->getCentralServer()) {
+      avgMetroCacheOccupancy += (100 * uIt->second.getCurrentSize() 
             / uIt->second.getMaxSize());
-    numCaches++;
+      numCaches++;
+    }
   }
-  avgMetroCacheOccupancy = avgMetroCacheOccupancy / numCaches;
+  if (numCaches != 0)
+    avgMetroCacheOccupancy = avgMetroCacheOccupancy / numCaches;
+  else
+    avgMetroCacheOccupancy = 0.0;
   this->flowStats.avgASCacheOccupancy.at(currentRound) = avgMetroCacheOccupancy;
   
   // print stats to screen for human visualization
