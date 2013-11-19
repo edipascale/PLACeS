@@ -53,16 +53,14 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
       }
     }
   // Initialize local cache nodes
-  if (!reducedCaching) {
-    this->localCacheMap = new LocalCacheMap;
+  this->localCacheMap = new LocalCacheMap;
+  if (!reducedCaching) {    
     VertexVec cacheNodes = topo->getLocalCacheNodes();
-
     BOOST_FOREACH(Vertex v, cacheNodes) {
       ContentCache cache(maxLocCacheSize, policy);
       localCacheMap->insert(std::make_pair(v, cache));
     }
   } else {
-    this->localCacheMap = new LocalCacheMap;
     Vertex v = topo->getCentralServer();
     ContentCache cache(maxLocCacheSize, policy);
     localCacheMap->insert(std::make_pair(v, cache));
@@ -87,6 +85,7 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
   // update the contentMap for content retrieval
   uint asid = topo->getAsid(user);
   ContentMap::iterator cIt = asidContentMap->at(asid).find(content);
+  std::pair<bool, std::set<ContentElement*> > addResult;
   if (cIt == asidContentMap->at(asid).end()) {
     // This is the first time the oracle sees this content, add it to the map
     // Note: this should not happen now, throw a warning
@@ -99,8 +98,7 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
   BOOST_LOG_TRIVIAL(trace) << time << ": caching content " << content->getName() << " at User " 
           << user.first << "," << user.second << 
           "; sizeDownloaded: " << sizeDownloaded;
-  std::pair<bool, std::set<ContentElement*> > addResult = 
-      userCacheMap->at(user).addToCache(content, sizeDownloaded, time);
+  addResult = userCacheMap->at(user).addToCache(content, sizeDownloaded, time);
   if (!addResult.first) {
     if (userCacheMap->at(user).getMaxSize() >= sizeDownloaded)
       BOOST_LOG_TRIVIAL(warning) << time << ": WARNING: failed to cache content " << content->getName() 
@@ -129,12 +127,16 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
     // (the flow is not simulated as it is assumed it was cached as it transited
     // towards the user)
     Vertex lCache = topo->getLocalCache(user.first);
-    // debug info
-   BOOST_LOG_TRIVIAL(trace) << time << ": caching content " << content->getName()
-      << " at local cache " << lCache;
-    // we disregard the return value here because AS cache do not appear in the
-    // contentMap
-    localCacheMap->at(lCache).addToCache(content, sizeDownloaded, time);
+    if (!localCacheMap->at(lCache).isCached(content, sizeDownloaded)) {
+      // debug info
+      BOOST_LOG_TRIVIAL(trace) << time << ": caching content " << content->getName()
+              << " at local cache " << lCache;
+      addResult = localCacheMap->at(lCache).addToCache(content, sizeDownloaded, time);
+      if (!addResult.first) {
+        BOOST_LOG_TRIVIAL(warning) << time << ": WARNING: failed to cache content " 
+                << content->getName() << " at AS cache "  << lCache;
+      }
+    }
   }
 }
 
@@ -448,7 +450,7 @@ void TopologyOracle::printStats(uint currentRound) {
           (double) (flowStats.servedRequests.at(currentRound) +
           flowStats.congestionBlocked.at(currentRound));
   // check how much caching space is used on average in user caches
-  float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0);
+  float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0), temp(0.0);
   uint numCaches = 0;
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
           this->maxCacheSize > 0; uIt++) {
@@ -467,8 +469,14 @@ void TopologyOracle::printStats(uint currentRound) {
           this->maxLocCacheSize > 0; uIt++) {
     // central server cache should not be included in the average computation
     if (uIt->first != topo->getCentralServer()) {
-      avgMetroCacheOccupancy += (100 * uIt->second.getCurrentSize() 
+      temp = (100 * uIt->second.getCurrentSize() 
             / uIt->second.getMaxSize());
+      BOOST_LOG_TRIVIAL(trace) << "AS cache " << uIt->first 
+              << " has a cache occupancy of " << temp << "% (currentSize: " 
+              << uIt->second.getCurrentSize() << ", maxSize: "
+              << uIt->second.getMaxSize() << ") with "
+              << uIt->second.getNumElementsCached() << " elements";
+      avgMetroCacheOccupancy += temp;
       numCaches++;
     }
   }
