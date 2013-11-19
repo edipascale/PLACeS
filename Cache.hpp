@@ -59,11 +59,6 @@ public:
   }
 
   Size getCurrentSize() const {
-    Size computedSize = 0;
-    for (auto it = cacheMap.begin(); it != cacheMap.end(); it++) {
-      computedSize += it->second.size;
-    }
-    assert(computedSize == currentSize);
     return this->currentSize;
   }
 
