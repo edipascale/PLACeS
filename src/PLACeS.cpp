@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
  
   std::vector<string> topoFileNameVec;
 
-  string topoFileName = "topologies/germanTopoNew.txt";
+  string topoFileName = "topologies/IrishTopology.graphml";
 
   po::options_description clo("Command line options");
   clo.add_options()
@@ -190,9 +190,9 @@ int main(int argc, char** argv) {
               "output average link load after each round")
           ("ucache-policy,P", po::value<uint>()->default_value((CachePolicy)LFU, "LFU"),
               "policy to enforce when replacing content in the user cache")
-          ("ucache-size,u", po::value<uint>()->default_value(10),
+          ("ucache-size,u", po::value<uint>()->default_value(16),
               "size of the user cache in GB")
-          ("lcache-size,l", po::value<uint>()->default_value(16384),
+          ("lcache-size,l", po::value<uint>()->default_value(12000),
               "size of the local AS cache in GB")
           ("debug-verbose,d", po::value<uint>()->default_value(logging::trivial::warning),
               "minimal severity level displayed for the Boost.log filter")
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
               "Average TV viewing hours per user per round")
           ("perturbations,e", po::value<bool>()->default_value(true),
               "Extend the popularity model with perturbations [VoD only]")
-          ("bitrate,b", po::value<uint>()->default_value(3),
+          ("bitrate,b", po::value<uint>()->default_value(5),
               "Average bitrate in Mbps of elements in the catalog")
           ("content-length,L", po::value<double>()->default_value(45),
               "Average length in minutes of elements in the catalog")

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="asid" for="node" attr.name="asid" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="ponC" for="node" attr.name="ponCustomers" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="nump" for="node" attr.name="numPon" attr.type="int">
+    <default>10</default>
+  </key>
+  <key id="avgu" for="node" attr.name="avgUsers" attr.type="int">
+    <default>512</default>
+  </key>
+  <key id="devu" for="node" attr.name="devUsers" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lat" for="node" attr.name="latitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lon" for="node" attr.name="longitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="upC" for="node" attr.name="upCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="dnC" for="node" attr.name="downCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="cs" for="node" attr.name="centralServer" attr.type="boolean">
+    <default>0</default>
+  </key>
+  <key id="bw" for="edge" attr.name="maxCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="len" for="edge" attr.name="length" attr.type="double">
+    <default>1</default>
+  </key>
+  <key id="type" for="edge" attr.name="type" attr.type="int">
+    <default>3</default>
+  </key>
+  <graph id="topo" edgedefault="directed" parse.order="nodesfirst">
+    <node id="c0">
+      <data key="asid">0</data>
+      <data key="nump">0</data>
+      <data key="cs">1</data>
+    </node>
+    <node id="c1">
+      <data key="asid">1</data>
+      <data key="nump">0</data>
+    </node>
+    <node id="m1_0">
+      <data key="asid">0</data>
+      <data key="nump">10</data>
+    </node>
+    <node id="m2_0">
+      <data key="asid">0</data>
+      <data key="nump">10</data>
+    </node>
+    <node id="m1_1">
+      <data key="asid">1</data>
+      <data key="nump">10</data>
+    </node>
+    <node id="m2_1">
+      <data key="asid">1</data>
+      <data key="nump">10</data>
+    </node>
+    <edge source="c0" target="c1">
+      <data key="bw">-1</data>
+      <data key="len">10</data>
+    </edge>
+    <edge source="c1" target="c0">
+      <data key="bw">-1</data>
+      <data key="len">10</data>
+    </edge>
+    <edge source="c0" target="m1_0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m1_0" target="c0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m1_0" target="m2_0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m2_0" target="m1_0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m2_0" target="c0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="c0" target="m2_0">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="c1" target="m1_1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m1_1" target="c1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m1_1" target="m2_1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m2_1" target="m1_1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="m2_1" target="c1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+    <edge source="c1" target="m2_1">
+      <data key="bw">10000</data>
+      <data key="len">3</data>
+      <data key="type">2</data>
+    </edge>
+  </graph>
+</graphml>
