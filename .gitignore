@@ -3,3 +3,5 @@
 /dist/Performance/
 /build/
 /dist/
+/results
+/*.sh
