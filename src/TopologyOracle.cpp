@@ -12,7 +12,7 @@ extern boost::mt19937 gen;
 
 TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->ponCardinality = vm["pon-cardinality"].as<uint>();
-  this->policy = (CachePolicy) vm["ucache-policy"].as<uint>();
+  this->policy = (CachePolicy) vm["cache-policy"].as<uint>();
   this->maxCacheSize = vm["ucache-size"].as<uint>() * 8000; // input is in GB, variable in Mb
   this->maxLocCacheSize = vm["lcache-size"].as<uint>()  * 8000; // input is in GB, variable in Mb;
   this->reducedCaching = vm["reduced-caching"].as<bool>();

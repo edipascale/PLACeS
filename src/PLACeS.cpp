@@ -188,8 +188,8 @@ int main(int argc, char** argv) {
               "number of IPTV channels [IPTV only]")
           ("print-load,i", po::value<bool>()->default_value(true),
               "output average link load after each round")
-          ("ucache-policy,P", po::value<uint>()->default_value((CachePolicy)LFU, "LFU"),
-              "policy to enforce when replacing content in the user cache")
+          ("cache-policy,P", po::value<uint>()->default_value((CachePolicy)LFU, "LFU"),
+              "policy to enforce when replacing content in the caches")
           ("ucache-size,u", po::value<uint>()->default_value(16),
               "size of the user cache in GB")
           ("lcache-size,l", po::value<uint>()->default_value(12000),
