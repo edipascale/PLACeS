@@ -50,7 +50,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -b " << vm["bitrate"].as<uint>()
           << " -u " << vm["ucache-size"].as<uint>()
           << " -l " << vm["lcache-size"].as<uint>()
-          << " -P " << vm["ucache-policy"].as<uint>()
+          << " -P " << vm["cache-policy"].as<uint>()
           << " -L " << vm["content-length"].as<double>()
           << " -D " << vm["content-dev"].as<double>()
           << " -R " << vm["reduced-caching"].as<bool>()
