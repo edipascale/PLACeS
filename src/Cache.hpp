@@ -23,12 +23,15 @@ enum CachePolicy {LRU, LFU};
 /* Struct to hold the caching parameters associated to each content element;
  * Timestamp must be a scalar which supports std::numeric_limits<Timestamp>::max()
  * Size can be any scalar which supports comparison operators (e.g. <,>,>= etc.)
+ * uploads is used to calculate the bandwidth used and to ensure that we do not
+ * erase an element which is currently required
  */
 template <typename Timestamp, typename Size>
 struct CacheEntry {
   Timestamp lastAccessed;
   unsigned int timesServed;
   Size size;
+  unsigned int uploads;
 };
 
 /* Implements a generic LRU or LFU cache, with a fixed maximum capacity maxSize
@@ -50,15 +53,27 @@ public:
   std::pair<bool, std::set<Content> > addToCache(Content content, 
       Size size, Timestamp time);
   void clearCache();
+  // to update metadata about the content (lastAccess, timesAccessed, uploads..)
   bool getFromCache(Content content, Timestamp time);
   bool isCached(Content content, Size sizeReq);
   void removeFromCache(Content content); // for expired content
+  bool uploadCompleted(Content content); // to decrease the upload counter
+  int getCurrentUploads(Content content);
+  
+  // to give the optimizer full access to the content of the cache
+  CacheMap getCacheMap() const {
+    return this->cacheMap;
+  }
+  
+  unsigned int getNumElementsCached() const {
+    return this->cacheMap.size();
+  }
 
-  unsigned int getCurrentSize() const {
+  Size getCurrentSize() const {
     return this->currentSize;
   }
 
-  unsigned int getMaxSize() const {
+  Size getMaxSize() const {
     return maxSize;
   }
   
@@ -85,8 +100,9 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
   deletedElements.clear();
   // check if the content was already cached
   typename CacheMap::iterator cIt = cacheMap.find(content);
-  if (cIt != cacheMap.end() && cIt->second.size >= size) {
-    // content is already cached 
+  if ((cIt != cacheMap.end() && cIt->second.size >= size) // content already cached
+      || size > getMaxSize()) { // content cannot possibly fit in the cache
+    // already cached or too big to be cached, quit 
     return std::make_pair(false, deletedElements);
   }  
   else {
@@ -97,10 +113,6 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
       this->currentSize -= cIt->second.size;
       oldFreqStat = cIt->second.timesServed;
       this->cacheMap.erase(cIt);
-    }
-    // check if the new element can fit into the cache
-    if (size > this->maxSize) {
-      return std::make_pair(false, deletedElements);
     }
     while (currentSize + size > maxSize) {
       // Replace content according to selected policy
@@ -143,6 +155,7 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
     entry.lastAccessed = time;
     entry.timesServed = oldFreqStat; // 0 if the content is new
     entry.size = size;
+    entry.uploads = 0;
     if (cacheMap.insert(std::make_pair(content,entry)).second == true) {
       currentSize += size;
       assert(currentSize <= maxSize);
@@ -167,6 +180,7 @@ bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp ti
   if (it != cacheMap.end()) {
     it->second.lastAccessed = time;
     it->second.timesServed++;
+    it->second.uploads++;
     return true;
   } 
   else
@@ -189,6 +203,28 @@ void Cache<Content, Size, Timestamp>::removeFromCache(Content content) {
     this->currentSize -= it->second.size;
     assert(this->currentSize >= 0);
     cacheMap.erase(it);
+  }
+}
+
+template <typename Content, typename Size, typename Timestamp>
+bool Cache<Content, Size, Timestamp>::uploadCompleted(Content content) {
+  typename CacheMap::iterator it = cacheMap.find(content);
+  if (it != cacheMap.end()) {
+    it->second.uploads = it->second.uploads - 1;
+    assert(it->second.uploads >= 0);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Content, typename Size, typename Timestamp>
+int Cache<Content, Size, Timestamp>::getCurrentUploads(Content content) {
+  typename CacheMap::iterator it = cacheMap.find(content);
+  if (it != cacheMap.end()) {
+    return it->second.uploads;
+  } else {
+    return -1;
   }
 }
 
