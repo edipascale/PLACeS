@@ -89,8 +89,8 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
   if (cIt == asidContentMap->at(asid).end()) {
     // This is the first time the oracle sees this content, add it to the map
     // Note: this should not happen now, throw a warning
-    std::cerr << "WARNING: TopologyOracle::addToCache() - unknown content "
-            << content->getName() << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << time << ":WARNING: TopologyOracle::addToCache() - unknown content "
+            << content->getName();
     std::set<PonUser> sourceNodes;
     cIt = asidContentMap->at(asid).insert(std::make_pair(content, sourceNodes)).first;
   }
