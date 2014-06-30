@@ -119,7 +119,12 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
     }
   }
   BOOST_FOREACH (ContentElement* e, addResult.second) {
+    // erase the content from the ContentMap entry of the user
     this->removeFromCMap(e, user);
+    // update the asidContentMap too
+    cIt = asidContentMap->at(asid).find(e);
+    if (cIt != asidContentMap->at(asid).end())
+      cIt->second.erase(user);
   }
  
   if (!reducedCaching && !preCaching) {
@@ -405,6 +410,12 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       flowStats.fromASCache.at(round)++;
   }
   topo->updateLoadMap(flow);
+  // notify the source cache that it has completed this upload
+  PonUser source = flow->getSource();
+  if (flow->isP2PFlow())
+    userCacheMap->at(source).uploadCompleted(flow->getContent());
+  else
+    localCacheMap->at(source.first).uploadCompleted(flow->getContent());
   // update cache info (unless the content has expired, e.g. a flow carried over
   // from the previous round)
   PonUser dest = flow->getDestination();
