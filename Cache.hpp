@@ -54,6 +54,11 @@ public:
   bool isCached(Content content, Size sizeReq);
   void removeFromCache(Content content); // for expired content
   
+  // to give the optimizer full access to the content of the cache
+  CacheMap getCacheMap() const {
+    return this->cacheMap;
+  }
+  
   unsigned int getNumElementsCached() const {
     return this->cacheMap.size();
   }
