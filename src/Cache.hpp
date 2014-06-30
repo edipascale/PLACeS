@@ -122,33 +122,34 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
         case LRU:          
           for (typename CacheMap::iterator it = cacheMap.begin();
                   it != cacheMap.end(); it++) {
-            if (it->second.lastAccessed < minTmp) {
+            if (it->second.uploads == 0 && it->second.lastAccessed < minTmp) {
               minTmp = it->second.lastAccessed;
               minIt = it;
             }              
           }
-          // remove the least recently used element from the cache
-          currentSize -= minIt->second.size;
-          deletedElements.insert(minIt->first);
-          cacheMap.erase(minIt);
           break;
         case LFU:
           for (typename CacheMap::iterator it = cacheMap.begin();
                   it != cacheMap.end(); it++) {
-            if (it->second.timesServed < minTmp) {
+            if (it->second.uploads == 0 && it->second.timesServed < minTmp) {
               minTmp = it->second.timesServed;
               minIt = it;
             }              
           }
-          // remove the least frequently used element from the cache
-          currentSize -= minIt->second.size;
-          deletedElements.insert(minIt->first);
-          cacheMap.erase(minIt);
           break;
         default:
           std::cerr << "ERROR: Cache::addToCache - unrecognized CachePolicy"
                   << std::endl;
       }
+      // check that there is an element we can erase (due to uploads)
+      if (minIt == cacheMap.end()) {
+        // all elements are being used for uploads, cannot cache
+        return std::make_pair(false, deletedElements);
+      }
+      // else remove the identified element from the cache
+      currentSize -= minIt->second.size;
+      deletedElements.insert(minIt->first);
+      cacheMap.erase(minIt);
     }
     // insert new element in the cache
     CacheEntry<Timestamp, Size> entry;
