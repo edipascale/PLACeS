@@ -6,6 +6,9 @@
 #include <initializer_list>
 #include <boost/random/mersenne_twister.hpp>
 #include <cmath>
+#define ILOUSESTL
+#define IL_STD
+#include <ilcplex/ilocplex.h>
 
 // random generator
 extern boost::mt19937 gen;
@@ -23,6 +26,8 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->devContentLength = vm["content-dev"].as<double>();
   this->bitrate = vm["bitrate"].as<uint>();
   this->preCaching = vm["pre-caching"].as<bool>();
+  //FIXME: this assumes constant bitrate for upload and a 10GPON
+  this->maxUploads = std::floor(10000 / bitrate);
   uint rounds = vm["rounds"].as<uint>();
   flowStats.avgFlowDuration.assign(rounds, 0);
   flowStats.avgPeerFlowDuration.assign(rounds, 0);
@@ -419,9 +424,22 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
   // update cache info (unless the content has expired, e.g. a flow carried over
   // from the previous round)
   PonUser dest = flow->getDestination();
-  if (flow->getContent() != nullptr)
-    this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
+  if (flow->getContent() != nullptr) {
+    /* here we need to ask the oracle to decide whether we should cache the new
+     * content. Because the optimization will also tell us what to delete, we
+     * have to remove those contents manually before invoking addToCache
+     */
+    std::pair<bool, bool> optResult = this->optimizeCaching(dest, 
+            flow->getContent(), flow->getSizeRequested());
+    /* we need to add the requested element if the optimization failed OR if
+     * it succeeded and it determined that we need to. The difference is that
+     * in the second case elements that need to be removed have already been erased
+     */
+    if (!optResult.first || (optResult.first && optResult.second)) {
+      this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
             (round+1)*time);
+    }
+  }
   // free resources in the topology
   topo->updateCapacity(flow, scheduler, false);
   // generate new request if this user's session is not over
@@ -582,4 +600,133 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
     return;
   } else
     asidContentMap->at(asid).at(content).erase(uIt);
+}
+
+std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
+        ContentElement* content, Capacity sizeRequested) {
+  /* FIXME: there is an inconsistence in our assumptions here, in that we add 
+   * an optimization variable for the requested content in addition to the 
+   * variables we have for the elements cached, but there is a chance that the 
+   * requested content was already cached (albeit with a different size). I need
+   * to either make sure that this case is covered or that it never happens (e.g.,
+   * by deleting it before entering the method).
+   */ 
+  IloEnv env;
+  int asid = topo->getAsid(reqUser);
+  try {    
+    IloModel model(env);
+    IloNumVarArray c(env);
+    auto cachedVec = userCacheMap->at(reqUser).getCacheMap();
+    // add a boolean variable for each of the elements cached
+    for (int i = 0; i < cachedVec.size(); i++) {
+      c.add(IloNumVar(env, 0, 1, ILOINT));
+    }
+    // add a boolean variable for the element requested
+    c.add(IloNumVar(env, 0, 1, ILOINT));
+    // Define the constraints
+    IloRangeArray constraints(env);
+    // Initialize the objective function expression
+    IloNumExpr exp(env);
+    // add the size of the elements cached, if kept in the cache
+    int i = 0;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
+      ContentElement* contIt = it->first;
+      exp += c[i] * it->second.size;
+      // also make sure that we do not erase a content if we are uploading it
+      if (it->second.uploads > 0)
+        constraints.add(c[i] == 1);
+      // build the constraint on rates if required
+      if (contentRateMap.at(contIt) > 0) {
+        IloNumExpr cExp(env, 0);
+        for (auto uit = asidContentMap->at(asid).at(contIt).begin(); 
+                uit != asidContentMap->at(asid).at(contIt).end(); uit++) {
+          if (reqUser != *uit) {
+            cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads() 
+                    + userCacheMap->at(*uit).getCurrentUploads(contIt);
+          } else {
+            // multiply the term by the caching variable so that we lose it if
+            // we decide to erase the element from the cache
+            cExp += c[i]* (IloInt)(maxUploads - userCacheMap->at(reqUser).getTotalUploads() 
+                    + userCacheMap->at(reqUser).getCurrentUploads(contIt));
+          }
+        }
+        constraints.add(cExp >= contentRateMap.at(it->first));
+      }
+      i++;
+    }
+    // same for the requested content
+    exp += c[cachedVec.size()] * sizeRequested;
+    IloNumExpr cExp(env, 0);
+    for (auto uit = asidContentMap->at(asid).at(content).begin(); 
+              uit != asidContentMap->at(asid).at(content).end(); uit++) {
+      if (reqUser != *uit) {
+        cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads() 
+                  + userCacheMap->at(*uit).getCurrentUploads(content);
+      } else {
+       cExp += c[cachedVec.size()]* (IloInt)(maxUploads - userCacheMap->at(reqUser).getTotalUploads() 
+                    + userCacheMap->at(reqUser).getCurrentUploads(content));
+      }
+    }
+    // if the requesting user was not already caching the content, we must add 
+    // its term to the sum in case we decide to cache the requested content
+    if (userCacheMap->at(reqUser).isCached(content, content->getSize()) == false) {
+      cExp += c[cachedVec.size()]* (IloInt)(maxUploads - userCacheMap->at(reqUser).getTotalUploads() 
+                    + userCacheMap->at(reqUser).getCurrentUploads(content));
+    }
+    constraints.add(cExp >= contentRateMap.at(content));
+    
+    //finally add a constraint on the maximum size of the cache
+    constraints.add(exp <= userCacheMap->at(reqUser).getMaxSize());
+
+    // specify that we are interested in minimizing the objective
+    IloObjective obj = IloMinimize(env, exp);
+    // Add the objectives and the constraints to the model
+    model.add(c);
+    model.add(obj);
+    model.add(constraints);
+
+    // ask CPLEX to solve the problem
+    IloCplex cplex(model);
+    if (!cplex.solve()) {
+      BOOST_LOG_TRIVIAL(warning) << "Failed to optimize caching for content " << 
+              content->getName() << "at user " << reqUser.first << "," <<
+              reqUser.second << ", reverting to standard cache policies";
+      return std::make_pair(false, false); 
+    }
+    
+    IloNumArray vals(env);
+    BOOST_LOG_TRIVIAL(trace) << "Solution status = " << cplex.getStatus();
+    BOOST_LOG_TRIVIAL(trace) << "Solution value  = " << cplex.getObjValue();
+    cplex.getValues(vals, c);
+    BOOST_LOG_TRIVIAL(trace) << "Values        = " << vals;
+    
+    // check if any element has to be deleted from the cache
+    i = 0;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
+      if (vals[i] == 0) {
+        userCacheMap->at(reqUser).removeFromCache(it->first);
+        // also delete the user from the asidCacheMap
+        asidContentMap->at(asid).at(it->first).erase(reqUser);
+      }
+      i++;
+    }
+    // check if reqContent has to be added to the cache
+    bool shouldCache = (vals[cachedVec.size()] == 1);
+    env.end();
+    return std::make_pair(true, shouldCache);
+    /*
+    // print the new content of the cache for debugging purposes
+    cachedVec = caches[reqUser].getCachedVec();
+    cout << "Cache content after optimization: " ;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++)
+      cout << *it << " ";
+    cout << endl << "Total size: " << caches[reqUser].getCurrentSize() << endl;
+     * */
+  } catch (IloException& e) {
+    BOOST_LOG_TRIVIAL(warning) << "Concert exception caught: " << e;
+  } catch (...) {
+    BOOST_LOG_TRIVIAL(warning) << "Unknown exception caught" ;    
+  }
+  env.end();
+  return std::make_pair(false, false); 
 }
