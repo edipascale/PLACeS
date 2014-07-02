@@ -118,16 +118,22 @@ public:
   void removeFromCMap(ContentElement* content, PonUser user);
   /* optimizeCaching implements the optimal caching algorithm to minimize storage
    * space while keeping high level of locality, by ensuring that some minimal
-   * rates of upload are always available. Rates are determined based on 
+   * number of replicas are always available. Replicas are determined based on 
    * popularity estimation (to be implemented). the function should be called 
    * before adding elements to the cache, as it determines whether or not the 
    * new element is worth storing and which elements should be erased to make
-   * space for it.
+   * space for it. It returns a pair of bool, the first of which tells whether
+   * the optimization was successful (i.e., a valid solution was found), and the
+   * second telling whether the requested element should be cached. The second
+   * boolean value should only be taken into consideration if the first is true.
    */
-  bool optimizeCaching(PonUser user, ContentElement* content, Capacity sizeRequested);
+  std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, 
+      Capacity sizeRequested);
+  
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);
   }
+  
   FlowStats getFlowStats() const {
     return this->flowStats;
   }
