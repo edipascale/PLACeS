@@ -59,6 +59,7 @@ public:
   void removeFromCache(Content content); // for expired content
   bool uploadCompleted(Content content); // to decrease the upload counter
   int getCurrentUploads(Content content);
+  int getTotalUploads();
   
   // to give the optimizer full access to the content of the cache
   CacheMap getCacheMap() const {
@@ -227,6 +228,14 @@ int Cache<Content, Size, Timestamp>::getCurrentUploads(Content content) {
   } else {
     return -1;
   }
+}
+
+template <typename Content, typename Size, typename Timestamp>
+int Cache<Content, Size, Timestamp>::getTotalUploads() {
+  int uploads = 0;
+  for (typename CacheMap::iterator it = cacheMap.begin(); it != cacheMap.end(); it++)
+    uploads += it->second.uploads;
+  return uploads;
 }
 
 #endif	/* CACHE_HPP */
