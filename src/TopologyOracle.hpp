@@ -90,6 +90,12 @@ protected:
   bool reducedCaching; // if true, use only a single CDN in the core;
                        // if false, one CDN micro cache in each AS
   bool preCaching;  // if true, AS caches are pre-filled with popular content and never updated
+  uint maxUploads;  // max number of concurrent uploads for the optimization problem
+  /* the following map associates to each content the expected number of concurrent
+   * uploads that the oracle expects at a given time. How to populate in a sensible
+   * way is something I am still to figure out.
+   */
+  std::map<ContentElement*, double> contentRateMap;
 public:
   TopologyOracle(Topology* topo, po::variables_map vm);
   ~TopologyOracle();
@@ -110,6 +116,15 @@ public:
   bool checkIfCached(Vertex lCache, ContentElement* content, Capacity sizeRequested);
   void getFromLocalCache(Vertex lCache, ContentElement* content, SimTime time);
   void removeFromCMap(ContentElement* content, PonUser user);
+  /* optimizeCaching implements the optimal caching algorithm to minimize storage
+   * space while keeping high level of locality, by ensuring that some minimal
+   * rates of upload are always available. Rates are determined based on 
+   * popularity estimation (to be implemented). the function should be called 
+   * before adding elements to the cache, as it determines whether or not the 
+   * new element is worth storing and which elements should be erased to make
+   * space for it.
+   */
+  bool optimizeCaching(PonUser user, ContentElement* content, Capacity sizeRequested);
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);
   }
