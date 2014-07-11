@@ -16,7 +16,7 @@
 
 
 // % of requests taking places at a give hour, starting from midnight
-const double usrPctgByHour[] = {
+const std::vector<double> usrPctgByHour = {
   4, 2, 1.5, 1.5, 1, 0.5, 0.5, 1, 1, 1.5, 2, 2.5, 3, 4, 4.5, 4.5, 4, 4, 4, 6, 12, 15, 12, 8
 //0  1   2    3   4   5    6   7  8   9   10  11 12 13  14   15  16 17 18 19  20  21  22  23
 };
@@ -24,7 +24,7 @@ const double usrPctgByHour[] = {
 const double dayWeights[] = {0.8, 0.9, 1, 0.8, 1.2, 1.3, 1.2};
 //                            M    T   W   T    F    S    S
 
-const double sessionLength[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
+const std::vector<double> sessionLength = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
         1, 1, 1, 1, 1, 1, 1, 1}; // 50% linear zapping, 50% entire content 
 
 /* Switching to a linear session length, this will no longer be used
@@ -77,6 +77,7 @@ protected:
   double avgContentLength; //average content length in minutes
   double devContentLength; // std deviation of content length
   double avgHoursPerUser; // hours of viewing per user per round
+  double avgReqLength; //  derivative, but useful for the popularity estimation
   uint bitrate; // bitrate of the encoded content in Mbps
   Topology* topo;
   AsidContentMap* asidContentMap; // keeps track of content available in each AS
@@ -92,8 +93,7 @@ protected:
   bool preCaching;  // if true, AS caches are pre-filled with popular content and never updated
   uint maxUploads;  // max number of concurrent uploads for the optimization problem
   /* the following map associates to each content the expected number of concurrent
-   * uploads that the oracle expects at a given time. How to populate in a sensible
-   * way is something I am still to figure out.
+   * uploads that the oracle expects per user per day.
    */
   std::map<ContentElement*, double> contentRateMap;
 public:
@@ -128,7 +128,7 @@ public:
    * boolean value should only be taken into consideration if the first is true.
    */
   std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, 
-      Capacity sizeRequested);
+      Capacity sizeRequested, SimTime time);
   
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);
