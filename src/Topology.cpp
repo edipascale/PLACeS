@@ -199,6 +199,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
       int ponC(0), ponNum(numPonMap.at(v));
       Capacity upCapacity(upCapMap.at(v)), downCapacity(downCapMap.at(v));
       // for each PON node, determine the number of active customers
+      uint asCustomers = 0;
       for (auto j = 0; j < ponNum; j++) {
         Vertex pon = boost::add_vertex(topology);
         // checks if the topology values should be overridden
@@ -207,6 +208,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
         else
           ponC = std::max((int) std::floor(ponDist(gen) + 0.5), 0);
         numCustomers += ponC;
+        asCustomers += ponC;
         topology[pon].ponCustomers = ponC;
         topology[pon].asid = asid;
         //add this to the PON Nodes list
@@ -218,6 +220,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
         result = this->addEdge(pon, v, upCapacity, UPSTREAM);
         assert(result);
       }
+      ASCustomersMap.insert(std::make_pair(asid, asCustomers));
     }
     this->numEdges = boost::num_edges(topology);
     this->numVertices = boost::num_vertices(topology);
@@ -259,6 +262,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
       }
       boost::random::normal_distribution<> ponDist(avgPonC, devPonC);
       // for each PON node, determine the number of active customers
+      uint asCustomers = 0;
       for (int j = 0; j < ponNum; j++) {
         Vertex pon = boost::add_vertex(topology);
         // checks if the topology values should be overridden
@@ -267,6 +271,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
         else 
           ponC = std::max((int)std::floor(ponDist(gen) + 0.5),0);
         numCustomers += ponC;
+        asCustomers += ponC;
         topology[pon].ponCustomers = ponC;
         topology[pon].asid = i;
         //add this to the PON Nodes list
@@ -278,6 +283,7 @@ Topology::Topology(string fileName, po::variables_map vm) {
         result = this->addEdge(pon, i, revCapacity, UPSTREAM);
         assert(result);
       }
+      ASCustomersMap.insert(std::make_pair(i, asCustomers));
     }
     // read the core links from the topology file
 	  for (uint i = 0; i < edges; i ++) {
