@@ -108,7 +108,12 @@ protected:
      * are actually going to be taken (i.e. sanpshotFreq > 0).
      */
     boost::dynamic_properties snapDp;
-    
+    /* the following map keeps track of how many peers are present in each AS.
+     * This is needed when calculating content rates in the cache optimization
+     * problem. The map is populated in the constructor, when determining the 
+     * number of users per PON.
+     */
+    std::map<uint, uint> ASCustomersMap;
     //utility methods
     void updateRouteCapacity(std::vector<Edge> route, Capacity toAdd);
     void updateEta(Flow* flow, Scheduler* scheduler);
@@ -155,6 +160,12 @@ public:
 
   NetworkStats getNetworkStats() const {
     return this->stats;
+  }
+  
+  /* returns the number of customers for a given AS id
+   */
+  uint getASCustomers(uint asid) {
+    return ASCustomersMap.at(asid);
   }
 };
 
