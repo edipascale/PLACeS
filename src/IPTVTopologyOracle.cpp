@@ -103,6 +103,10 @@ void IPTVTopologyOracle::populateCatalog() {
         boost::lexical_cast<string > ((day + 6) * contentNum + i), day, i, size);
       dailyCatalog[std::abs(day)].at(i) = content;
       this->addContent(content);
+      /* Here is where we need to update the contentRateMap
+       */
+      double rate = (avgHoursPerUser * 3600 / avgReqLength) * rankDist->pmf(i) * relDayDist->pmf(std::abs(day));
+      contentRateMap.insert(std::make_pair(content, rate));
     }
   }
 }
@@ -126,7 +130,16 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
             currentRound + 1, i, size);
     dailyCatalog[0].at(i) = content;
-    this->addContent(content);
+    this->addContent(content);   
+  }
+  // update the contentRateMap for all the catalog
+  for (uint day = 0; day < 7; day++) {
+    for (uint i = 0; i < contentNum; i++) {
+      double rate = (avgHoursPerUser * 3600 / avgReqLength) * 
+              rankDist->pmf(i) * relDayDist->pmf(day);
+      ContentElement* content = dailyCatalog.at(day).at(i);
+      contentRateMap.insert(std::make_pair(content, rate));       
+    }
   }
 }
 
