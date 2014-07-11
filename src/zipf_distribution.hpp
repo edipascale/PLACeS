@@ -68,6 +68,8 @@ public:
 
   template<class Engine>
   result_type operator()(Engine& eng) { return dist_(eng); }
+  
+  RealType pmf(IntType i) { return dist_.probabilities().at(i); }
 };
 
 } }
