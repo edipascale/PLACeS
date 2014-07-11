@@ -22,12 +22,14 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->topo = topo;
   this->mode = (SimMode) vm["sim-mode"].as<uint>();
   this->avgHoursPerUser = vm["avg-hours-per-user"].as<double>();
-  this->avgContentLength = vm["content-length"].as<double>();
+  this->avgContentLength = vm["content-length"].as<double>(); // in minutes
   this->devContentLength = vm["content-dev"].as<double>();
   this->bitrate = vm["bitrate"].as<uint>();
   this->preCaching = vm["pre-caching"].as<bool>();
   //FIXME: this assumes constant bitrate for upload and a 10GPON
-  this->maxUploads = std::floor(10000 / bitrate);
+  this->maxUploads = std::floor(10240 / (ponCardinality * bitrate));
+  this->avgReqLength = (avgContentLength * 60 *  // in seconds
+          std::accumulate(sessionLength.begin(), sessionLength.end(), 0)/sessionLength.size());
   uint rounds = vm["rounds"].as<uint>();
   flowStats.avgFlowDuration.assign(rounds, 0);
   flowStats.avgPeerFlowDuration.assign(rounds, 0);
@@ -430,7 +432,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
      * have to remove those contents manually before invoking addToCache
      */
     std::pair<bool, bool> optResult = this->optimizeCaching(dest, 
-            flow->getContent(), flow->getSizeRequested());
+            flow->getContent(), flow->getSizeRequested(), time);
     /* we need to add the requested element if the optimization failed OR if
      * it succeeded and it determined that we need to. The difference is that
      * in the second case elements that need to be removed have already been erased
@@ -568,6 +570,8 @@ void TopologyOracle::removeContent(ContentElement* content) {
           lit != localCacheMap->end(); lit++) {
     lit->second.removeFromCache(content);
   }
+  // erase it from the contentRateMap too
+  contentRateMap.erase(content);
 }
 
 bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content,
@@ -603,7 +607,7 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
 }
 
 std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
-        ContentElement* content, Capacity sizeRequested) {
+        ContentElement* content, Capacity sizeRequested, SimTime time) {
   /* FIXME: there is an inconsistence in our assumptions here, in that we add 
    * an optimization variable for the requested content in addition to the 
    * variables we have for the elements cached, but there is a chance that the 
@@ -611,6 +615,12 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
    * to either make sure that this case is covered or that it never happens (e.g.,
    * by deleting it before entering the method).
    */ 
+  int hour = std::floor(time / 3600);
+  /* attempting to fix a potential bug in case we enter this function when it's
+  /* midnight of the following day
+   */
+  if (hour >= usrPctgByHour.size())
+    hour = usrPctgByHour.size() - 1;
   IloEnv env;
   int asid = topo->getAsid(reqUser);
   try {    
@@ -636,7 +646,26 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       if (it->second.uploads > 0)
         constraints.add(c[i] == 1);
       // build the constraint on rates if required
-      if (contentRateMap.at(contIt) > 0) {
+      /* the contentRateMap holds the number of requests expected for each content
+       * per user per day. To get the number of requests per hour per AS we need
+       * to get the % of requests in this particular hour via usrPctgByHour and
+       * multiply it by the number of users in the AS of the requester. The avg
+       * concurrent request number is calculated as reqPerHour * avgReqLength. To
+       * get the peak of concurrent users, which is what we need, we multiply
+       * that value by 3 (to be checked).
+       */
+      double avgReqPerHour = (contentRateMap.at(contIt) * usrPctgByHour.at(hour) / 100) *
+          topo->getASCustomers(asid);      
+      BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << contIt->getName() << "," << hour
+              << ") = (" << contentRateMap.at(contIt) << " * " << usrPctgByHour.at(hour)
+              << " / 100) * " << topo->getASCustomers(asid)
+              << " = " << avgReqPerHour;
+      int contentRate = std::ceil(avgReqPerHour * avgReqLength / 3600 );
+      BOOST_LOG_TRIVIAL(trace) << "contentRate = std::ceil(" << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) = " << contentRate;
+      if (contentRate > 0) {
+        //BOOST_LOG_TRIVIAL(info) << "contentRate = " << contentRate << " for content "
+        //        << contIt->getName() << " in asid " << asid << " at time " << hour;
         IloNumExpr cExp(env, 0);
         for (auto uit = asidContentMap->at(asid).at(contIt).begin(); 
                 uit != asidContentMap->at(asid).at(contIt).end(); uit++) {
@@ -650,7 +679,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
                     + userCacheMap->at(reqUser).getCurrentUploads(contIt));
           }
         }
-        constraints.add(cExp >= contentRateMap.at(it->first));
+        constraints.add(cExp >= contentRate);
       }
       i++;
     }
@@ -673,7 +702,21 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       cExp += c[cachedVec.size()]* (IloInt)(maxUploads - userCacheMap->at(reqUser).getTotalUploads() 
                     + userCacheMap->at(reqUser).getCurrentUploads(content));
     }
-    constraints.add(cExp >= contentRateMap.at(content));
+    // add a contentRate constraint for the requested content if needed
+    double avgReqPerHour = (contentRateMap.at(content) * usrPctgByHour.at(hour) / 100) *
+          topo->getASCustomers(asid);
+    BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << content->getName() << "," << hour
+              << ") = (" << contentRateMap.at(content) << " * " << usrPctgByHour.at(hour)
+              << " / 100) * " << topo->getASCustomers(asid)
+              << " = " << avgReqPerHour;
+    int contentRate = std::ceil(avgReqPerHour * avgReqLength / 3600 );
+    BOOST_LOG_TRIVIAL(trace) << "contentRate = std::ceil(" << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) = " << contentRate;
+    if (contentRate > 0) {
+      //BOOST_LOG_TRIVIAL(info) << "contentRate = " << contentRate << " for content "
+      //       << content->getName() << " in asid " << asid << " at time " << hour;
+      constraints.add(cExp >= contentRate);
+    }
     
     //finally add a constraint on the maximum size of the cache
     constraints.add(exp <= userCacheMap->at(reqUser).getMaxSize());
@@ -687,10 +730,11 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
 
     // ask CPLEX to solve the problem
     IloCplex cplex(model);
+    cplex.setOut(env.getNullStream());
     if (!cplex.solve()) {
-      BOOST_LOG_TRIVIAL(warning) << "Failed to optimize caching for content " << 
-              content->getName() << "at user " << reqUser.first << "," <<
-              reqUser.second << ", reverting to standard cache policies";
+      BOOST_LOG_TRIVIAL(info) << "Failed to optimize caching for content " << 
+              content->getName() << " at user " << reqUser.first << "," <<
+              reqUser.second << "; reverting to standard cache policies";
       return std::make_pair(false, false); 
     }
     
@@ -705,8 +749,8 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
     for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
       if (vals[i] == 0) {
         userCacheMap->at(reqUser).removeFromCache(it->first);
-        // also delete the user from the asidCacheMap
-        asidContentMap->at(asid).at(it->first).erase(reqUser);
+        // also delete the user from the content map
+        removeFromCMap(it->first, reqUser);
       }
       i++;
     }
@@ -724,9 +768,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
      * */
   } catch (IloException& e) {
     BOOST_LOG_TRIVIAL(warning) << "Concert exception caught: " << e;
-  } catch (...) {
-    BOOST_LOG_TRIVIAL(warning) << "Unknown exception caught" ;    
-  }
+  } 
   env.end();
   return std::make_pair(false, false); 
 }
