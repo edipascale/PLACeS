@@ -4,7 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>Cache.hpp</itemPath>
+      <itemPath>src/Cache.hpp</itemPath>
       <itemPath>src/ContentElement.hpp</itemPath>
       <itemPath>src/Flow.hpp</itemPath>
       <itemPath>src/IPTVTopologyOracle.hpp</itemPath>
@@ -99,8 +99,6 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
-      <item path="Cache.hpp" ex="false" tool="3" flavor2="0">
-      </item>
       <folder path="TestFiles">
         <linkerTool>
           <linkerAddLib>
@@ -113,6 +111,8 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
+      <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ContentElement.hpp" ex="false" tool="3" flavor2="0">
@@ -216,7 +216,7 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
-      <item path="Cache.hpp" ex="false" tool="3" flavor2="0">
+      <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
       </item>

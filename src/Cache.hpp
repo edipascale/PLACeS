@@ -53,12 +53,16 @@ public:
   bool getFromCache(Content content, Timestamp time);
   bool isCached(Content content, Size sizeReq);
   void removeFromCache(Content content); // for expired content
+  
+  unsigned int getNumElementsCached() const {
+    return this->cacheMap.size();
+  }
 
-  unsigned int getCurrentSize() const {
+  Size getCurrentSize() const {
     return this->currentSize;
   }
 
-  unsigned int getMaxSize() const {
+  Size getMaxSize() const {
     return maxSize;
   }
   
@@ -85,8 +89,9 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
   deletedElements.clear();
   // check if the content was already cached
   typename CacheMap::iterator cIt = cacheMap.find(content);
-  if (cIt != cacheMap.end() && cIt->second.size >= size) {
-    // content is already cached 
+  if ((cIt != cacheMap.end() && cIt->second.size >= size) // content already cached
+      || size > getMaxSize()) { // content cannot possibly fit in the cache
+    // already cached or too big to be cached, quit 
     return std::make_pair(false, deletedElements);
   }  
   else {
@@ -97,10 +102,6 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
       this->currentSize -= cIt->second.size;
       oldFreqStat = cIt->second.timesServed;
       this->cacheMap.erase(cIt);
-    }
-    // check if the new element can fit into the cache
-    if (size > this->maxSize) {
-      return std::make_pair(false, deletedElements);
     }
     while (currentSize + size > maxSize) {
       // Replace content according to selected policy
