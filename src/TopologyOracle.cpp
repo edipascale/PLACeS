@@ -24,6 +24,7 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->avgHoursPerUser = vm["avg-hours-per-user"].as<double>();
   this->avgContentLength = vm["content-length"].as<double>(); // in minutes
   this->devContentLength = vm["content-dev"].as<double>();
+  this->peakReqRatio = vm["peak-req-ratio"].as<uint>();
   this->bitrate = vm["bitrate"].as<uint>();
   this->preCaching = vm["pre-caching"].as<bool>();
   //FIXME: this assumes constant bitrate for upload and a 10GPON
@@ -660,27 +661,26 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
               << ") = (" << contentRateMap.at(contIt) << " * " << usrPctgByHour.at(hour)
               << " / 100) * " << topo->getASCustomers(asid)
               << " = " << avgReqPerHour;
-      int contentRate = std::ceil(avgReqPerHour * avgReqLength / 3600 );
-      BOOST_LOG_TRIVIAL(trace) << "contentRate = std::ceil(" << avgReqPerHour
-              << " * " << avgReqLength << " / 3600) = " << contentRate;
-      if (contentRate > 0) {
-        //BOOST_LOG_TRIVIAL(info) << "contentRate = " << contentRate << " for content "
-        //        << contIt->getName() << " in asid " << asid << " at time " << hour;
-        IloNumExpr cExp(env, 0);
-        for (auto uit = asidContentMap->at(asid).at(contIt).begin(); 
-                uit != asidContentMap->at(asid).at(contIt).end(); uit++) {
-          if (reqUser != *uit) {
-            cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads() 
-                    + userCacheMap->at(*uit).getCurrentUploads(contIt);
-          } else {
-            // multiply the term by the caching variable so that we lose it if
-            // we decide to erase the element from the cache
-            cExp += c[i]* (IloInt)(maxUploads - userCacheMap->at(reqUser).getTotalUploads() 
-                    + userCacheMap->at(reqUser).getCurrentUploads(contIt));
-          }
+      int contentRate = std::floor((peakReqRatio * avgReqPerHour * avgReqLength / 3600) + 0.5);
+      // ensure that we keep at least one copy of each content in each AS
+      contentRate = std::max(1, contentRate);
+      BOOST_LOG_TRIVIAL(trace) << "contentRate = std::floor((" << peakReqRatio 
+              << " * " << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) + 0.5) = " << contentRate;
+      IloNumExpr cExp(env, 0);
+      for (auto uit = asidContentMap->at(asid).at(contIt).begin();
+              uit != asidContentMap->at(asid).at(contIt).end(); uit++) {
+        if (reqUser != *uit) {
+          cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads()
+                  + userCacheMap->at(*uit).getCurrentUploads(contIt);
+        } else {
+          // multiply the term by the caching variable so that we lose it if
+          // we decide to erase the element from the cache
+          cExp += c[i]* (IloInt) (maxUploads - userCacheMap->at(reqUser).getTotalUploads()
+                  + userCacheMap->at(reqUser).getCurrentUploads(contIt));
         }
-        constraints.add(cExp >= contentRate);
       }
+      constraints.add(cExp >= contentRate);      
       i++;
     }
     // same for the requested content
@@ -709,14 +709,13 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
               << ") = (" << contentRateMap.at(content) << " * " << usrPctgByHour.at(hour)
               << " / 100) * " << topo->getASCustomers(asid)
               << " = " << avgReqPerHour;
-    int contentRate = std::ceil(avgReqPerHour * avgReqLength / 3600 );
-    BOOST_LOG_TRIVIAL(trace) << "contentRate = std::ceil(" << avgReqPerHour
-              << " * " << avgReqLength << " / 3600) = " << contentRate;
-    if (contentRate > 0) {
-      //BOOST_LOG_TRIVIAL(info) << "contentRate = " << contentRate << " for content "
-      //       << content->getName() << " in asid " << asid << " at time " << hour;
-      constraints.add(cExp >= contentRate);
-    }
+    int contentRate = std::floor((peakReqRatio * avgReqPerHour * avgReqLength / 3600) + 0.5);
+    // ensure that we keep at least one copy of each content in each AS
+    contentRate = std::max(1, contentRate);
+    BOOST_LOG_TRIVIAL(trace) << "contentRate = std::floor((" << peakReqRatio 
+              << " * " << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) + 0.5) = " << contentRate;
+    constraints.add(cExp >= contentRate);    
     
     //finally add a constraint on the maximum size of the cache
     constraints.add(exp <= userCacheMap->at(reqUser).getMaxSize());
@@ -735,6 +734,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       BOOST_LOG_TRIVIAL(info) << "Failed to optimize caching for content " << 
               content->getName() << " at user " << reqUser.first << "," <<
               reqUser.second << "; reverting to standard cache policies";
+      env.end();
       return std::make_pair(false, false); 
     }
     
