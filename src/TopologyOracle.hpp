@@ -78,6 +78,7 @@ protected:
   double devContentLength; // std deviation of content length
   double avgHoursPerUser; // hours of viewing per user per round
   double avgReqLength; //  derivative, but useful for the popularity estimation
+  uint peakReqRatio; // multiplicative factor to determine peak requests from avg requests
   uint bitrate; // bitrate of the encoded content in Mbps
   Topology* topo;
   AsidContentMap* asidContentMap; // keeps track of content available in each AS
