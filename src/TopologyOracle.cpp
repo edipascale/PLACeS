@@ -591,7 +591,10 @@ void TopologyOracle::getFromLocalCache(Vertex lCache, ContentElement* content,
   // local cache
   if (localCacheMap->at(lCache).getMaxSize() >= content->getSize()) {
     bool result = localCacheMap->at(lCache).getFromCache(content, time);
-    assert (result);
+    // the central server should have inifinite capacity but this is not implemented
+    // so we should not get worried if the result is false
+    if (lCache != topo->getCentralServer())
+      assert (result);
   }
 }
 
