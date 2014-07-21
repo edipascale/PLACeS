@@ -656,7 +656,8 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
        * multiply it by the number of users in the AS of the requester. The avg
        * concurrent request number is calculated as reqPerHour * avgReqLength. To
        * get the peak of concurrent users, which is what we need, we multiply
-       * that value by 3 (to be checked).
+       * that value by a pakReqRatio, which is taken as an integer input parameter 
+       * (-k).
        */
       double avgReqPerHour = (contentRateMap.at(contIt) * usrPctgByHour.at(hour) / 100) *
           topo->getASCustomers(asid);      
