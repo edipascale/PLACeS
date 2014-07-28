@@ -183,18 +183,22 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   PonUser destination = flow->getDestination();
   PonUser closestSource = UNKNOWN;
   SimTime time = scheduler->getSimTime();
-  std::string contentName = flow->getContent()->getName();
+  ContentElement* content = flow->getContent();
+  std::string contentName = content->getName();
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << contentName
             << " to user " << destination.first << "," << destination.second;
+  // update the number of requests for this content
+  auto it = ranking.get<name>().find(contentName);
+  ranking.modify(it, incrementViews());
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.
-  if (checkIfCached(destination, flow->getContent(), flow->getSizeRequested())) {
+  if (checkIfCached(destination, content, flow->getSizeRequested())) {
     // signal to the scheduler that this flow is "virtual"
     flow->setSource(destination);
     flow->setEta(time);
     // update this user's cacheMap entry (for LRU/LFU)
-    bool result = userCacheMap->at(destination).getFromCache(flow->getContent(),
+    bool result = userCacheMap->at(destination).getFromCache(content,
             (scheduler->getCurrentRound()+1)*time);
     assert(result);
     flowStats.servedRequests.at(scheduler->getCurrentRound())++;
@@ -209,7 +213,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   }
   // try to find a local peer first
   uint asid = topo->getAsid(destination);
-  std::set<PonUser> localSources = asidContentMap->at(asid).at(flow->getContent());
+  std::set<PonUser> localSources = asidContentMap->at(asid).at(content);
   // copy the set to a vector which can then be randomized to reduce the chance
   // the same peer will be selected over and over until congestion is reached
   std::vector<PonUser> randSources(localSources.begin(), localSources.end());
@@ -220,7 +224,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   while (!randSources.empty() && !foundSource) {
     closestSource = randSources.back();
     // check if the identified source has enough content to serve this request
-    if (this->checkIfCached(closestSource, flow->getContent(), 
+    if (this->checkIfCached(closestSource, content, 
             flow->getSizeRequested()) 
             && !topo->isCongested(closestSource, destination))
       foundSource = true;
@@ -238,7 +242,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     if (!reducedCaching) 
     {
       Vertex lCache = topo->getLocalCache(flow->getDestination().first);
-      if (checkIfCached(lCache, flow->getContent(), flow->getSizeRequested())) {
+      if (checkIfCached(lCache, content, flow->getSizeRequested())) {
         // NOTE: We should check here if the downlink is congested, but with our
         // current hypothesis it should never be the case
         assert(topo->isCongested(std::make_pair(lCache, 0), destination) == false);
@@ -249,7 +253,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
                 << " from AS cache node " << lCache
                 << " (closestSource=" << closestSource.first
                 << "," << closestSource.second << ")";
-        this->getFromLocalCache(lCache, flow->getContent(), 
+        this->getFromLocalCache(lCache, content, 
                 (scheduler->getCurrentRound()+1)*time);
         flow->setSource(std::make_pair(lCache, 0));
         flowStats.servedRequests.at(scheduler->getCurrentRound())++;
@@ -276,7 +280,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       for (uint i = 0; i < topo->getNumASes(); i++) {
         if (exploredASes[i])
           continue;
-        cIt = asidContentMap->at(i).find(flow->getContent());
+        cIt = asidContentMap->at(i).find(content);
         if (cIt == asidContentMap->at(i).end() || cIt->second.empty()) {
           // this AS has no source with the required content, mark it as explored
           // to save time at a future iteration
@@ -295,7 +299,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       if (minDistance != INF_TIME) {
         // Attempts to find the closest source whose route to the destination is not congested
         localSources.clear();
-        localSources = asidContentMap->at(asIndex).at(flow->getContent());
+        localSources = asidContentMap->at(asIndex).at(content);
         randSources.clear();
         randSources.assign(localSources.begin(), localSources.end());
         std::random_shuffle(randSources.begin(), randSources.end());
@@ -303,7 +307,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
         while (!randSources.empty() && !foundSource) {
           closestSource = randSources.back();
           // check if the identified source has enough content to serve this request
-          if (this->checkIfCached(closestSource, flow->getContent(), 
+          if (this->checkIfCached(closestSource, content, 
                   flow->getSizeRequested()) 
                   && !topo->isCongested(closestSource, destination))
               foundSource = true;
@@ -336,14 +340,13 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // If we're in reducedCaching mode, check if the content is stored on the 
     // central cache, otherwise fetch it off-network
     if (reducedCaching) {
-      if (!checkIfCached(centralServer, flow->getContent(), 
+      if (!checkIfCached(centralServer, content, 
               flow->getSizeRequested())) {
-        localCacheMap->at(centralServer).addToCache(flow->getContent(), 
-                flow->getContent()->getSize(),
-                (scheduler->getCurrentRound()+1)*time);
+        localCacheMap->at(centralServer).addToCache(content, 
+                content->getSize(), (scheduler->getCurrentRound()+1)*time);
       }
       // update LFU/LRU stats
-      this->getFromLocalCache(centralServer, flow->getContent(), 
+      this->getFromLocalCache(centralServer, content, 
               (scheduler->getCurrentRound()+1)*time);
     }
     flow->setP2PFlow(false);
@@ -355,7 +358,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   } else {
     // p2p flow, update user cache statistics (for LFU/LRU purposes)
     flow->setP2PFlow(true);
-    bool result = userCacheMap->at(closestSource).getFromCache(flow->getContent(),
+    bool result = userCacheMap->at(closestSource).getFromCache(content,
             (scheduler->getCurrentRound()+1)*time);
     assert(result);
     // check for locality is done here to avoid central server to be mistakenly
@@ -556,6 +559,8 @@ void TopologyOracle::addContent(ContentElement* content) {
       lit->second.addToCache(content, content->getSize(), 0);
     }
   }
+  // insert the content into the ranking table
+  ranking.insert(content);
 }
 
 void TopologyOracle::removeContent(ContentElement* content) {
@@ -573,6 +578,8 @@ void TopologyOracle::removeContent(ContentElement* content) {
   }
   // erase it from the contentRateMap too
   contentRateMap.erase(content);
+  // and from the ranking table
+  ranking.erase(ranking.get<name>().find(content->getName()));
 }
 
 bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content,

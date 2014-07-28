@@ -105,7 +105,7 @@ void IPTVTopologyOracle::populateCatalog() {
       this->addContent(content);
       /* Here is where we need to update the contentRateMap
        */
-      double rate = (avgHoursPerUser * 3600 / avgReqLength) * rankDist->pmf(i) * relDayDist->pmf(std::abs(day));
+      double rate = 0.0;
       contentRateMap.insert(std::make_pair(content, rate));
     }
   }
@@ -119,6 +119,11 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   }
   for (uint day = 6; day > 0; day--) {
     dailyCatalog[day] = dailyCatalog[day - 1];
+    // scale down rate according to day distribution
+    for (uint i = 0; i < contentNum; i++) {
+      ContentElement* content = dailyCatalog.at(day).at(i);
+      contentRateMap.at(content) *= relDayDist->pmf(day);
+    }
   }
   // normal distribution to generate content length in minutes
   boost::random::normal_distribution<> normDist(this->avgContentLength, 
@@ -130,17 +135,9 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
             currentRound + 1, i, size);
     dailyCatalog[0].at(i) = content;
+    contentRateMap.insert(std::make_pair(content, 0.0));
     this->addContent(content);   
-  }
-  // update the contentRateMap for all the catalog
-  for (uint day = 0; day < 7; day++) {
-    for (uint i = 0; i < contentNum; i++) {
-      double rate = (avgHoursPerUser * 3600 / avgReqLength) * 
-              rankDist->pmf(i) * relDayDist->pmf(day);
-      ContentElement* content = dailyCatalog.at(day).at(i);
-      contentRateMap.insert(std::make_pair(content, rate));       
-    }
-  }
+  }  
 }
 
 void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time, 
