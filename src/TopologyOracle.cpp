@@ -188,8 +188,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << contentName
             << " to user " << destination.first << "," << destination.second;
   // update the number of requests for this content
-  auto it = ranking.get<name>().find(contentName);
-  ranking.modify(it, incrementViews());
+  catalog.hit(content);
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.
@@ -560,7 +559,7 @@ void TopologyOracle::addContent(ContentElement* content) {
     }
   }
   // insert the content into the ranking table
-  ranking.insert(content);
+  catalog.insert(content);
 }
 
 void TopologyOracle::removeContent(ContentElement* content) {
@@ -579,7 +578,7 @@ void TopologyOracle::removeContent(ContentElement* content) {
   // erase it from the contentRateMap too
   contentRateMap.erase(content);
   // and from the ranking table
-  ranking.erase(ranking.get<name>().find(content->getName()));
+  catalog.erase(content);
 }
 
 bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content,

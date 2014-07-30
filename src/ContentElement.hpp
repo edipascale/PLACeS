@@ -88,26 +88,5 @@ public:
   }
 };
 
-//tags for multi index container
-struct views {};
-struct name {};
-using namespace boost::multi_index;
-
-typedef boost::multi_index_container <
-  ContentElement*,
-  indexed_by <
-    hashed_unique < tag<name>, const_mem_fun<ContentElement, std::string, &ContentElement::getName  > >,
-    ordered_non_unique< tag<views>, const_mem_fun<ContentElement, unsigned int, &ContentElement::getViewsThisRound>, std::greater<unsigned int> >
-  >
-> Ranking;
-
-// functor to increment views
-struct incrementViews {
-  incrementViews(){};
-  void operator() (ContentElement* content) {
-    content->increaseViewsThisRound();
-  }
-};
-
 #endif	/* CONTENTELEMENT_HPP */
 

@@ -9,6 +9,7 @@
       <itemPath>src/Flow.hpp</itemPath>
       <itemPath>src/IPTVTopologyOracle.hpp</itemPath>
       <itemPath>src/PLACeS.hpp</itemPath>
+      <itemPath>RankingTable.hpp</itemPath>
       <itemPath>src/RunningAvg.hpp</itemPath>
       <itemPath>src/Scheduler.hpp</itemPath>
       <itemPath>src/SimTimeInterval.hpp</itemPath>
@@ -107,6 +108,8 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
+      <item path="RankingTable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <folder path="TestFiles">
         <linkerTool>
           <linkerAddLib>
@@ -232,6 +235,8 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
+      <item path="RankingTable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">

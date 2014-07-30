@@ -13,6 +13,7 @@
 #include "zipf_distribution.hpp"
 #include <fstream>
 #include "Cache.hpp"
+#include "RankingTable.hpp"
 
 
 // % of requests taking places at a give hour, starting from midnight
@@ -97,8 +98,8 @@ protected:
    * uploads that the oracle expects per user per day.
    */
   std::map<ContentElement*, double> contentRateMap;
-  // multi index container to keep track of content popularity
-  Ranking ranking;
+  // bimap-based container to keep track of content popularity
+  RankingTable<ContentElement*> catalog;
   
 public:
   TopologyOracle(Topology* topo, po::variables_map vm);
