@@ -440,6 +440,10 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
     /* here we need to ask the oracle to decide whether we should cache the new
      * content. Because the optimization will also tell us what to delete, we
      * have to remove those contents manually before invoking addToCache
+     * Note that in the popularity estimation branch, we should try to optimize
+     * only when we know enough about the content - e.g. a couple of hours.
+     * we should also prevent those young contents to be eliminated by the 
+     * optimizer!
      */
     std::pair<bool, bool> optResult = this->optimizeCaching(dest, 
             flow->getContent(), flow->getSizeRequested(), time, round);
@@ -668,6 +672,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
        * (-k).
        */
       uint dayIndex = currentRound - contIt->getReleaseDay();
+      assert(0 <= dayIndex && dayIndex < 7);
       uint rank = dailyRanking.at(dayIndex).getRankOf(contIt);
       double rate = contentRateVec.at(dayIndex).at(rank);
       double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
@@ -719,6 +724,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
     }
     // add a contentRate constraint for the requested content if needed
     uint dayIndex = currentRound - content->getReleaseDay();
+    assert(0 <= dayIndex && dayIndex < 7);
     uint rank = dailyRanking.at(dayIndex).getRankOf(content);
     double rate = contentRateVec.at(dayIndex).at(rank);
     double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *

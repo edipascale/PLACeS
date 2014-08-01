@@ -125,11 +125,8 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   for (uint day = 6; day > 0; day--) {
     dailyCatalog[day] = dailyCatalog[day - 1];
     dailyRanking.at(day) = dailyRanking.at(day-1);
-    // scale down rate according to day distribution
-    for (uint i = 0; i < contentNum; i++) {
-      ContentElement* content = dailyCatalog.at(day).at(i);
-    }
   }
+  dailyRanking.at(0).clear();
   // normal distribution to generate content length in minutes
   boost::random::normal_distribution<> normDist(this->avgContentLength, 
           this->devContentLength);
