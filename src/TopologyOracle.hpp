@@ -94,12 +94,12 @@ protected:
                        // if false, one CDN micro cache in each AS
   bool preCaching;  // if true, AS caches are pre-filled with popular content and never updated
   uint maxUploads;  // max number of concurrent uploads for the optimization problem
-  /* the following map associates to each content the expected number of concurrent
-   * uploads that the oracle expects per user per day.
+  /* the following vector associates to each day of release and rank the expected 
+   * number of requests that the oracle expects per user per day.
    */
-  std::map<ContentElement*, double> contentRateMap;
+  std::vector< std::vector<double> > contentRateVec;
   // bimap-based container to keep track of content popularity
-  RankingTable<ContentElement*> catalog;
+  std::vector<RankingTable<ContentElement*> > dailyRanking;
   
 public:
   TopologyOracle(Topology* topo, po::variables_map vm);
@@ -133,7 +133,7 @@ public:
    * boolean value should only be taken into consideration if the first is true.
    */
   std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, 
-      Capacity sizeRequested, SimTime time);
+      Capacity sizeRequested, SimTime time, uint currentRound);
   
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);

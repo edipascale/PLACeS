@@ -73,6 +73,11 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
     ContentCache cache(maxLocCacheSize, policy);
     localCacheMap->insert(std::make_pair(v, cache));
   }
+  
+  //Initialize dailyRanking
+  RankingTable<ContentElement*> ranking;
+  dailyRanking.resize(7, ranking);
+  
 }
 
 TopologyOracle::~TopologyOracle() {
@@ -86,6 +91,7 @@ TopologyOracle::~TopologyOracle() {
   delete this->asidContentMap;
   localCacheMap->clear();
   delete this->localCacheMap;
+  dailyRanking.clear();
 }
 
 void TopologyOracle::addToCache(PonUser user, ContentElement* content, 
@@ -183,12 +189,13 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   PonUser destination = flow->getDestination();
   PonUser closestSource = UNKNOWN;
   SimTime time = scheduler->getSimTime();
+  int currentDay = scheduler->getCurrentRound();
   ContentElement* content = flow->getContent();
   std::string contentName = content->getName();
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << contentName
             << " to user " << destination.first << "," << destination.second;
   // update the number of requests for this content
-  catalog.hit(content);
+  dailyRanking.at(currentDay-content->getReleaseDay()).hit(content);
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.
@@ -435,7 +442,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
      * have to remove those contents manually before invoking addToCache
      */
     std::pair<bool, bool> optResult = this->optimizeCaching(dest, 
-            flow->getContent(), flow->getSizeRequested(), time);
+            flow->getContent(), flow->getSizeRequested(), time, round);
     /* we need to add the requested element if the optimization failed OR if
      * it succeeded and it determined that we need to. The difference is that
      * in the second case elements that need to be removed have already been erased
@@ -558,8 +565,6 @@ void TopologyOracle::addContent(ContentElement* content) {
       lit->second.addToCache(content, content->getSize(), 0);
     }
   }
-  // insert the content into the ranking table
-  catalog.insert(content);
 }
 
 void TopologyOracle::removeContent(ContentElement* content) {
@@ -575,10 +580,6 @@ void TopologyOracle::removeContent(ContentElement* content) {
           lit != localCacheMap->end(); lit++) {
     lit->second.removeFromCache(content);
   }
-  // erase it from the contentRateMap too
-  contentRateMap.erase(content);
-  // and from the ranking table
-  catalog.erase(content);
 }
 
 bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content,
@@ -617,7 +618,8 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
 }
 
 std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
-        ContentElement* content, Capacity sizeRequested, SimTime time) {
+        ContentElement* content, Capacity sizeRequested, SimTime time, 
+        uint currentRound) {
   /* FIXME: there is an inconsistence in our assumptions here, in that we add 
    * an optimization variable for the requested content in addition to the 
    * variables we have for the elements cached, but there is a chance that the 
@@ -656,7 +658,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       if (it->second.uploads > 0)
         constraints.add(c[i] == 1);
       // build the constraint on rates if required
-      /* the contentRateMap holds the number of requests expected for each content
+      /* the contentRateVec holds the number of requests expected for each content
        * per user per day. To get the number of requests per hour per AS we need
        * to get the % of requests in this particular hour via usrPctgByHour and
        * multiply it by the number of users in the AS of the requester. The avg
@@ -665,10 +667,13 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
        * that value by a pakReqRatio, which is taken as an integer input parameter 
        * (-k).
        */
-      double avgReqPerHour = (contentRateMap.at(contIt) * usrPctgByHour.at(hour) / 100) *
+      uint dayIndex = currentRound - contIt->getReleaseDay();
+      uint rank = dailyRanking.at(dayIndex).getRankOf(contIt);
+      double rate = contentRateVec.at(dayIndex).at(rank);
+      double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
           topo->getASCustomers(asid);      
       BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << contIt->getName() << "," << hour
-              << ") = (" << contentRateMap.at(contIt) << " * " << usrPctgByHour.at(hour)
+              << ") = (" << rate << " * " << usrPctgByHour.at(hour)
               << " / 100) * " << topo->getASCustomers(asid)
               << " = " << avgReqPerHour;
       int contentRate = std::floor((peakReqRatio * avgReqPerHour * avgReqLength / 3600) + 0.5);
@@ -713,10 +718,13 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
                     + userCacheMap->at(reqUser).getCurrentUploads(content));
     }
     // add a contentRate constraint for the requested content if needed
-    double avgReqPerHour = (contentRateMap.at(content) * usrPctgByHour.at(hour) / 100) *
+    uint dayIndex = currentRound - content->getReleaseDay();
+    uint rank = dailyRanking.at(dayIndex).getRankOf(content);
+    double rate = contentRateVec.at(dayIndex).at(rank);
+    double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
           topo->getASCustomers(asid);
     BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << content->getName() << "," << hour
-              << ") = (" << contentRateMap.at(content) << " * " << usrPctgByHour.at(hour)
+              << ") = (" << rate << " * " << usrPctgByHour.at(hour)
               << " / 100) * " << topo->getASCustomers(asid)
               << " = " << avgReqPerHour;
     int contentRate = std::floor((peakReqRatio * avgReqPerHour * avgReqLength / 3600) + 0.5);

@@ -14,13 +14,20 @@ extern boost::mt19937 gen;
 IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm) :
     TopologyOracle(topo, vm) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
-  // allocate memory for the dailyCatalog
+  this->relDayDist = new boost::random::zipf_distribution<>(7, 0, 1);
+  this->rankDist = new boost::random::zipf_distribution<>(contentNum, 10, 0.6); 
+  // allocate memory for the dailyCatalog and initialize contentRateVec
+  std::vector<double> dailyRank(contentNum, 0.0);
+  contentRateVec.resize(7, dailyRank);
   for (uint i = 0; i < 7; i++) {
     std::vector<ContentElement*> vec(contentNum, nullptr);
     dailyCatalog.push_back(vec);
+    for (uint j = 0; j < contentNum; j++) {
+      contentRateVec.at(i).at(j) = (avgHoursPerUser * 3600 / avgReqLength) 
+              * relDayDist->pmf(i) * rankDist->pmf(j);
+    }
   }
-  this->relDayDist = new boost::random::zipf_distribution<>(7, 0, 1);
-  this->rankDist = new boost::random::zipf_distribution<>(contentNum, 10, 0.6); 
+  
 }
 
 IPTVTopologyOracle::~IPTVTopologyOracle() {
@@ -102,27 +109,25 @@ void IPTVTopologyOracle::populateCatalog() {
       ContentElement* content = new ContentElement(
         boost::lexical_cast<string > ((day + 6) * contentNum + i), day, i, size);
       dailyCatalog[std::abs(day)].at(i) = content;
+      dailyRanking.at(std::abs(day)).insert(content);
       this->addContent(content);
-      /* Here is where we need to update the contentRateMap
-       */
-      double rate = 0.0;
-      contentRateMap.insert(std::make_pair(content, rate));
     }
   }
 }
 
 void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   // Update catalogue 
+  dailyRanking.at(6).clear();
   BOOST_FOREACH(ContentElement* content, dailyCatalog[6]) {
     this->removeContent(content);
     delete content;
   }
   for (uint day = 6; day > 0; day--) {
     dailyCatalog[day] = dailyCatalog[day - 1];
+    dailyRanking.at(day) = dailyRanking.at(day-1);
     // scale down rate according to day distribution
     for (uint i = 0; i < contentNum; i++) {
       ContentElement* content = dailyCatalog.at(day).at(i);
-      contentRateMap.at(content) *= relDayDist->pmf(day);
     }
   }
   // normal distribution to generate content length in minutes
@@ -135,7 +140,7 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
             currentRound + 1, i, size);
     dailyCatalog[0].at(i) = content;
-    contentRateMap.insert(std::make_pair(content, 0.0));
+    dailyRanking.at(0).insert(content);
     this->addContent(content);   
   }  
 }
