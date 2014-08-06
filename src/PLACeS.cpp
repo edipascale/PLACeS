@@ -55,7 +55,9 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -D " << vm["content-dev"].as<double>()
           << " -R " << vm["reduced-caching"].as<bool>()
           << " -m " << vm["min-flow-increase"].as<double>()
-          << " -k " << vm["peak-req-ratio"].as<uint>();
+          << " -k " << vm["peak-req-ratio"].as<uint>()
+          << " -h " << vm["est-shift"].as<double>()
+          << " -x " << vm["est-exp"].as<double>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
@@ -220,8 +222,12 @@ int main(int argc, char** argv) {
               "Frequency at which to take graphml snapshots of the network")
           ("pre-caching,M", po::value<bool>()->default_value(false),
               "if true stores most popular content in AS caches (reduced-caching must be false)")
-          ("peak-req-ratio,k", po::value<uint>()->default_value(6),
+          ("peak-req-ratio,k", po::value<uint>()->default_value(100),
               "peak-to-average ratio of requests per hour, for popularity rate estimations")
+          ("est-shift,h", po::value<double>()->default_value(10),
+              "shift parameter of the estimated popularity ZM distribution")
+          ("est-exp,x", po::value<double>()->default_value(0.6),
+              "exponent parameter of the estimated popularity ZM distribution")
           ;
   
   po::variables_map vm;

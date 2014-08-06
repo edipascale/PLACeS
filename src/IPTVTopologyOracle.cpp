@@ -19,12 +19,14 @@ IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm) :
   // allocate memory for the dailyCatalog and initialize contentRateVec
   std::vector<double> dailyRank(contentNum, 0.0);
   contentRateVec.resize(7, dailyRank);
+  auto estRankDist = boost::random::zipf_distribution<>(contentNum, 
+          vm["est-shift"].as<double>(), vm["est-exp"].as<double>()); 
   for (uint i = 0; i < 7; i++) {
     std::vector<ContentElement*> vec(contentNum, nullptr);
     dailyCatalog.push_back(vec);
     for (uint j = 0; j < contentNum; j++) {
       contentRateVec.at(i).at(j) = (avgHoursPerUser * 3600 / avgReqLength) 
-              * relDayDist->pmf(i) * rankDist->pmf(j);
+              * relDayDist->pmf(i) * estRankDist.pmf(j);
     }
   }
   
