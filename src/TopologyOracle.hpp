@@ -62,6 +62,7 @@ struct FlowStats {
   std::vector<uint> fromPeers;
   std::vector<uint> fromCentralServer;
   std::vector<uint> congestionBlocked;
+  std::vector<uint> cacheOptimized;
 };
 
 /* The TopologyOracle keeps track of what everyone is caching and uses that

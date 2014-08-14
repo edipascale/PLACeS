@@ -55,9 +55,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -D " << vm["content-dev"].as<double>()
           << " -R " << vm["reduced-caching"].as<bool>()
           << " -m " << vm["min-flow-increase"].as<double>()
-          << " -k " << vm["peak-req-ratio"].as<uint>()
-          << " -h " << vm["est-shift"].as<double>()
-          << " -x " << vm["est-exp"].as<double>();
+          << " -k " << vm["peak-req-ratio"].as<uint>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
@@ -100,7 +98,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   }
   // Print flow stats for each round
   FlowStats flowStats = oracle->getFlowStats();
-  outputF << "Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
+  outputF << "Rnd Completed Served Optimized Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
           "AvgTime AvgP2PTime AvgASTime AvgUsrCache% AvgASCache%" << endl;
   std::vector<double> localPctg, ASPctg, P2PPctg, CSPctg, blockPctg;
   localPctg.assign(rounds, 0);
@@ -122,6 +120,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             flowStats.congestionBlocked.at(i));
     outputF << i << " " << flowStats.completedRequests.at(i) << " "
             << flowStats.servedRequests.at(i) << " "
+            << flowStats.cacheOptimized.at(i) << " "
             << flowStats.localRequests.at(i) << " " << localPctg.at(i) << " "
             << flowStats.fromPeers.at(i) << " " << P2PPctg.at(i) << " "
             << flowStats.fromASCache.at(i) << " " << ASPctg.at(i) << " "
@@ -139,6 +138,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
     outputF << "a " 
             << accumulate(flowStats.completedRequests.begin(), flowStats.completedRequests.end(), 0) << " "
             << accumulate(flowStats.servedRequests.begin(), flowStats.servedRequests.end(), 0) << " "
+            << accumulate(flowStats.cacheOptimized.begin(), flowStats.cacheOptimized.end(), 0) << " "
             << accumulate(flowStats.localRequests.begin(), flowStats.localRequests.end(), 0) << " "
             << (double) (accumulate(localPctg.begin(), localPctg.end(), 0.0) / rounds) << " "
             << accumulate(flowStats.fromPeers.begin(), flowStats.fromPeers.end(), 0) << " "
@@ -223,12 +223,7 @@ int main(int argc, char** argv) {
           ("pre-caching,M", po::value<bool>()->default_value(false),
               "if true stores most popular content in AS caches (reduced-caching must be false)")
           ("peak-req-ratio,k", po::value<uint>()->default_value(100),
-              "peak-to-average ratio of requests per hour, for popularity rate estimations")
-          ("est-shift,h", po::value<double>()->default_value(10),
-              "shift parameter of the estimated popularity ZM distribution")
-          ("est-exp,x", po::value<double>()->default_value(0.6),
-              "exponent parameter of the estimated popularity ZM distribution")
-          ;
+              "peak-to-average ratio of requests per hour, for popularity rate estimations");
   
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, clo), vm);
@@ -286,8 +281,8 @@ int main(int argc, char** argv) {
         topo->printNetworkStats(currentRound, roundDuration);
       }
       oracle->printStats(currentRound);
-      scheduler->startNewRound();
       oracle->notifyEndRound(currentRound);
+      scheduler->startNewRound();
       if (currentRound+1< vm["rounds"].as<uint>()) {
         oracle->updateCatalog(currentRound);
       }
