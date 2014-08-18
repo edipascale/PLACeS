@@ -20,6 +20,7 @@ public:
     typedef typename RankingBimap::left_map LeftMap;
 protected:
     std::vector<uint> hits;
+    std::vector<uint> roundHits;
     RankingBimap catalog;
     bool swap(uint a, uint b);
 public:
@@ -36,7 +37,10 @@ public:
     uint size() const;
     void clear();
     uint getHits(Element e) const;
+    uint getRoundHits(Element e) const;
     uint getHitsByRank(uint rank) const;
+    uint getRoundHitsByRank(uint rank) const;
+    void resetRoundHits();
     void printRanking() const {
         for (auto it = catalog.right.begin(); it != catalog.right.end(); it++)
         std::cout << "element " << it->second << " has rank " << it->first 
@@ -53,7 +57,9 @@ void RankingTable<Element>::insert(Element e) {
     
     catalog.left.insert(std::make_pair(e,hits.size()));
     this->hits.push_back(0);
-    assert(this->hits.size() == catalog.left.size());    
+    this->roundHits.push_back(0);
+    assert(hits.size() == catalog.left.size());
+    assert(hits.size() == roundHits.size());    
 }
 
 template <class Element>
@@ -71,7 +77,9 @@ void RankingTable<Element>::eraseByRank(uint rank) {
     if (init != catalog.right.end()) {
         catalog.right.erase(init);
         hits.erase(hits.begin()+rank);
+        roundHits.erase(roundHits.begin()+rank);
         assert(catalog.right.size() == hits.size());
+        assert(hits.size() == roundHits.size());    
         init = catalog.right.find(rank+1);
         for (auto it = init; it != catalog.right.end(); it++) {
             catalog.right.replace_key(it, rank);
@@ -122,6 +130,7 @@ template <class Element>
 void RankingTable<Element>::clear() {
     catalog.clear();
     hits.clear();
+    roundHits.clear();
 }
 
 template <class Element>
@@ -142,6 +151,7 @@ bool RankingTable<Element>::swap(uint a, uint b) {
 //        std::cout << *vit << " ";
 //    std::cout << std::endl;
     std::swap(hits.at(a), hits.at(b));
+    std::swap(roundHits.at(a), roundHits.at(b));
 //    std::cout << "debug: hits after swap: ";
 //    for (auto vit = hits.begin(); vit != hits.end(); vit++)
 //        std::cout << *vit << " ";
@@ -157,6 +167,7 @@ void RankingTable<Element>::hit(Element e) {
     uint oldRank = it->second;
     uint oldHits = hits.at(oldRank);
     hits.at(oldRank) = hits.at(oldRank) + 1;
+    roundHits.at(oldRank) = roundHits.at(oldRank) + 1;
     int index = 0;
     for (index = oldRank; index > 0 && hits.at(index-1) < hits.at(oldRank); index--);
     if (index != oldRank) {
@@ -172,6 +183,11 @@ uint RankingTable<Element>::getHits(Element e) const {
     uint rank = getRankOf(e);
     return hits.at(rank);
 }
+template <class Element>
+uint RankingTable<Element>::getRoundHits(Element e) const {
+    uint rank = getRankOf(e);
+    return roundHits.at(rank);
+}
 
 template <class Element>
 uint RankingTable<Element>::getHitsByRank(uint rank) const {
@@ -179,6 +195,19 @@ uint RankingTable<Element>::getHitsByRank(uint rank) const {
         return hits.at(rank);
     else
         throw -1;
+}
+
+template <class Element>
+uint RankingTable<Element>::getRoundHitsByRank(uint rank) const {
+    if (rank >= 0 && rank < hits.size())
+        return roundHits.at(rank);
+    else
+        throw -1;
+}
+
+template <class Element>
+void RankingTable<Element>::resetRoundHits() {
+  roundHits.assign(roundHits.size(), 0);
 }
 
 #endif	/* RANKINGTABLE_HPP */

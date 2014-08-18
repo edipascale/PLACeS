@@ -10,7 +10,7 @@
 
 #include "TopologyOracle.hpp"
 #include "zipf_distribution.hpp"
-
+#include "boost/random/uniform_real_distribution.hpp"
 
 
 /* The TopologyOracle keeps track of what everyone is caching and uses that
@@ -25,6 +25,13 @@ protected:
   UserViewMap userViewMap;
   boost::random::zipf_distribution<>* relDayDist;
   boost::random::zipf_distribution<>* rankDist;
+  /* the following distributions are used to generate the parameters for the
+   * Zipf-Mandelbrot popularity distribution, which is going to change each
+   * day.
+   */
+  boost::random::uniform_int_distribution<>* shiftDist;
+  boost::random::uniform_real_distribution<>* expDist;
+  
   /* the daily catalog contains all the available contents sorted by day of
    * release, with dailyCatalog[0] being the content released in the current
    * day and dailyCatalog[6] the content released 6 days ago (and thus about 

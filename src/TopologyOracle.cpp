@@ -485,10 +485,10 @@ void TopologyOracle::notifyEndRound(uint endingRound) {
   for (uint day = 0; day < 7; day++) {
     for (auto i = 0; i < dailyRanking.at(day).size(); i++) {      
       contentRateVec.at(day).at(i) = ((contentRateVec.at(day).at(i) * 
-              endingRound) + dailyRanking.at(day).getHitsByRank(i))/(endingRound+1);
+              endingRound) + dailyRanking.at(day).getRoundHitsByRank(i))/(endingRound+1);
     }
   }
-  BOOST_LOG_TRIVIAL(info) << "old rate for day 0 rank 0: " << old << ", new: "
+  BOOST_LOG_TRIVIAL(debug) << "old rate for day 0 rank 0: " << old << ", new: "
           << contentRateVec.at(0).at(0) << ", daily hits: " << dailyRanking.at(0).getHitsByRank(0);
   return;
 }
