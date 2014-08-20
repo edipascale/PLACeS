@@ -101,9 +101,10 @@ protected:
   std::vector< std::vector<double> > contentRateVec;
   // bimap-based container to keep track of content popularity
   std::vector<RankingTable<ContentElement*> > dailyRanking;
+  uint roundDuration;
   
 public:
-  TopologyOracle(Topology* topo, po::variables_map vm);
+  TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~TopologyOracle();
   bool serveRequest(Flow* flow, Scheduler* scheduler);
   void addToCache(PonUser user, ContentElement* content, 
@@ -117,7 +118,7 @@ public:
   Topology* getTopology() {return topo;}
   void printStats(uint currentRound);
   void addContent(ContentElement* content);
-  void removeContent(ContentElement* content);
+  void removeContent(ContentElement* content, uint roundsElapsed);
   bool checkIfCached(PonUser user, ContentElement* content, Capacity sizeRequested);
   bool checkIfCached(Vertex lCache, ContentElement* content, Capacity sizeRequested);
   void getFromLocalCache(Vertex lCache, ContentElement* content, SimTime time);

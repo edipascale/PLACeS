@@ -13,7 +13,8 @@
 // random generator
 extern boost::mt19937 gen;
 
-TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
+TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration) {
+  this->roundDuration = roundDuration;
   this->ponCardinality = vm["pon-cardinality"].as<uint>();
   this->policy = (CachePolicy) vm["cache-policy"].as<uint>();
   this->maxCacheSize = vm["ucache-size"].as<uint>() * 8000; // input is in GB, variable in Mb
@@ -590,18 +591,19 @@ void TopologyOracle::addContent(ContentElement* content) {
   }
 }
 
-void TopologyOracle::removeContent(ContentElement* content) {
+void TopologyOracle::removeContent(ContentElement* content, uint roundsElapsed) {
   // erase the expiring content from all user and local caches
+  SimTime time = roundsElapsed * roundDuration;
   AsidContentMap::iterator aIt;
   for (aIt = asidContentMap->begin(); aIt != asidContentMap->end(); aIt++) {
     BOOST_FOREACH(PonUser user, aIt->second.at(content)) {
-      userCacheMap->at(user).removeFromCache(content);
+      userCacheMap->at(user).removeFromCache(content, time);
     }
     aIt->second.erase(content);
   }
   for (LocalCacheMap::iterator lit = localCacheMap->begin(); 
           lit != localCacheMap->end(); lit++) {
-    lit->second.removeFromCache(content);
+    lit->second.removeFromCache(content, time);
   }
 }
 
@@ -643,7 +645,8 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
 std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
         ContentElement* content, Capacity sizeRequested, SimTime time, 
         uint currentRound) {
-  /* FIXME: there is an inconsistence in our assumptions here, in that we add 
+  SimTime absTime = time + (currentRound*roundDuration);
+  /* there is an inconsistence in our assumptions here, in that we add 
    * an optimization variable for the requested content in addition to the 
    * variables we have for the elements cached, but there is a chance that the 
    * requested content was already cached (albeit with a different size). I need
@@ -651,7 +654,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
    * by deleting it). In the next few lines I attempt to do so.
    */ 
   if (checkIfCached(reqUser, content, 0) == true) {
-    userCacheMap->at(reqUser).removeFromCache(content);
+    userCacheMap->at(reqUser).removeFromCache(content, absTime);
     removeFromCMap(content, reqUser);
   }
   
@@ -827,7 +830,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
     i = 0;
     for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
       if (vals[i] == 0) {
-        userCacheMap->at(reqUser).removeFromCache(it->first);
+        userCacheMap->at(reqUser).removeFromCache(it->first, absTime);
         // also delete the user from the content map
         removeFromCMap(it->first, reqUser);
       }

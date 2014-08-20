@@ -11,8 +11,8 @@
 // random generator
 extern boost::mt19937 gen;
 
-IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm) :
-    TopologyOracle(topo, vm) {
+IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm,
+        uint roundDuration) : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
   this->relDayDist = new boost::random::zipf_distribution<>(7, 0, 1);
   this->shiftDist = new boost::random::uniform_int_distribution<>(0,50);
@@ -119,7 +119,7 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   // Update catalogue 
   dailyRanking.at(6).clear();
   BOOST_FOREACH(ContentElement* content, dailyCatalog[6]) {
-    this->removeContent(content);
+    this->removeContent(content, currentRound+1);
     delete content;
   }
   for (uint day = 6; day > 0; day--) {

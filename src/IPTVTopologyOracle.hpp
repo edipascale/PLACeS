@@ -40,7 +40,7 @@ protected:
   std::vector< std::vector<ContentElement*> > dailyCatalog;
   
 public:
-  IPTVTopologyOracle(Topology* topo, po::variables_map vm);
+  IPTVTopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~IPTVTopologyOracle();
   void generateUserViewMap(Scheduler* scheduler);
   void populateCatalog();

@@ -262,10 +262,10 @@ int main(int argc, char** argv) {
     // determine the oracle type  basing on the current simulation mode
     if ((SimMode) vm["sim-mode"].as<uint > () == IPTV) {
       roundDuration = 86400; // 1 day
-      oracle = new IPTVTopologyOracle(topo, vm);
+      oracle = new IPTVTopologyOracle(topo, vm, roundDuration);
     } else {
       roundDuration = 604800; // 1 week
-      oracle = new VoDTopologyOracle(topo, vm);
+      oracle = new VoDTopologyOracle(topo, vm, roundDuration);
     }
     oracle->populateCatalog();
     if (vm["pre-caching"].as<bool>() && !vm["reduced-caching"].as<bool>())

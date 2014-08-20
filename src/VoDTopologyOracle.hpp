@@ -27,7 +27,7 @@ protected:
   void scheduleRequests(std::list<ContentElement*> list, Scheduler* scheduler);
   
 public:
-  VoDTopologyOracle(Topology* topo, po::variables_map vm);
+  VoDTopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~VoDTopologyOracle();
   void generateUserViewMap(Scheduler* scheduler);
   void populateCatalog();
