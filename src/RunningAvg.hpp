@@ -1,6 +1,6 @@
 /* 
  * File:   RunningAvg.hpp
- * Author: manuhalo
+ * Author: Emanuele Di Pascale
  *
  * Created on 24 settembre 2013, 10.32
  */
@@ -10,9 +10,9 @@
 #include <utility>
 #include <iostream>
 
-template <class T1, class T2>
+template <class Value, class Timestamp>
 class RunningAvg {
-  typedef typename std::pair<T1, T2> DataPoint;
+  typedef typename std::pair<Value, Timestamp> DataPoint;
   protected:
     double avg;
     DataPoint lastEntry;
@@ -23,34 +23,40 @@ class RunningAvg {
       lastEntry = std::make_pair(0,0);
     }
     
-    RunningAvg(DataPoint initial) {
-      avg = initial.first;
-      lastEntry = initial;
+    RunningAvg(Value value, Timestamp time) {
+      avg = value;
+      lastEntry = std::make_pair(value, time);
     }
     
-    bool add(DataPoint newEntry) {
-      if (newEntry.second < lastEntry.second) {
-       // std::cerr << "RunningAvg: newEntry preceeds lastEntry (" 
-       //         << newEntry.second << "<" << lastEntry.second << ")" 
-       //         << std::endl;
+    bool add(Value newValue, Timestamp time) {
+      if (time < lastEntry.second) {
         return false;
-      } else if (newEntry.second == lastEntry.second) {
-        lastEntry.first = newEntry.first;
+      } else if (time == lastEntry.second) {
+        lastEntry.first = newValue;
         return true;
       } else {
-        avg = (avg * lastEntry.second + lastEntry.first * (newEntry.second -
-              lastEntry.second)) / newEntry.second;
-        lastEntry = newEntry;
+        avg = (avg * lastEntry.second + lastEntry.first * (time -
+              lastEntry.second)) / time;
+        lastEntry = std::make_pair(newValue, time);
         return true;
       }
     }
     
-    double extract (T2 currentTime) {
-      return (avg * lastEntry.second + lastEntry.first * (currentTime - 
+    /* Returns a double because it's the result of a division and integrity
+     * cannot be preserved. The caller can round it in whatever way he requires
+     * if need be. Returns DBL_MAX if currentTime is less than the last timestamp
+     */
+    double extract (Timestamp currentTime) {
+      if (currentTime == 0 && lastEntry.second == 0)
+        return avg;
+      else if (currentTime < lastEntry.second)
+        return DBL_MAX;
+      else
+        return (avg * lastEntry.second + lastEntry.first * (currentTime - 
               lastEntry.second))/currentTime; 
     }
     
-    bool increment(T1 increment, T2 currentTime) {
+    bool increment(Value increment, Timestamp currentTime) {
       if (currentTime < lastEntry.second) {
         std::cerr << "RunningAvg: newEntry preceeds lastEntry (" 
                 << currentTime << "<" << lastEntry.second << ")" 
@@ -68,12 +74,12 @@ class RunningAvg {
       }
     }
     
-    void reset(DataPoint initial) {
-      avg = initial.first;
-      lastEntry = initial;
+    void reset(Value value, Timestamp time) {
+      avg = value;
+      lastEntry = std::make_pair(value, time);;
     }
     
-    T2 getLastTimestamp() const {
+    Timestamp getLastTimestamp() const {
       return lastEntry.second;
     }
 };

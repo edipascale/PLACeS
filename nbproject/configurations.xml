@@ -81,7 +81,6 @@
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
           </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
@@ -117,6 +116,20 @@
           <linkerLibItems>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibLibItem>cunit</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </folder>
@@ -207,7 +220,6 @@
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
           </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
@@ -235,6 +247,20 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
       <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
