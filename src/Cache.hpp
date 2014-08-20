@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <iostream>
 #include <limits>
+#include "RunningAvg.hpp"
 
 /* Policy to use in caches to replace old content and make space for new one
  * LRU = Least Recently Used, LFU = Least Frequently Used
@@ -46,6 +47,17 @@ protected:
   Size maxSize;
   Size currentSize;
   CachePolicy policy;
+  RunningAvg<double, Timestamp> cacheOccupancy;
+  void updateOccupancy(Timestamp time) {
+    double occ = 100 * currentSize / maxSize;
+    bool result = cacheOccupancy.add(occ, time);
+    if (!result) {
+      std::cerr << "Failed to update the cache occupancy at time " 
+              << time << ", last timestamp: " << cacheOccupancy.getLastTimestamp()
+              << "; aborting. " << std::endl;
+      abort();
+    }
+  }
   
 public:
   friend class CacheTestClass;
@@ -88,7 +100,7 @@ public:
 };
 
 template <typename Content, typename Size, typename Timestamp>
-Cache<Content, Size, Timestamp>::Cache(Size maxSize, CachePolicy policy) {
+Cache<Content, Size, Timestamp>::Cache(Size maxSize, CachePolicy policy) : cacheOccupancy() {
   this->maxSize = maxSize;
   this->policy = policy;
   this->currentSize = 0;
@@ -113,6 +125,9 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
       // the caching info - after all it's the same content)
       this->currentSize -= cIt->second.size;
       oldFreqStat = cIt->second.timesServed;
+      /* FIXME: if something goes wrong and we cannot cache the new element,
+       * we will lose the previous (partial) copy
+       */
       this->cacheMap.erase(cIt);
     }
     while (currentSize + size > maxSize) {
@@ -161,10 +176,12 @@ std::pair<bool, std::set<Content> > Cache<Content, Size, Timestamp>::addToCache(
     if (cacheMap.insert(std::make_pair(content,entry)).second == true) {
       currentSize += size;
       assert(currentSize <= maxSize);
+      updateOccupancy(time);
       return std::make_pair(true, deletedElements);
     } else {
       std::cerr << "WARNING: Cache::addToCache() - Could not insert content "
               << std::endl;
+      updateOccupancy(time);
       return std::make_pair(false, deletedElements);
     }
   }
@@ -174,6 +191,7 @@ template <typename Content, typename Size, typename Timestamp>
 void Cache<Content, Size, Timestamp>::clearCache() {
   cacheMap.clear();
   this->currentSize = 0;
+  cacheOccupancy.reset(0,0);
 }
 
 template <typename Content, typename Size, typename Timestamp>
@@ -205,6 +223,7 @@ void Cache<Content, Size, Timestamp>::removeFromCache(Content content, Timestamp
     this->currentSize -= it->second.size;
     assert(this->currentSize >= 0);
     cacheMap.erase(it);
+    updateOccupancy(time);
   }
 }
 
