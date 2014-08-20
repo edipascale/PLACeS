@@ -516,10 +516,10 @@ void TopologyOracle::printStats(uint currentRound) {
   // check how much caching space is used on average in user caches
   float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0), temp(0.0);
   uint numCaches = 0;
+  SimTime extTime = (currentRound + 1 ) * roundDuration;
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
           this->maxCacheSize > 0; uIt++) {
-    avgUserCacheOccupancy += (100* uIt->second.getCurrentSize() 
-            / uIt->second.getMaxSize());
+    avgUserCacheOccupancy += uIt->second.getAvgOccupancy(extTime);
     numCaches++;
   }
   if (numCaches != 0)
@@ -533,8 +533,7 @@ void TopologyOracle::printStats(uint currentRound) {
           this->maxLocCacheSize > 0; uIt++) {
     // central server cache should not be included in the average computation
     if (uIt->first != topo->getCentralServer()) {
-      temp = (100 * uIt->second.getCurrentSize() 
-            / uIt->second.getMaxSize());
+      temp = uIt->second.getAvgOccupancy(extTime);
       BOOST_LOG_TRIVIAL(trace) << "AS cache " << uIt->first 
               << " has a cache occupancy of " << temp << "% (currentSize: " 
               << uIt->second.getCurrentSize() << ", maxSize: "

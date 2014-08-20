@@ -72,6 +72,13 @@ public:
   bool uploadCompleted(Content content); // to decrease the upload counter
   int getCurrentUploads(Content content);
   int getTotalUploads();
+  double getAvgOccupancy(Timestamp time) {
+    double avg = cacheOccupancy.extract(time);
+    return avg;
+  }
+  void resetOccupancy(double value, Timestamp time) {
+    cacheOccupancy.reset(value, time);
+  }
   
   // to give the optimizer full access to the content of the cache
   CacheMap getCacheMap() const {
