@@ -519,8 +519,15 @@ void TopologyOracle::printStats(uint currentRound) {
   SimTime extTime = (currentRound + 1 ) * roundDuration;
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
           this->maxCacheSize > 0; uIt++) {
-    avgUserCacheOccupancy += uIt->second.getAvgOccupancy(extTime);
+    temp = uIt->second.getAvgOccupancy(extTime);
+    BOOST_LOG_TRIVIAL(trace) << "User " << uIt->first.first << "," <<  uIt->first.second
+              << " has a cache occupancy of " << temp << "% (currentSize: " 
+              << uIt->second.getCurrentSize() << ", maxSize: "
+              << uIt->second.getMaxSize() << ") with "
+              << uIt->second.getNumElementsCached() << " elements";
+    avgUserCacheOccupancy += temp;
     numCaches++;
+    uIt->second.resetOccupancy(extTime);
   }
   if (numCaches != 0)
     avgUserCacheOccupancy = avgUserCacheOccupancy / numCaches;
@@ -542,6 +549,7 @@ void TopologyOracle::printStats(uint currentRound) {
       avgMetroCacheOccupancy += temp;
       numCaches++;
     }
+  uIt->second.resetOccupancy(extTime);  
   }
   if (numCaches != 0)
     avgMetroCacheOccupancy = avgMetroCacheOccupancy / numCaches;

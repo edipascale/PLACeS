@@ -16,16 +16,19 @@ class RunningAvg {
   protected:
     double avg;
     DataPoint lastEntry;
+    Timestamp start;
   
   public:
     RunningAvg() {
       avg = 0;
       lastEntry = std::make_pair(0,0);
+      start = 0;
     }
     
     RunningAvg(Value value, Timestamp time) {
       avg = value;
       lastEntry = std::make_pair(value, time);
+      start = time;
     }
     
     bool add(Value newValue, Timestamp time) {
@@ -35,8 +38,8 @@ class RunningAvg {
         lastEntry.first = newValue;
         return true;
       } else {
-        avg = (avg * lastEntry.second + lastEntry.first * (time -
-              lastEntry.second)) / time;
+        avg = (avg * (lastEntry.second - start) + lastEntry.first * (time -
+              lastEntry.second)) / (time-start);
         lastEntry = std::make_pair(newValue, time);
         return true;
       }
@@ -47,27 +50,24 @@ class RunningAvg {
      * if need be. Returns DBL_MAX if currentTime is less than the last timestamp
      */
     double extract (Timestamp currentTime) {
-      if (currentTime == 0 && lastEntry.second == 0)
+      if (currentTime == start && lastEntry.second == start)
         return avg;
       else if (currentTime < lastEntry.second)
         return DBL_MAX;
       else
-        return (avg * lastEntry.second + lastEntry.first * (currentTime - 
-              lastEntry.second))/currentTime; 
+        return (avg * (lastEntry.second - start) + lastEntry.first * (currentTime - 
+              lastEntry.second))/ (currentTime - start); 
     }
     
     bool increment(Value increment, Timestamp currentTime) {
       if (currentTime < lastEntry.second) {
-        std::cerr << "RunningAvg: newEntry preceeds lastEntry (" 
-                << currentTime << "<" << lastEntry.second << ")" 
-                << std::endl;
         return false;
       } else if (currentTime == lastEntry.second) {
         lastEntry.first += increment;
         return true;
       } else {
-        avg = (avg * lastEntry.second + lastEntry.first * (currentTime -
-              lastEntry.second)) / currentTime;
+        avg = (avg * (lastEntry.second - start) + lastEntry.first * (currentTime -
+              lastEntry.second)) / (currentTime - start);
         lastEntry.first += increment;
         lastEntry.second = currentTime;
         return true;
@@ -77,11 +77,13 @@ class RunningAvg {
     void reset(Value value, Timestamp time) {
       avg = value;
       lastEntry = std::make_pair(value, time);;
+      start = time;
     }
     
     Timestamp getLastTimestamp() const {
       return lastEntry.second;
     }
+    
 };
 
 #endif	/* RUNNINGAVG_HPP */

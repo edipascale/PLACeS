@@ -76,7 +76,9 @@ public:
     double avg = cacheOccupancy.extract(time);
     return avg;
   }
-  void resetOccupancy(double value, Timestamp time) {
+  
+  void resetOccupancy(Timestamp time) {
+    double value = 100 * currentSize / maxSize;
     cacheOccupancy.reset(value, time);
   }
   
