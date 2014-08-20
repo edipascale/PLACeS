@@ -110,7 +110,7 @@ void IPTVTopologyOracle::populateCatalog() {
         boost::lexical_cast<string > ((day + 6) * contentNum + i), day, i, size);
       dailyCatalog[std::abs(day)].at(i) = content;
       dailyRanking.at(std::abs(day)).insert(content);
-      this->addContent(content);
+      this->addContent(content, 0);
     }
   }
 }
@@ -139,7 +139,7 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
             currentRound + 1, i, size);
     dailyCatalog[0].at(i) = content;
     dailyRanking.at(0).insert(content);
-    this->addContent(content);   
+    this->addContent(content, currentRound+1);   
   }  
 }
 

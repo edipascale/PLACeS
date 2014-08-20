@@ -351,7 +351,8 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       if (!checkIfCached(centralServer, content, 
               flow->getSizeRequested())) {
         localCacheMap->at(centralServer).addToCache(content, 
-                content->getSize(), (scheduler->getCurrentRound()+1)*time);
+                content->getSize(), 
+                (scheduler->getCurrentRound()*roundDuration)+time);
       }
       // update LFU/LRU stats
       this->getFromLocalCache(centralServer, content, 
@@ -447,7 +448,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
      */
     if (round == 0) {
       this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
-            (round+1)*time);
+            round * roundDuration + time);
     } else {
       std::pair<bool, bool> optResult = this->optimizeCaching(dest,
               flow->getContent(), flow->getSizeRequested(), time, round);
@@ -457,7 +458,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
        */
       if (!optResult.first || (optResult.first && optResult.second)) {
         this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(),
-                (round + 1) * time);
+                round * roundDuration + time);
         // also record if the cache optimization was successful 
         if (optResult.first == true)
           flowStats.cacheOptimized.at(round)++;
@@ -574,7 +575,8 @@ void TopologyOracle::printStats(uint currentRound) {
             << "%" << std::endl << std::endl;  
 }
 
-void TopologyOracle::addContent(ContentElement* content) {
+void TopologyOracle::addContent(ContentElement* content, uint elapsedRounds) {
+  SimTime time = elapsedRounds * roundDuration;
   AsidContentMap::iterator aIt;
   for (aIt = asidContentMap->begin(); aIt != asidContentMap->end(); aIt++) {
     std::set<PonUser> users;
@@ -583,10 +585,7 @@ void TopologyOracle::addContent(ContentElement* content) {
   if (this->reducedCaching) {
     for (LocalCacheMap::iterator lit = localCacheMap->begin();
             lit != localCacheMap->end(); lit++) {
-      // the time of addition shouldn't matter as the CDN sever always has
-      // enough space for all contents in our simulations
-      //FIXME: this might matter after all, especially in IPTV simulations
-      lit->second.addToCache(content, content->getSize(), 0);
+      lit->second.addToCache(content, content->getSize(), time);
     }
   }
 }

@@ -36,7 +36,7 @@ void VoDTopologyOracle::populateCatalog() {
       this->atPeak.push_back(content);
     else
       this->beforePeak.push_back(content);
-    this->addContent(content);
+    this->addContent(content, 0);
   }
 }
 

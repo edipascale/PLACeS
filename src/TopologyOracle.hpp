@@ -117,7 +117,7 @@ public:
   // this is a hack and should be removed
   Topology* getTopology() {return topo;}
   void printStats(uint currentRound);
-  void addContent(ContentElement* content);
+  void addContent(ContentElement* content, uint elapsedRounds);
   void removeContent(ContentElement* content, uint roundsElapsed);
   bool checkIfCached(PonUser user, ContentElement* content, Capacity sizeRequested);
   bool checkIfCached(Vertex lCache, ContentElement* content, Capacity sizeRequested);
