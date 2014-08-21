@@ -6,11 +6,16 @@
 #include <initializer_list>
 #include <boost/random/mersenne_twister.hpp>
 #include <cmath>
+#define ILOUSESTL
+#define IL_STD
+#include <ilcplex/ilocplex.h>
 
 // random generator
 extern boost::mt19937 gen;
 
-TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
+TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration) {
+  this->roundDuration = roundDuration;
+  this->cachingOpt = vm["optimize-caching"].as<bool>();
   this->ponCardinality = vm["pon-cardinality"].as<uint>();
   this->policy = (CachePolicy) vm["cache-policy"].as<uint>();
   this->maxCacheSize = vm["ucache-size"].as<uint>() * 8000; // input is in GB, variable in Mb
@@ -19,10 +24,15 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   this->topo = topo;
   this->mode = (SimMode) vm["sim-mode"].as<uint>();
   this->avgHoursPerUser = vm["avg-hours-per-user"].as<double>();
-  this->avgContentLength = vm["content-length"].as<double>();
+  this->avgContentLength = vm["content-length"].as<double>(); // in minutes
   this->devContentLength = vm["content-dev"].as<double>();
+  this->peakReqRatio = vm["peak-req-ratio"].as<uint>();
   this->bitrate = vm["bitrate"].as<uint>();
   this->preCaching = vm["pre-caching"].as<bool>();
+  //FIXME: this assumes constant bitrate for upload and a 10GPON
+  this->maxUploads = std::floor(10240 / (ponCardinality * bitrate));
+  this->avgReqLength = (avgContentLength * 60 *  // in seconds
+          std::accumulate(sessionLength.begin(), sessionLength.end(), 0)/sessionLength.size());
   uint rounds = vm["rounds"].as<uint>();
   flowStats.avgFlowDuration.assign(rounds, 0);
   flowStats.avgPeerFlowDuration.assign(rounds, 0);
@@ -36,6 +46,7 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
   flowStats.fromPeers.assign(rounds, 0);
   flowStats.fromCentralServer.assign(rounds, 0);
   flowStats.congestionBlocked.assign(rounds, 0);
+  flowStats.cacheOptimized.assign(rounds, 0);
   this->userCacheMap = new UserCacheMap;
   this->asidContentMap = new AsidContentMap;
   for (uint i = 0; i < topo->getNumASes(); i++) {
@@ -65,6 +76,11 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm) {
     ContentCache cache(maxLocCacheSize, policy);
     localCacheMap->insert(std::make_pair(v, cache));
   }
+  
+  //Initialize dailyRanking
+  RankingTable<ContentElement*> ranking;
+  dailyRanking.resize(7, ranking);
+  
 }
 
 TopologyOracle::~TopologyOracle() {
@@ -78,6 +94,7 @@ TopologyOracle::~TopologyOracle() {
   delete this->asidContentMap;
   localCacheMap->clear();
   delete this->localCacheMap;
+  dailyRanking.clear();
 }
 
 void TopologyOracle::addToCache(PonUser user, ContentElement* content, 
@@ -89,8 +106,8 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
   if (cIt == asidContentMap->at(asid).end()) {
     // This is the first time the oracle sees this content, add it to the map
     // Note: this should not happen now, throw a warning
-    std::cerr << "WARNING: TopologyOracle::addToCache() - unknown content "
-            << content->getName() << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << time << ":WARNING: TopologyOracle::addToCache() - unknown content "
+            << content->getName();
     std::set<PonUser> sourceNodes;
     cIt = asidContentMap->at(asid).insert(std::make_pair(content, sourceNodes)).first;
   }
@@ -119,7 +136,12 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
     }
   }
   BOOST_FOREACH (ContentElement* e, addResult.second) {
+    // erase the content from the ContentMap entry of the user
     this->removeFromCMap(e, user);
+    // update the asidContentMap too
+    cIt = asidContentMap->at(asid).find(e);
+    if (cIt != asidContentMap->at(asid).end())
+      cIt->second.erase(user);
   }
  
   if (!reducedCaching && !preCaching) {
@@ -170,18 +192,22 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   PonUser destination = flow->getDestination();
   PonUser closestSource = UNKNOWN;
   SimTime time = scheduler->getSimTime();
-  std::string contentName = flow->getContent()->getName();
+  int currentDay = scheduler->getCurrentRound();
+  ContentElement* content = flow->getContent();
+  std::string contentName = content->getName();
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for content " << contentName
             << " to user " << destination.first << "," << destination.second;
+  // update the number of requests for this content
+  dailyRanking.at(currentDay-content->getReleaseDay()).hit(content);
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.
-  if (checkIfCached(destination, flow->getContent(), flow->getSizeRequested())) {
+  if (checkIfCached(destination, content, flow->getSizeRequested())) {
     // signal to the scheduler that this flow is "virtual"
     flow->setSource(destination);
     flow->setEta(time);
     // update this user's cacheMap entry (for LRU/LFU)
-    bool result = userCacheMap->at(destination).getFromCache(flow->getContent(),
+    bool result = userCacheMap->at(destination).getFromCache(content,
             (scheduler->getCurrentRound()+1)*time);
     assert(result);
     flowStats.servedRequests.at(scheduler->getCurrentRound())++;
@@ -196,7 +222,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   }
   // try to find a local peer first
   uint asid = topo->getAsid(destination);
-  std::set<PonUser> localSources = asidContentMap->at(asid).at(flow->getContent());
+  std::set<PonUser> localSources = asidContentMap->at(asid).at(content);
   // copy the set to a vector which can then be randomized to reduce the chance
   // the same peer will be selected over and over until congestion is reached
   std::vector<PonUser> randSources(localSources.begin(), localSources.end());
@@ -207,7 +233,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   while (!randSources.empty() && !foundSource) {
     closestSource = randSources.back();
     // check if the identified source has enough content to serve this request
-    if (this->checkIfCached(closestSource, flow->getContent(), 
+    if (this->checkIfCached(closestSource, content, 
             flow->getSizeRequested()) 
             && !topo->isCongested(closestSource, destination))
       foundSource = true;
@@ -225,7 +251,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     if (!reducedCaching) 
     {
       Vertex lCache = topo->getLocalCache(flow->getDestination().first);
-      if (checkIfCached(lCache, flow->getContent(), flow->getSizeRequested())) {
+      if (checkIfCached(lCache, content, flow->getSizeRequested())) {
         // NOTE: We should check here if the downlink is congested, but with our
         // current hypothesis it should never be the case
         assert(topo->isCongested(std::make_pair(lCache, 0), destination) == false);
@@ -236,7 +262,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
                 << " from AS cache node " << lCache
                 << " (closestSource=" << closestSource.first
                 << "," << closestSource.second << ")";
-        this->getFromLocalCache(lCache, flow->getContent(), 
+        this->getFromLocalCache(lCache, content, 
                 (scheduler->getCurrentRound()+1)*time);
         flow->setSource(std::make_pair(lCache, 0));
         flowStats.servedRequests.at(scheduler->getCurrentRound())++;
@@ -263,7 +289,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       for (uint i = 0; i < topo->getNumASes(); i++) {
         if (exploredASes[i])
           continue;
-        cIt = asidContentMap->at(i).find(flow->getContent());
+        cIt = asidContentMap->at(i).find(content);
         if (cIt == asidContentMap->at(i).end() || cIt->second.empty()) {
           // this AS has no source with the required content, mark it as explored
           // to save time at a future iteration
@@ -282,7 +308,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
       if (minDistance != INF_TIME) {
         // Attempts to find the closest source whose route to the destination is not congested
         localSources.clear();
-        localSources = asidContentMap->at(asIndex).at(flow->getContent());
+        localSources = asidContentMap->at(asIndex).at(content);
         randSources.clear();
         randSources.assign(localSources.begin(), localSources.end());
         std::random_shuffle(randSources.begin(), randSources.end());
@@ -290,7 +316,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
         while (!randSources.empty() && !foundSource) {
           closestSource = randSources.back();
           // check if the identified source has enough content to serve this request
-          if (this->checkIfCached(closestSource, flow->getContent(), 
+          if (this->checkIfCached(closestSource, content, 
                   flow->getSizeRequested()) 
                   && !topo->isCongested(closestSource, destination))
               foundSource = true;
@@ -323,14 +349,14 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // If we're in reducedCaching mode, check if the content is stored on the 
     // central cache, otherwise fetch it off-network
     if (reducedCaching) {
-      if (!checkIfCached(centralServer, flow->getContent(), 
+      if (!checkIfCached(centralServer, content, 
               flow->getSizeRequested())) {
-        localCacheMap->at(centralServer).addToCache(flow->getContent(), 
-                flow->getContent()->getSize(),
-                (scheduler->getCurrentRound()+1)*time);
+        localCacheMap->at(centralServer).addToCache(content, 
+                content->getSize(), 
+                (scheduler->getCurrentRound()*roundDuration)+time);
       }
       // update LFU/LRU stats
-      this->getFromLocalCache(centralServer, flow->getContent(), 
+      this->getFromLocalCache(centralServer, content, 
               (scheduler->getCurrentRound()+1)*time);
     }
     flow->setP2PFlow(false);
@@ -342,7 +368,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   } else {
     // p2p flow, update user cache statistics (for LFU/LRU purposes)
     flow->setP2PFlow(true);
-    bool result = userCacheMap->at(closestSource).getFromCache(flow->getContent(),
+    bool result = userCacheMap->at(closestSource).getFromCache(content,
             (scheduler->getCurrentRound()+1)*time);
     assert(result);
     // check for locality is done here to avoid central server to be mistakenly
@@ -405,12 +431,41 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       flowStats.fromASCache.at(round)++;
   }
   topo->updateLoadMap(flow);
+  // notify the source cache that it has completed this upload
+  PonUser source = flow->getSource();
+  if (flow->isP2PFlow())
+    userCacheMap->at(source).uploadCompleted(flow->getContent());
+  else
+    localCacheMap->at(source.first).uploadCompleted(flow->getContent());
   // update cache info (unless the content has expired, e.g. a flow carried over
   // from the previous round)
   PonUser dest = flow->getDestination();
-  if (flow->getContent() != nullptr)
-    this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
-            (round+1)*time);
+  if (flow->getContent() != nullptr) {
+    /* here we need to ask the oracle to decide whether we should cache the new
+     * content. Because the optimization will also tell us what to delete, we
+     * have to remove those contents manually before invoking addToCache
+     * Note that in the popularity estimation branch, we should try to optimize
+     * only when we know enough about the content - e.g. a round.
+     */
+    if (round == 0 || !cachingOpt) {
+      this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
+            round * roundDuration + time);
+    } else {
+      std::pair<bool, bool> optResult = this->optimizeCaching(dest,
+              flow->getContent(), flow->getSizeRequested(), time, round);
+      /* we need to add the requested element if the optimization failed OR if
+       * it succeeded and it determined that we need to. The difference is that
+       * in the second case elements that need to be removed have already been erased
+       */
+      if (!optResult.first || (optResult.first && optResult.second)) {
+        this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(),
+                round * roundDuration + time);
+        // also record if the cache optimization was successful 
+        if (optResult.first == true)
+          flowStats.cacheOptimized.at(round)++;
+      }
+    }
+  }
   // free resources in the topology
   topo->updateCapacity(flow, scheduler, false);
   // generate new request if this user's session is not over
@@ -428,6 +483,16 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
 void TopologyOracle::notifyEndRound(uint endingRound) {
   // reset load on each link of the topology to prepare for next round's collection
   this->topo->resetLoadMap();
+  // update the contentRateVec with the views observed on the current round
+  double old = contentRateVec.at(0).at(0);
+  for (uint day = 0; day < 7; day++) {
+    for (auto i = 0; i < dailyRanking.at(day).size(); i++) {      
+      contentRateVec.at(day).at(i) = ((contentRateVec.at(day).at(i) * 
+              endingRound) + dailyRanking.at(day).getRoundHitsByRank(i))/(endingRound+1);
+    }
+  }
+  BOOST_LOG_TRIVIAL(debug) << "old rate for day 0 rank 0: " << old << ", new: "
+          << contentRateVec.at(0).at(0) << ", daily hits: " << dailyRanking.at(0).getHitsByRank(0);
   return;
 }
 
@@ -452,11 +517,18 @@ void TopologyOracle::printStats(uint currentRound) {
   // check how much caching space is used on average in user caches
   float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0), temp(0.0);
   uint numCaches = 0;
+  SimTime extTime = (currentRound + 1 ) * roundDuration;
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
           this->maxCacheSize > 0; uIt++) {
-    avgUserCacheOccupancy += (100* uIt->second.getCurrentSize() 
-            / uIt->second.getMaxSize());
+    temp = uIt->second.getAvgOccupancy(extTime);
+    BOOST_LOG_TRIVIAL(trace) << "User " << uIt->first.first << "," <<  uIt->first.second
+              << " has a cache occupancy of " << temp << "% (currentSize: " 
+              << uIt->second.getCurrentSize() << ", maxSize: "
+              << uIt->second.getMaxSize() << ") with "
+              << uIt->second.getNumElementsCached() << " elements";
+    avgUserCacheOccupancy += temp;
     numCaches++;
+    uIt->second.resetOccupancy(extTime);
   }
   if (numCaches != 0)
     avgUserCacheOccupancy = avgUserCacheOccupancy / numCaches;
@@ -469,8 +541,7 @@ void TopologyOracle::printStats(uint currentRound) {
           this->maxLocCacheSize > 0; uIt++) {
     // central server cache should not be included in the average computation
     if (uIt->first != topo->getCentralServer()) {
-      temp = (100 * uIt->second.getCurrentSize() 
-            / uIt->second.getMaxSize());
+      temp = uIt->second.getAvgOccupancy(extTime);
       BOOST_LOG_TRIVIAL(trace) << "AS cache " << uIt->first 
               << " has a cache occupancy of " << temp << "% (currentSize: " 
               << uIt->second.getCurrentSize() << ", maxSize: "
@@ -479,6 +550,7 @@ void TopologyOracle::printStats(uint currentRound) {
       avgMetroCacheOccupancy += temp;
       numCaches++;
     }
+  uIt->second.resetOccupancy(extTime);  
   }
   if (numCaches != 0)
     avgMetroCacheOccupancy = avgMetroCacheOccupancy / numCaches;
@@ -491,7 +563,9 @@ void TopologyOracle::printStats(uint currentRound) {
           << " out of " << flowStats.servedRequests.at(currentRound)
           << " requests, of which " << flowStats.localRequests.at(currentRound) 
           << " locally ("
-          << localPctg << "%). " << std::endl << "P2P flows: " 
+          << localPctg << "%). " << std::endl 
+          << "Successful cache optimizations: " << flowStats.cacheOptimized.at(currentRound)
+          << std::endl << "P2P flows: " 
           << flowStats.fromPeers.at(currentRound) << " (" << P2PPctg 
           << "%), AS Cache Flows: "
           << flowStats.fromASCache.at(currentRound) << " (" 
@@ -509,7 +583,8 @@ void TopologyOracle::printStats(uint currentRound) {
             << "%" << std::endl << std::endl;  
 }
 
-void TopologyOracle::addContent(ContentElement* content) {
+void TopologyOracle::addContent(ContentElement* content, uint elapsedRounds) {
+  SimTime time = elapsedRounds * roundDuration;
   AsidContentMap::iterator aIt;
   for (aIt = asidContentMap->begin(); aIt != asidContentMap->end(); aIt++) {
     std::set<PonUser> users;
@@ -518,26 +593,24 @@ void TopologyOracle::addContent(ContentElement* content) {
   if (this->reducedCaching) {
     for (LocalCacheMap::iterator lit = localCacheMap->begin();
             lit != localCacheMap->end(); lit++) {
-      // the time of addition shouldn't matter as the CDN sever always has
-      // enough space for all contents in our simulations
-      //FIXME: this might matter after all, especially in IPTV simulations
-      lit->second.addToCache(content, content->getSize(), 0);
+      lit->second.addToCache(content, content->getSize(), time);
     }
   }
 }
 
-void TopologyOracle::removeContent(ContentElement* content) {
+void TopologyOracle::removeContent(ContentElement* content, uint roundsElapsed) {
   // erase the expiring content from all user and local caches
+  SimTime time = roundsElapsed * roundDuration;
   AsidContentMap::iterator aIt;
   for (aIt = asidContentMap->begin(); aIt != asidContentMap->end(); aIt++) {
     BOOST_FOREACH(PonUser user, aIt->second.at(content)) {
-      userCacheMap->at(user).removeFromCache(content);
+      userCacheMap->at(user).removeFromCache(content, time);
     }
     aIt->second.erase(content);
   }
   for (LocalCacheMap::iterator lit = localCacheMap->begin(); 
           lit != localCacheMap->end(); lit++) {
-    lit->second.removeFromCache(content);
+    lit->second.removeFromCache(content, time);
   }
 }
 
@@ -557,7 +630,10 @@ void TopologyOracle::getFromLocalCache(Vertex lCache, ContentElement* content,
   // local cache
   if (localCacheMap->at(lCache).getMaxSize() >= content->getSize()) {
     bool result = localCacheMap->at(lCache).getFromCache(content, time);
-    assert (result);
+    // the central server should have inifinite capacity but this is not implemented
+    // so we should not get worried if the result is false
+    if (lCache != topo->getCentralServer())
+      assert (result);
   }
 }
 
@@ -571,4 +647,217 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
     return;
   } else
     asidContentMap->at(asid).at(content).erase(uIt);
+}
+
+std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
+        ContentElement* content, Capacity sizeRequested, SimTime time, 
+        uint currentRound) {
+  SimTime absTime = time + (currentRound*roundDuration);
+  /* there is an inconsistence in our assumptions here, in that we add 
+   * an optimization variable for the requested content in addition to the 
+   * variables we have for the elements cached, but there is a chance that the 
+   * requested content was already cached (albeit with a different size). I need
+   * to either make sure that this case is covered or that it never happens (e.g.,
+   * by deleting it). In the next few lines I attempt to do so.
+   */ 
+  if (checkIfCached(reqUser, content, 0) == true) {
+    userCacheMap->at(reqUser).removeFromCache(content, absTime);
+    removeFromCMap(content, reqUser);
+  }
+  
+  int hour = std::floor(time / 3600);
+  /* attempting to fix a potential bug in case we enter this function when it's
+  /* midnight of the following day
+   */
+  if (hour >= usrPctgByHour.size())
+    hour = usrPctgByHour.size() - 1;
+  IloEnv env;
+  int asid = topo->getAsid(reqUser);
+  try {    
+    IloModel model(env);
+    IloNumVarArray c(env);
+    auto cachedVec = userCacheMap->at(reqUser).getCacheMap();
+    // add a boolean variable for each of the elements cached
+    // char varName[24];
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
+      // varName = ((string)("c_" + it->first->getName())).c_str();
+      c.add(IloNumVar(env, 0, 1, ILOINT));
+    }
+    // add a boolean variable for the element requested
+    // varName = ((string)("c_" + content->getName())).c_str();
+    c.add(IloNumVar(env, 0, 1, ILOINT));
+    // Define the constraints
+    IloRangeArray constraints(env);
+    // Initialize the objective function expression
+    IloNumExpr exp(env);
+    // add the size of the elements cached, if kept in the cache
+    int i = 0;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
+      ContentElement* contIt = it->first;
+      exp += c[i] * it->second.size;
+      // also make sure that we do not erase a content if we are uploading it
+      if  (it->second.uploads > 0) {
+        constraints.add(c[i] == 1);
+        i++;
+        continue;
+      }
+      // build the constraint on rates if required
+      /* the contentRateVec holds the number of requests expected for each content
+       * per day. To get the number of requests per hour per AS we need
+       * to get the % of requests in this particular hour via usrPctgByHour and
+       * multiply it by the fraction of users in the AS of the requester. The avg
+       * concurrent request number is calculated as reqPerHour * avgReqLength. To
+       * get the peak of concurrent users, which is what we need, we multiply
+       * that value by a pakReqRatio, which is taken as an integer input parameter 
+       * (-k).
+       */
+      uint dayIndex = currentRound - contIt->getReleaseDay();
+      assert(0 <= dayIndex && dayIndex < 7);
+      /* if it's a young content (released today and with only a few hours of life)
+       * make sure it is not erased, as ranking is still too volatile to be accurate
+       */
+      if (dayIndex == 0 && hour < 6) {
+        constraints.add(c[i] == 1);
+        i++;
+        continue;
+      }
+      uint rank = dailyRanking.at(dayIndex).getRankOf(contIt);
+      double rate = contentRateVec.at(dayIndex).at(rank);
+      double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
+          (topo->getASCustomers(asid) / topo->getNumCustomers());      
+      BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour(" << contIt->getName() << "," << hour
+              << ") = (" << rate << " * " << usrPctgByHour.at(hour)
+              << " / 100) * (" << topo->getASCustomers(asid) << " / " << topo->getNumCustomers()
+              << ") = " << avgReqPerHour;
+      if (avgReqPerHour < 1) {
+        BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour for content " << contIt->getName()
+                << " is less than 1 (" << avgReqPerHour << "), setting it to 1";
+        avgReqPerHour = 1;
+      }
+      int contentRate = std::floor((peakReqRatio * avgReqPerHour * (avgReqLength / 3600)) + 0.5);
+      // ensure that the peakReqRatio does not inflate the requests to more than the users we have
+      contentRate = std::min(contentRate, static_cast<int>(topo->getASCustomers(asid)));
+      // ensure that we keep at least one copy of each content in each AS
+      contentRate = std::max(1, contentRate);
+      BOOST_LOG_TRIVIAL(debug) << "contentRate = std::floor((" << peakReqRatio 
+              << " * " << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) + 0.5) = " << contentRate;
+      IloNumExpr cExp(env, 0);
+      for (auto uit = asidContentMap->at(asid).at(contIt).begin();
+              uit != asidContentMap->at(asid).at(contIt).end(); uit++) {
+        if (reqUser != *uit) {
+          cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads()
+                  + userCacheMap->at(*uit).getCurrentUploads(contIt);
+        } else {
+          // multiply the term by the caching variable so that we lose it if
+          // we decide to erase the element from the cache
+          cExp += c[i]* (IloInt) (maxUploads - userCacheMap->at(reqUser).getTotalUploads()
+                  + userCacheMap->at(reqUser).getCurrentUploads(contIt));
+        }
+      }
+      constraints.add(cExp >= contentRate);      
+      i++;
+    }
+    // same for the requested content
+    exp += c[cachedVec.size()] * sizeRequested;
+    // add a contentRate constraint for the requested content if needed
+    uint dayIndex = currentRound - content->getReleaseDay();
+    assert(0 <= dayIndex && dayIndex < 7);
+    if (dayIndex == 0 && hour < 6) {
+      constraints.add(c[cachedVec.size()] == 1);
+    } else {
+      uint rank = dailyRanking.at(dayIndex).getRankOf(content);
+      double rate = contentRateVec.at(dayIndex).at(rank);
+      double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
+              (topo->getASCustomers(asid) / topo->getNumCustomers());
+      BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour(" << content->getName() << "," << hour
+              << ") = (" << rate << " * " << usrPctgByHour.at(hour)
+              << " / 100) * (" << topo->getASCustomers(asid) << " / " << topo->getNumCustomers()
+              << ") = " << avgReqPerHour;
+      if (avgReqPerHour < 1) {
+        BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour for content " << content->getName()
+                << " is less than 1 (" << avgReqPerHour << "), setting it to 1";
+        avgReqPerHour = 1;
+      }
+      int contentRate = std::floor((peakReqRatio * avgReqPerHour * (avgReqLength / 3600)) + 0.5);
+      // ensure that the peakReqRatio does not inflate the requests to more than the users we have
+      contentRate = std::min(contentRate, static_cast<int>(topo->getASCustomers(asid)));
+      // ensure that we keep at least one copy of each content in each AS
+      contentRate = std::max(1, contentRate);
+      BOOST_LOG_TRIVIAL(debug) << "contentRate = std::floor((" << peakReqRatio
+              << " * " << avgReqPerHour
+              << " * " << avgReqLength << " / 3600) + 0.5) = " << contentRate;
+      IloNumExpr cExp(env, 0);
+      for (auto uit = asidContentMap->at(asid).at(content).begin();
+              uit != asidContentMap->at(asid).at(content).end(); uit++) {
+        if (reqUser != *uit) {
+          cExp += maxUploads - userCacheMap->at(*uit).getTotalUploads()
+                  + userCacheMap->at(*uit).getCurrentUploads(content);
+        } else {
+          cExp += c[cachedVec.size()]* (IloInt) (maxUploads - userCacheMap->at(reqUser).getTotalUploads()
+                  + userCacheMap->at(reqUser).getCurrentUploads(content));
+        }
+      }
+      // if the requesting user was not already caching the content, we must add 
+      // its term to the sum in case we decide to cache the requested content
+      if (userCacheMap->at(reqUser).isCached(content, content->getSize()) == false) {
+        cExp += c[cachedVec.size()]* (IloInt) (maxUploads - userCacheMap->at(reqUser).getTotalUploads()
+                + userCacheMap->at(reqUser).getCurrentUploads(content));
+      }
+      constraints.add(cExp >= contentRate);
+    }
+    //finally add a constraint on the maximum size of the cache
+    constraints.add(exp <= userCacheMap->at(reqUser).getMaxSize());
+
+    // specify that we are interested in minimizing the objective
+    IloObjective obj = IloMinimize(env, exp);
+    // Add the objectives and the constraints to the model
+    model.add(c);
+    model.add(obj);
+    model.add(constraints);
+
+    // ask CPLEX to solve the problem
+    IloCplex cplex(model);
+    cplex.setOut(env.getNullStream());
+    if (!cplex.solve()) {
+      BOOST_LOG_TRIVIAL(debug) << "Failed to optimize caching for content " << 
+              content->getName() << " at user " << reqUser.first << "," <<
+              reqUser.second << "; reverting to standard cache policies";
+      env.end();
+      return std::make_pair(false, false); 
+    }
+    
+    IloNumArray vals(env);
+    BOOST_LOG_TRIVIAL(trace) << "Solution status = " << cplex.getStatus();
+    BOOST_LOG_TRIVIAL(trace) << "Solution value  = " << cplex.getObjValue();
+    cplex.getValues(vals, c);
+    BOOST_LOG_TRIVIAL(trace) << "Values        = " << vals;
+    
+    // check if any element has to be deleted from the cache
+    i = 0;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++) {
+      if (vals[i] == 0) {
+        userCacheMap->at(reqUser).removeFromCache(it->first, absTime);
+        // also delete the user from the content map
+        removeFromCMap(it->first, reqUser);
+      }
+      i++;
+    }
+    // check if reqContent has to be added to the cache
+    bool shouldCache = (vals[cachedVec.size()] == 1);
+    env.end();
+    return std::make_pair(true, shouldCache);
+    /*
+    // print the new content of the cache for debugging purposes
+    cachedVec = caches[reqUser].getCachedVec();
+    cout << "Cache content after optimization: " ;
+    for (auto it = cachedVec.begin(); it != cachedVec.end(); it++)
+      cout << *it << " ";
+    cout << endl << "Total size: " << caches[reqUser].getCurrentSize() << endl;
+     * */
+  } catch (IloException& e) {
+    BOOST_LOG_TRIVIAL(warning) << "Concert exception caught: " << e;
+  } 
+  env.end();
+  return std::make_pair(false, false); 
 }

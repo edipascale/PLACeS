@@ -51,8 +51,8 @@ OBJECTFILES= \
 CFLAGS=`cppunit-config --cflags` 
 
 # CC Compiler Flags
-CCFLAGS=`cppunit-config --cflags` 
-CXXFLAGS=`cppunit-config --cflags` 
+CCFLAGS=
+CXXFLAGS=
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -61,7 +61,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/boost_1_54_0/stage/lib -lboost_log_setup -lboost_log -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_system -lboost_thread -lboost_graph -lpthread -lcppunit
+LDLIBSOPTIONS=-L/usr/local/boost_1_54_0/stage/lib -L/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic -L/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic -lboost_log_setup -lboost_log -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_system -lboost_thread -lboost_graph -lcppunit -lilocplex -lcplex -lconcert -lcplexdistmip -lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -74,52 +74,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/places: ${OBJECTFILES}
 ${OBJECTDIR}/src/ContentElement.o: src/ContentElement.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
 
 ${OBJECTDIR}/src/Flow.o: src/Flow.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
 
 ${OBJECTDIR}/src/IPTVTopologyOracle.o: src/IPTVTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
 
 ${OBJECTDIR}/src/PLACeS.o: src/PLACeS.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
 
 ${OBJECTDIR}/src/Scheduler.o: src/Scheduler.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
 
 ${OBJECTDIR}/src/SimTimeInterval.o: src/SimTimeInterval.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
 
 ${OBJECTDIR}/src/Topology.o: src/Topology.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
 
 ${OBJECTDIR}/src/TopologyOracle.o: src/TopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
 
 ${OBJECTDIR}/src/UGCPopularity.o: src/UGCPopularity.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
 
 ${OBJECTDIR}/src/VoDTopologyOracle.o: src/VoDTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
 
 # Subprojects
 .build-subprojects:

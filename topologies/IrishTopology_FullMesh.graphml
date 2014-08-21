@@ -1,0 +1,1688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="asid" for="node" attr.name="asid" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="ponC" for="node" attr.name="ponCustomers" attr.type="int">
+    <default>0</default>
+  </key>
+  <key id="nump" for="node" attr.name="numPon" attr.type="int">
+    <default>10</default>
+  </key>
+  <key id="avgu" for="node" attr.name="avgUsers" attr.type="int">
+    <default>512</default>
+  </key>
+  <key id="devu" for="node" attr.name="devUsers" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lat" for="node" attr.name="latitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="lon" for="node" attr.name="longitude" attr.type="double">
+    <default>0</default>
+  </key>
+  <key id="upC" for="node" attr.name="upCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="dnC" for="node" attr.name="downCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="cs" for="node" attr.name="centralServer" attr.type="boolean">
+    <default>0</default>
+  </key>
+  <key id="bw" for="edge" attr.name="maxCapacity" attr.type="double">
+    <default>10240</default>
+  </key>
+  <key id="len" for="edge" attr.name="length" attr.type="double">
+    <default>1</default>
+  </key>
+  <key id="type" for="edge" attr.name="type" attr.type="int">
+    <default>3</default>
+  </key>
+  <graph id="topo" edgedefault="directed" parse.order="nodesfirst">
+      <node id="mc0">
+      <data key="asid">0</data>
+      <data key="nump">528</data>
+      <data key="lat">53.8389162316</data>
+      <data key="lon">-6.3031378146</data>
+    </node>
+    <node id="mc1">
+      <data key="asid">1</data>
+      <data key="nump">64</data>
+      <data key="lat">54.5484003314</data>
+      <data key="lon">-7.8342127307</data>
+    </node>
+    <node id="mc2">
+      <data key="asid">2</data>
+      <data key="nump">152</data>
+      <data key="lat">53.920798422</data>
+      <data key="lon">-7.8677638998</data>
+    </node>
+    <node id="mc3">
+      <data key="asid">3</data>
+      <data key="nump">227</data>
+      <data key="lat">52.3663113824</data>
+      <data key="lon">-7.1726937861</data>
+    </node>
+    <node id="mc4">
+      <data key="asid">4</data>
+      <data key="nump">225</data>
+      <data key="lat">52.7537950578</data>
+      <data key="lon">-6.7062594408</data>
+    </node>
+    <node id="mc5">
+      <data key="asid">5</data>
+      <data key="nump">151</data>
+      <data key="lat">53.4283242351</data>
+      <data key="lon">-9.3172553016</data>
+    </node>
+    <node id="mc6">
+      <data key="asid">6</data>
+      <data key="nump">100</data>
+      <data key="lat">55.1832119315</data>
+      <data key="lon">-7.9747743234</data>
+    </node>
+    <node id="mc7">
+      <data key="asid">7</data>
+      <data key="nump">95</data>
+      <data key="lat">51.9063971121</data>
+      <data key="lon">-9.4409511674</data>
+    </node>
+    <node id="mc8">
+      <data key="asid">8</data>
+      <data key="nump">301</data>
+      <data key="lat">52.1679976432</data>
+      <data key="lon">-8.743099789</data>
+    </node>
+    <node id="mc9">
+      <data key="asid">9</data>
+      <data key="nump">575</data>
+      <data key="lat">53.6610768983</data>
+      <data key="lon">-6.8963416109</data>
+    </node>
+    <node id="mc10">
+      <data key="asid">10</data>
+      <data key="nump">152</data>
+      <data key="lat">53.432569538</data>
+      <data key="lon">-7.6372015527</data>
+    </node>
+    <node id="mc11">
+      <data key="asid">11</data>
+      <data key="nump">91</data>
+      <data key="lat">53.80035074</data>
+      <data key="lon">-9.5193976603</data>
+    </node>
+    <node id="mc12">
+      <data key="asid">12</data>
+      <data key="nump">301</data>
+      <data key="lat">52.148117534</data>
+      <data key="lon">-7.8526856877</data>
+    </node>
+    <node id="mc13">
+      <data key="asid">13</data>
+      <data key="nump">219</data>
+      <data key="lat">52.8183833933</data>
+      <data key="lon">-8.8679197455</data>
+    </node>
+    <node id="mc14">
+      <data key="asid">14</data>
+      <data key="cs">1</data>
+      <data key="nump">610</data>
+      <data key="lat">52.9241688887</data>
+      <data key="lon">-6.1158906331</data>
+    </node>
+    <node id="mc15">
+      <data key="asid">15</data>
+      <data key="nump">121</data>
+      <data key="lat">52.3580909005</data>
+      <data key="lon">-9.4918093024</data>
+    </node>
+    <node id="mc16">
+      <data key="asid">16</data>
+      <data key="nump">95</data>
+      <data key="lat">54.2111049993</data>
+      <data key="lon">-9.2155783969</data>
+    </node>
+    <node id="mc17">
+      <data key="asid">17</data>
+      <data key="nump">122</data>
+      <data key="lat">53.1657952639</data>
+      <data key="lon">-8.2941477964</data>
+    </node>
+    <node id="mc18">
+      <data key="asid">18</data>
+      <data key="nump">100</data>
+      <data key="lat">54.8344857195</data>
+      <data key="lon">-7.4820392102</data>
+    </node>
+    <node id="mc19">
+      <data key="asid">19</data>
+      <data key="nump">77</data>
+      <data key="lat">51.7689252296</data>
+      <data key="lon">-9.7689027971</data>
+    </node>
+        <edge source="mc0" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">126.976556213</data>
+    </edge>
+    <edge source="mc1" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">126.976556213</data>
+    </edge>
+    <edge source="mc0" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">102.89349793</data>
+    </edge>
+    <edge source="mc2" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">102.89349793</data>
+    </edge>
+    <edge source="mc0" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">173.619291968</data>
+    </edge>
+    <edge source="mc3" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">173.619291968</data>
+    </edge>
+    <edge source="mc0" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">123.520297379</data>
+    </edge>
+    <edge source="mc4" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">123.520297379</data>
+    </edge>
+    <edge source="mc0" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">203.760547255</data>
+    </edge>
+    <edge source="mc5" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">203.760547255</data>
+    </edge>
+    <edge source="mc0" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">184.232699747</data>
+    </edge>
+    <edge source="mc6" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">184.232699747</data>
+    </edge>
+    <edge source="mc0" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">300.633584725</data>
+    </edge>
+    <edge source="mc7" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">300.633584725</data>
+    </edge>
+    <edge source="mc0" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">247.154620932</data>
+    </edge>
+    <edge source="mc8" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">247.154620932</data>
+    </edge>
+    <edge source="mc0" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">43.702423329</data>
+    </edge>
+    <edge source="mc9" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">43.702423329</data>
+    </edge>
+    <edge source="mc0" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">98.8167316413</data>
+    </edge>
+    <edge source="mc10" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">98.8167316413</data>
+    </edge>
+    <edge source="mc0" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">211.013347182</data>
+    </edge>
+    <edge source="mc11" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">211.013347182</data>
+    </edge>
+    <edge source="mc0" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">214.568297597</data>
+    </edge>
+    <edge source="mc12" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">214.568297597</data>
+    </edge>
+    <edge source="mc0" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">204.515342016</data>
+    </edge>
+    <edge source="mc13" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">204.515342016</data>
+    </edge>
+    <edge source="mc0" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">102.406215389</data>
+    </edge>
+    <edge source="mc14" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">102.406215389</data>
+    </edge>
+    <edge source="mc0" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">268.929161212</data>
+    </edge>
+    <edge source="mc15" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">268.929161212</data>
+    </edge>
+    <edge source="mc0" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">194.551098024</data>
+    </edge>
+    <edge source="mc16" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">194.551098024</data>
+    </edge>
+    <edge source="mc0" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">151.362939861</data>
+    </edge>
+    <edge source="mc17" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">151.362939861</data>
+    </edge>
+    <edge source="mc0" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">134.432959081</data>
+    </edge>
+    <edge source="mc18" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">134.432959081</data>
+    </edge>
+    <edge source="mc0" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">327.224343076</data>
+    </edge>
+    <edge source="mc19" target="mc0">
+      <data key="bw">-1</data>
+      <data key="len">327.224343076</data>
+    </edge>
+    <edge source="mc1" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">69.7763663048</data>
+    </edge>
+    <edge source="mc2" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">69.7763663048</data>
+    </edge>
+    <edge source="mc1" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">246.400565533</data>
+    </edge>
+    <edge source="mc3" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">246.400565533</data>
+    </edge>
+    <edge source="mc1" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">212.806882627</data>
+    </edge>
+    <edge source="mc4" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">212.806882627</data>
+    </edge>
+    <edge source="mc1" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">157.730547791</data>
+    </edge>
+    <edge source="mc5" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">157.730547791</data>
+    </edge>
+    <edge source="mc1" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">71.1138955813</data>
+    </edge>
+    <edge source="mc6" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">71.1138955813</data>
+    </edge>
+    <edge source="mc1" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">312.423074968</data>
+    </edge>
+    <edge source="mc7" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">312.423074968</data>
+    </edge>
+    <edge source="mc1" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">271.297234022</data>
+    </edge>
+    <edge source="mc8" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">271.297234022</data>
+    </edge>
+    <edge source="mc1" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">116.000171103</data>
+    </edge>
+    <edge source="mc9" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">116.000171103</data>
+    </edge>
+    <edge source="mc1" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">124.66293141</data>
+    </edge>
+    <edge source="mc10" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">124.66293141</data>
+    </edge>
+    <edge source="mc1" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">137.560613402</data>
+    </edge>
+    <edge source="mc11" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">137.560613402</data>
+    </edge>
+    <edge source="mc1" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">266.734510507</data>
+    </edge>
+    <edge source="mc12" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">266.734510507</data>
+    </edge>
+    <edge source="mc1" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">203.924909232</data>
+    </edge>
+    <edge source="mc13" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">203.924909232</data>
+    </edge>
+    <edge source="mc1" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">212.904683903</data>
+    </edge>
+    <edge source="mc14" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">212.904683903</data>
+    </edge>
+    <edge source="mc1" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">266.953395102</data>
+    </edge>
+    <edge source="mc15" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">266.953395102</data>
+    </edge>
+    <edge source="mc1" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">96.9396762979</data>
+    </edge>
+    <edge source="mc16" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">96.9396762979</data>
+    </edge>
+    <edge source="mc1" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">156.570529528</data>
+    </edge>
+    <edge source="mc17" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">156.570529528</data>
+    </edge>
+    <edge source="mc1" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">39.0168468358</data>
+    </edge>
+    <edge source="mc18" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">39.0168468358</data>
+    </edge>
+    <edge source="mc1" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">334.658656819</data>
+    </edge>
+    <edge source="mc19" target="mc1">
+      <data key="bw">-1</data>
+      <data key="len">334.658656819</data>
+    </edge>
+    <edge source="mc2" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">178.845028483</data>
+    </edge>
+    <edge source="mc3" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">178.845028483</data>
+    </edge>
+    <edge source="mc2" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">150.851039171</data>
+    </edge>
+    <edge source="mc4" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">150.851039171</data>
+    </edge>
+    <edge source="mc2" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">109.993227419</data>
+    </edge>
+    <edge source="mc5" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">109.993227419</data>
+    </edge>
+    <edge source="mc2" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">140.455220048</data>
+    </edge>
+    <edge source="mc6" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">140.455220048</data>
+    </edge>
+    <edge source="mc2" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">247.41640323</data>
+    </edge>
+    <edge source="mc7" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">247.41640323</data>
+    </edge>
+    <edge source="mc2" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">203.365286564</data>
+    </edge>
+    <edge source="mc8" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">203.365286564</data>
+    </edge>
+    <edge source="mc2" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">69.9957627871</data>
+    </edge>
+    <edge source="mc9" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">69.9957627871</data>
+    </edge>
+    <edge source="mc2" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">56.33708736</data>
+    </edge>
+    <edge source="mc10" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">56.33708736</data>
+    </edge>
+    <edge source="mc2" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">109.063789094</data>
+    </edge>
+    <edge source="mc11" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">109.063789094</data>
+    </edge>
+    <edge source="mc2" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">196.99194034</data>
+    </edge>
+    <edge source="mc12" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">196.99194034</data>
+    </edge>
+    <edge source="mc2" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">139.299028686</data>
+    </edge>
+    <edge source="mc13" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">139.299028686</data>
+    </edge>
+    <edge source="mc2" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">160.378129674</data>
+    </edge>
+    <edge source="mc14" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">160.378129674</data>
+    </edge>
+    <edge source="mc2" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">204.625268617</data>
+    </edge>
+    <edge source="mc15" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">204.625268617</data>
+    </edge>
+    <edge source="mc2" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">93.6279875442</data>
+    </edge>
+    <edge source="mc16" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">93.6279875442</data>
+    </edge>
+    <edge source="mc2" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">88.4975138074</data>
+    </edge>
+    <edge source="mc17" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">88.4975138074</data>
+    </edge>
+    <edge source="mc2" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">104.557444653</data>
+    </edge>
+    <edge source="mc18" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">104.557444653</data>
+    </edge>
+    <edge source="mc2" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">271.017129267</data>
+    </edge>
+    <edge source="mc19" target="mc2">
+      <data key="bw">-1</data>
+      <data key="len">271.017129267</data>
+    </edge>
+    <edge source="mc3" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">53.3571000642</data>
+    </edge>
+    <edge source="mc4" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">53.3571000642</data>
+    </edge>
+    <edge source="mc3" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">185.984368966</data>
+    </edge>
+    <edge source="mc5" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">185.984368966</data>
+    </edge>
+    <edge source="mc3" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">317.423250188</data>
+    </edge>
+    <edge source="mc6" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">317.423250188</data>
+    </edge>
+    <edge source="mc3" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">162.925508387</data>
+    </edge>
+    <edge source="mc7" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">162.925508387</data>
+    </edge>
+    <edge source="mc3" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">109.045329161</data>
+    </edge>
+    <edge source="mc8" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">109.045329161</data>
+    </edge>
+    <edge source="mc3" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">145.062024326</data>
+    </edge>
+    <edge source="mc9" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">145.062024326</data>
+    </edge>
+    <edge source="mc3" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">122.510243177</data>
+    </edge>
+    <edge source="mc10" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">122.510243177</data>
+    </edge>
+    <edge source="mc3" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">223.427254667</data>
+    </edge>
+    <edge source="mc11" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">223.427254667</data>
+    </edge>
+    <edge source="mc3" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">52.2237995482</data>
+    </edge>
+    <edge source="mc12" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">52.2237995482</data>
+    </edge>
+    <edge source="mc3" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">124.975694389</data>
+    </edge>
+    <edge source="mc13" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">124.975694389</data>
+    </edge>
+    <edge source="mc3" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">94.4454002792</data>
+    </edge>
+    <edge source="mc14" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">94.4454002792</data>
+    </edge>
+    <edge source="mc3" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">157.372296509</data>
+    </edge>
+    <edge source="mc15" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">157.372296509</data>
+    </edge>
+    <edge source="mc3" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">245.827043762</data>
+    </edge>
+    <edge source="mc16" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">245.827043762</data>
+    </edge>
+    <edge source="mc3" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">116.525770178</data>
+    </edge>
+    <edge source="mc17" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">116.525770178</data>
+    </edge>
+    <edge source="mc3" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">275.03293525</data>
+    </edge>
+    <edge source="mc18" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">275.03293525</data>
+    </edge>
+    <edge source="mc3" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">189.356129124</data>
+    </edge>
+    <edge source="mc19" target="mc3">
+      <data key="bw">-1</data>
+      <data key="len">189.356129124</data>
+    </edge>
+    <edge source="mc4" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">189.670304367</data>
+    </edge>
+    <edge source="mc5" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">189.670304367</data>
+    </edge>
+    <edge source="mc4" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">282.403813471</data>
+    </edge>
+    <edge source="mc6" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">282.403813471</data>
+    </edge>
+    <edge source="mc4" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">208.203426177</data>
+    </edge>
+    <edge source="mc7" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">208.203426177</data>
+    </edge>
+    <edge source="mc4" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">152.496135884</data>
+    </edge>
+    <edge source="mc8" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">152.496135884</data>
+    </edge>
+    <edge source="mc4" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">101.612298952</data>
+    </edge>
+    <edge source="mc9" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">101.612298952</data>
+    </edge>
+    <edge source="mc4" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">97.7167469612</data>
+    </edge>
+    <edge source="mc10" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">97.7167469612</data>
+    </edge>
+    <edge source="mc4" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">220.125543823</data>
+    </edge>
+    <edge source="mc11" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">220.125543823</data>
+    </edge>
+    <edge source="mc4" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">102.750707414</data>
+    </edge>
+    <edge source="mc12" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">102.750707414</data>
+    </edge>
+    <edge source="mc4" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">145.451754748</data>
+    </edge>
+    <edge source="mc13" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">145.451754748</data>
+    </edge>
+    <edge source="mc4" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">43.9192018845</data>
+    </edge>
+    <edge source="mc14" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">43.9192018845</data>
+    </edge>
+    <edge source="mc4" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">193.254150059</data>
+    </edge>
+    <edge source="mc15" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">193.254150059</data>
+    </edge>
+    <edge source="mc4" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">231.834892659</data>
+    </edge>
+    <edge source="mc16" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">231.834892659</data>
+    </edge>
+    <edge source="mc4" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">115.729397309</data>
+    </edge>
+    <edge source="mc17" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">115.729397309</data>
+    </edge>
+    <edge source="mc4" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">236.754050064</data>
+    </edge>
+    <edge source="mc18" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">236.754050064</data>
+    </edge>
+    <edge source="mc4" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">235.280026822</data>
+    </edge>
+    <edge source="mc19" target="mc4">
+      <data key="bw">-1</data>
+      <data key="len">235.280026822</data>
+    </edge>
+    <edge source="mc5" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">213.545870741</data>
+    </edge>
+    <edge source="mc6" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">213.545870741</data>
+    </edge>
+    <edge source="mc5" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">169.329561258</data>
+    </edge>
+    <edge source="mc7" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">169.329561258</data>
+    </edge>
+    <edge source="mc5" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">145.26838547</data>
+    </edge>
+    <edge source="mc8" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">145.26838547</data>
+    </edge>
+    <edge source="mc5" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">161.923691915</data>
+    </edge>
+    <edge source="mc9" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">161.923691915</data>
+    </edge>
+    <edge source="mc5" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">111.231663264</data>
+    </edge>
+    <edge source="mc10" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">111.231663264</data>
+    </edge>
+    <edge source="mc5" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">43.4359680104</data>
+    </edge>
+    <edge source="mc11" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">43.4359680104</data>
+    </edge>
+    <edge source="mc5" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">172.984177805</data>
+    </edge>
+    <edge source="mc12" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">172.984177805</data>
+    </edge>
+    <edge source="mc5" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">74.1072839972</data>
+    </edge>
+    <edge source="mc13" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">74.1072839972</data>
+    </edge>
+    <edge source="mc5" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">220.437912248</data>
+    </edge>
+    <edge source="mc14" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">220.437912248</data>
+    </edge>
+    <edge source="mc5" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">119.504059178</data>
+    </edge>
+    <edge source="mc15" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">119.504059178</data>
+    </edge>
+    <edge source="mc5" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">87.2419253451</data>
+    </edge>
+    <edge source="mc16" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">87.2419253451</data>
+    </edge>
+    <edge source="mc5" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">73.9474674968</data>
+    </edge>
+    <edge source="mc17" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">73.9474674968</data>
+    </edge>
+    <edge source="mc5" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">196.698197674</data>
+    </edge>
+    <edge source="mc18" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">196.698197674</data>
+    </edge>
+    <edge source="mc5" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">186.902683196</data>
+    </edge>
+    <edge source="mc19" target="mc5">
+      <data key="bw">-1</data>
+      <data key="len">186.902683196</data>
+    </edge>
+    <edge source="mc6" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">376.763667273</data>
+    </edge>
+    <edge source="mc7" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">376.763667273</data>
+    </edge>
+    <edge source="mc6" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">338.855775258</data>
+    </edge>
+    <edge source="mc8" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">338.855775258</data>
+    </edge>
+    <edge source="mc6" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">182.948906276</data>
+    </edge>
+    <edge source="mc9" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">182.948906276</data>
+    </edge>
+    <edge source="mc6" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">195.76692086</data>
+    </edge>
+    <edge source="mc10" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">195.76692086</data>
+    </edge>
+    <edge source="mc6" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">183.167004578</data>
+    </edge>
+    <edge source="mc11" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">183.167004578</data>
+    </edge>
+    <edge source="mc6" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">337.370841567</data>
+    </edge>
+    <edge source="mc12" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">337.370841567</data>
+    </edge>
+    <edge source="mc6" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">269.183009239</data>
+    </edge>
+    <edge source="mc13" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">269.183009239</data>
+    </edge>
+    <edge source="mc6" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">278.765095086</data>
+    </edge>
+    <edge source="mc14" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">278.765095086</data>
+    </edge>
+    <edge source="mc6" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">329.352230905</data>
+    </edge>
+    <edge source="mc15" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">329.352230905</data>
+    </edge>
+    <edge source="mc6" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">134.229983761</data>
+    </edge>
+    <edge source="mc16" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">134.229983761</data>
+    </edge>
+    <edge source="mc6" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">225.145357761</data>
+    </edge>
+    <edge source="mc17" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">225.145357761</data>
+    </edge>
+    <edge source="mc6" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">49.8761675966</data>
+    </edge>
+    <edge source="mc18" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">49.8761675966</data>
+    </edge>
+    <edge source="mc6" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">397.500097887</data>
+    </edge>
+    <edge source="mc19" target="mc6">
+      <data key="bw">-1</data>
+      <data key="len">397.500097887</data>
+    </edge>
+    <edge source="mc7" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">55.8635028912</data>
+    </edge>
+    <edge source="mc8" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">55.8635028912</data>
+    </edge>
+    <edge source="mc7" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">259.332839128</data>
+    </edge>
+    <edge source="mc9" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">259.332839128</data>
+    </edge>
+    <edge source="mc7" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">208.641249281</data>
+    </edge>
+    <edge source="mc10" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">208.641249281</data>
+    </edge>
+    <edge source="mc7" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">210.531594816</data>
+    </edge>
+    <edge source="mc11" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">210.531594816</data>
+    </edge>
+    <edge source="mc7" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">111.865913332</data>
+    </edge>
+    <edge source="mc12" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">111.865913332</data>
+    </edge>
+    <edge source="mc7" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">108.547902654</data>
+    </edge>
+    <edge source="mc13" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">108.547902654</data>
+    </edge>
+    <edge source="mc7" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">252.122623265</data>
+    </edge>
+    <edge source="mc14" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">252.122623265</data>
+    </edge>
+    <edge source="mc7" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">50.3142636064</data>
+    </edge>
+    <edge source="mc15" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">50.3142636064</data>
+    </edge>
+    <edge source="mc7" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">256.552463464</data>
+    </edge>
+    <edge source="mc16" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">256.552463464</data>
+    </edge>
+    <edge source="mc7" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">159.979205364</data>
+    </edge>
+    <edge source="mc17" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">159.979205364</data>
+    </edge>
+    <edge source="mc7" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">350.312352852</data>
+    </edge>
+    <edge source="mc18" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">350.312352852</data>
+    </edge>
+    <edge source="mc7" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">27.2110740777</data>
+    </edge>
+    <edge source="mc19" target="mc7">
+      <data key="bw">-1</data>
+      <data key="len">27.2110740777</data>
+    </edge>
+    <edge source="mc8" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">206.970216677</data>
+    </edge>
+    <edge source="mc9" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">206.970216677</data>
+    </edge>
+    <edge source="mc8" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">158.954533472</data>
+    </edge>
+    <edge source="mc10" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">158.954533472</data>
+    </edge>
+    <edge source="mc8" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">188.680695958</data>
+    </edge>
+    <edge source="mc11" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">188.680695958</data>
+    </edge>
+    <edge source="mc8" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">60.7425606169</data>
+    </edge>
+    <edge source="mc12" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">60.7425606169</data>
+    </edge>
+    <edge source="mc8" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">72.7658953567</data>
+    </edge>
+    <edge source="mc13" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">72.7658953567</data>
+    </edge>
+    <edge source="mc8" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">196.406382042</data>
+    </edge>
+    <edge source="mc14" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">196.406382042</data>
+    </edge>
+    <edge source="mc8" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">55.1290991646</data>
+    </edge>
+    <edge source="mc15" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">55.1290991646</data>
+    </edge>
+    <edge source="mc8" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">229.208202928</data>
+    </edge>
+    <edge source="mc16" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">229.208202928</data>
+    </edge>
+    <edge source="mc8" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">114.933513693</data>
+    </edge>
+    <edge source="mc17" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">114.933513693</data>
+    </edge>
+    <edge source="mc8" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">307.800803955</data>
+    </edge>
+    <edge source="mc18" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">307.800803955</data>
+    </edge>
+    <edge source="mc8" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">83.0586331554</data>
+    </edge>
+    <edge source="mc19" target="mc8">
+      <data key="bw">-1</data>
+      <data key="len">83.0586331554</data>
+    </edge>
+    <edge source="mc9" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">55.1143088283</data>
+    </edge>
+    <edge source="mc10" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">55.1143088283</data>
+    </edge>
+    <edge source="mc9" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">173.121551104</data>
+    </edge>
+    <edge source="mc11" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">173.121551104</data>
+    </edge>
+    <edge source="mc9" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">179.927784006</data>
+    </edge>
+    <edge source="mc12" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">179.927784006</data>
+    </edge>
+    <edge source="mc9" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">161.116526608</data>
+    </edge>
+    <edge source="mc13" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">161.116526608</data>
+    </edge>
+    <edge source="mc9" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">96.9169101283</data>
+    </edge>
+    <edge source="mc14" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">96.9169101283</data>
+    </edge>
+    <edge source="mc9" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">225.985421656</data>
+    </edge>
+    <edge source="mc15" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">225.985421656</data>
+    </edge>
+    <edge source="mc9" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">163.558938636</data>
+    </edge>
+    <edge source="mc16" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">163.558938636</data>
+    </edge>
+    <edge source="mc9" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">107.704382088</data>
+    </edge>
+    <edge source="mc17" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">107.704382088</data>
+    </edge>
+    <edge source="mc9" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">135.826025644</data>
+    </edge>
+    <edge source="mc18" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">135.826025644</data>
+    </edge>
+    <edge source="mc9" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">285.620201485</data>
+    </edge>
+    <edge source="mc19" target="mc9">
+      <data key="bw">-1</data>
+      <data key="len">285.620201485</data>
+    </edge>
+    <edge source="mc10" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">130.623990644</data>
+    </edge>
+    <edge source="mc11" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">130.623990644</data>
+    </edge>
+    <edge source="mc10" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">143.467356247</data>
+    </edge>
+    <edge source="mc12" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">143.467356247</data>
+    </edge>
+    <edge source="mc10" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">106.736568242</data>
+    </edge>
+    <edge source="mc13" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">106.736568242</data>
+    </edge>
+    <edge source="mc10" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">116.002767596</data>
+    </edge>
+    <edge source="mc14" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">116.002767596</data>
+    </edge>
+    <edge source="mc10" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">172.36923718</data>
+    </edge>
+    <edge source="mc15" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">172.36923718</data>
+    </edge>
+    <edge source="mc10" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">134.918983916</data>
+    </edge>
+    <edge source="mc16" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">134.918983916</data>
+    </edge>
+    <edge source="mc10" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">52.7478351766</data>
+    </edge>
+    <edge source="mc17" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">52.7478351766</data>
+    </edge>
+    <edge source="mc10" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">156.115190809</data>
+    </edge>
+    <edge source="mc18" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">156.115190809</data>
+    </edge>
+    <edge source="mc10" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">234.238783472</data>
+    </edge>
+    <edge source="mc19" target="mc10">
+      <data key="bw">-1</data>
+      <data key="len">234.238783472</data>
+    </edge>
+    <edge source="mc11" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">214.811090175</data>
+    </edge>
+    <edge source="mc12" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">214.811090175</data>
+    </edge>
+    <edge source="mc11" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">117.380626309</data>
+    </edge>
+    <edge source="mc13" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">117.380626309</data>
+    </edge>
+    <edge source="mc11" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">245.774516959</data>
+    </edge>
+    <edge source="mc14" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">245.774516959</data>
+    </edge>
+    <edge source="mc11" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">160.281865294</data>
+    </edge>
+    <edge source="mc15" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">160.281865294</data>
+    </edge>
+    <edge source="mc11" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">49.771189478</data>
+    </edge>
+    <edge source="mc16" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">49.771189478</data>
+    </edge>
+    <edge source="mc11" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">107.40663559</data>
+    </edge>
+    <edge source="mc17" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">107.40663559</data>
+    </edge>
+    <edge source="mc11" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">175.046628027</data>
+    </edge>
+    <edge source="mc18" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">175.046628027</data>
+    </edge>
+    <edge source="mc11" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">226.363977268</data>
+    </edge>
+    <edge source="mc19" target="mc11">
+      <data key="bw">-1</data>
+      <data key="len">226.363977268</data>
+    </edge>
+    <edge source="mc12" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">101.330154012</data>
+    </edge>
+    <edge source="mc13" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">101.330154012</data>
+    </edge>
+    <edge source="mc12" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">145.659983197</data>
+    </edge>
+    <edge source="mc14" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">145.659983197</data>
+    </edge>
+    <edge source="mc12" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">113.918691365</data>
+    </edge>
+    <edge source="mc15" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">113.918691365</data>
+    </edge>
+    <edge source="mc12" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">246.552303545</data>
+    </edge>
+    <edge source="mc16" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">246.552303545</data>
+    </edge>
+    <edge source="mc12" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">116.938513</data>
+    </edge>
+    <edge source="mc17" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">116.938513</data>
+    </edge>
+    <edge source="mc12" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">299.525838839</data>
+    </edge>
+    <edge source="mc18" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">299.525838839</data>
+    </edge>
+    <edge source="mc12" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">137.815071725</data>
+    </edge>
+    <edge source="mc19" target="mc12">
+      <data key="bw">-1</data>
+      <data key="len">137.815071725</data>
+    </edge>
+    <edge source="mc13" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">184.957558909</data>
+    </edge>
+    <edge source="mc14" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">184.957558909</data>
+    </edge>
+    <edge source="mc13" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">66.260089225</data>
+    </edge>
+    <edge source="mc15" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">66.260089225</data>
+    </edge>
+    <edge source="mc13" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">156.461408865</data>
+    </edge>
+    <edge source="mc16" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">156.461408865</data>
+    </edge>
+    <edge source="mc13" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">54.4366786566</data>
+    </edge>
+    <edge source="mc17" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">54.4366786566</data>
+    </edge>
+    <edge source="mc13" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">241.765527731</data>
+    </edge>
+    <edge source="mc18" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">241.765527731</data>
+    </edge>
+    <edge source="mc13" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">131.718112452</data>
+    </edge>
+    <edge source="mc19" target="mc13">
+      <data key="bw">-1</data>
+      <data key="len">131.718112452</data>
+    </edge>
+    <edge source="mc14" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">236.148710057</data>
+    </edge>
+    <edge source="mc15" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">236.148710057</data>
+    </edge>
+    <edge source="mc14" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">249.558629675</data>
+    </edge>
+    <edge source="mc16" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">249.558629675</data>
+    </edge>
+    <edge source="mc14" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">147.973214232</data>
+    </edge>
+    <edge source="mc17" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">147.973214232</data>
+    </edge>
+    <edge source="mc14" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">230.365468216</data>
+    </edge>
+    <edge source="mc18" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">230.365468216</data>
+    </edge>
+    <edge source="mc14" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">279.196232249</data>
+    </edge>
+    <edge source="mc19" target="mc14">
+      <data key="bw">-1</data>
+      <data key="len">279.196232249</data>
+    </edge>
+    <edge source="mc15" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">206.732076637</data>
+    </edge>
+    <edge source="mc16" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">206.732076637</data>
+    </edge>
+    <edge source="mc15" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">120.588227267</data>
+    </edge>
+    <edge source="mc17" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">120.588227267</data>
+    </edge>
+    <edge source="mc15" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">305.414647227</data>
+    </edge>
+    <edge source="mc18" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">305.414647227</data>
+    </edge>
+    <edge source="mc15" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">68.1528611357</data>
+    </edge>
+    <edge source="mc19" target="mc15">
+      <data key="bw">-1</data>
+      <data key="len">68.1528611357</data>
+    </edge>
+    <edge source="mc16" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">131.030914438</data>
+    </edge>
+    <edge source="mc17" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">131.030914438</data>
+    </edge>
+    <edge source="mc16" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">131.519761646</data>
+    </edge>
+    <edge source="mc18" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">131.519761646</data>
+    </edge>
+    <edge source="mc16" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">273.897494828</data>
+    </edge>
+    <edge source="mc19" target="mc16">
+      <data key="bw">-1</data>
+      <data key="len">273.897494828</data>
+    </edge>
+    <edge source="mc17" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">192.867705632</data>
+    </edge>
+    <edge source="mc18" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">192.867705632</data>
+    </edge>
+    <edge source="mc17" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">184.553678966</data>
+    </edge>
+    <edge source="mc19" target="mc17">
+      <data key="bw">-1</data>
+      <data key="len">184.553678966</data>
+    </edge>
+    <edge source="mc18" target="mc19">
+      <data key="bw">-1</data>
+      <data key="len">372.929229273</data>
+    </edge>
+    <edge source="mc19" target="mc18">
+      <data key="bw">-1</data>
+      <data key="len">372.929229273</data>
+    </edge>
+  </graph>
+</graphml>

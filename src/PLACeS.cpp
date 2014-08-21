@@ -54,7 +54,9 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -L " << vm["content-length"].as<double>()
           << " -D " << vm["content-dev"].as<double>()
           << " -R " << vm["reduced-caching"].as<bool>()
-          << " -m " << vm["min-flow-increase"].as<double>();
+          << " -m " << vm["min-flow-increase"].as<double>()
+          << " -k " << vm["peak-req-ratio"].as<uint>()
+          << " -O " << vm["optimize-caching"].as<bool>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
@@ -97,7 +99,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   }
   // Print flow stats for each round
   FlowStats flowStats = oracle->getFlowStats();
-  outputF << "Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
+  outputF << "Rnd Completed Served Optimized Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
           "AvgTime AvgP2PTime AvgASTime AvgUsrCache% AvgASCache%" << endl;
   std::vector<double> localPctg, ASPctg, P2PPctg, CSPctg, blockPctg;
   localPctg.assign(rounds, 0);
@@ -119,6 +121,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             flowStats.congestionBlocked.at(i));
     outputF << i << " " << flowStats.completedRequests.at(i) << " "
             << flowStats.servedRequests.at(i) << " "
+            << flowStats.cacheOptimized.at(i) << " "
             << flowStats.localRequests.at(i) << " " << localPctg.at(i) << " "
             << flowStats.fromPeers.at(i) << " " << P2PPctg.at(i) << " "
             << flowStats.fromASCache.at(i) << " " << ASPctg.at(i) << " "
@@ -136,6 +139,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
     outputF << "a " 
             << accumulate(flowStats.completedRequests.begin(), flowStats.completedRequests.end(), 0) << " "
             << accumulate(flowStats.servedRequests.begin(), flowStats.servedRequests.end(), 0) << " "
+            << accumulate(flowStats.cacheOptimized.begin(), flowStats.cacheOptimized.end(), 0) << " "
             << accumulate(flowStats.localRequests.begin(), flowStats.localRequests.end(), 0) << " "
             << (double) (accumulate(localPctg.begin(), localPctg.end(), 0.0) / rounds) << " "
             << accumulate(flowStats.fromPeers.begin(), flowStats.fromPeers.end(), 0) << " "
@@ -219,7 +223,11 @@ int main(int argc, char** argv) {
               "Frequency at which to take graphml snapshots of the network")
           ("pre-caching,M", po::value<bool>()->default_value(false),
               "if true stores most popular content in AS caches (reduced-caching must be false)")
-          ;
+          ("peak-req-ratio,k", po::value<uint>()->default_value(100),
+              "peak-to-average ratio of requests per hour, for popularity rate estimations")
+          ("optimize-caching,O", po::value<bool>()->default_value(true),
+              "If true, attempts to minimize storage space used for caching")
+  ;
   
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, clo), vm);
@@ -258,10 +266,10 @@ int main(int argc, char** argv) {
     // determine the oracle type  basing on the current simulation mode
     if ((SimMode) vm["sim-mode"].as<uint > () == IPTV) {
       roundDuration = 86400; // 1 day
-      oracle = new IPTVTopologyOracle(topo, vm);
+      oracle = new IPTVTopologyOracle(topo, vm, roundDuration);
     } else {
       roundDuration = 604800; // 1 week
-      oracle = new VoDTopologyOracle(topo, vm);
+      oracle = new VoDTopologyOracle(topo, vm, roundDuration);
     }
     oracle->populateCatalog();
     if (vm["pre-caching"].as<bool>() && !vm["reduced-caching"].as<bool>())
@@ -277,8 +285,8 @@ int main(int argc, char** argv) {
         topo->printNetworkStats(currentRound, roundDuration);
       }
       oracle->printStats(currentRound);
-      scheduler->startNewRound();
       oracle->notifyEndRound(currentRound);
+      scheduler->startNewRound();
       if (currentRound+1< vm["rounds"].as<uint>()) {
         oracle->updateCatalog(currentRound);
       }

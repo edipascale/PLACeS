@@ -13,10 +13,11 @@
 #include "zipf_distribution.hpp"
 #include <fstream>
 #include "Cache.hpp"
+#include "RankingTable.hpp"
 
 
 // % of requests taking places at a give hour, starting from midnight
-const double usrPctgByHour[] = {
+const std::vector<double> usrPctgByHour = {
   4, 2, 1.5, 1.5, 1, 0.5, 0.5, 1, 1, 1.5, 2, 2.5, 3, 4, 4.5, 4.5, 4, 4, 4, 6, 12, 15, 12, 8
 //0  1   2    3   4   5    6   7  8   9   10  11 12 13  14   15  16 17 18 19  20  21  22  23
 };
@@ -24,7 +25,7 @@ const double usrPctgByHour[] = {
 const double dayWeights[] = {0.8, 0.9, 1, 0.8, 1.2, 1.3, 1.2};
 //                            M    T   W   T    F    S    S
 
-const double sessionLength[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
+const std::vector<double> sessionLength = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
         1, 1, 1, 1, 1, 1, 1, 1}; // 50% linear zapping, 50% entire content 
 
 /* Switching to a linear session length, this will no longer be used
@@ -61,6 +62,7 @@ struct FlowStats {
   std::vector<uint> fromPeers;
   std::vector<uint> fromCentralServer;
   std::vector<uint> congestionBlocked;
+  std::vector<uint> cacheOptimized;
 };
 
 /* The TopologyOracle keeps track of what everyone is caching and uses that
@@ -77,6 +79,8 @@ protected:
   double avgContentLength; //average content length in minutes
   double devContentLength; // std deviation of content length
   double avgHoursPerUser; // hours of viewing per user per round
+  double avgReqLength; //  derivative, but useful for the popularity estimation
+  uint peakReqRatio; // multiplicative factor to determine peak requests from avg requests
   uint bitrate; // bitrate of the encoded content in Mbps
   Topology* topo;
   AsidContentMap* asidContentMap; // keeps track of content available in each AS
@@ -90,8 +94,18 @@ protected:
   bool reducedCaching; // if true, use only a single CDN in the core;
                        // if false, one CDN micro cache in each AS
   bool preCaching;  // if true, AS caches are pre-filled with popular content and never updated
+  uint maxUploads;  // max number of concurrent uploads for the optimization problem
+  /* the following vector associates to each day of release and rank the expected 
+   * number of requests that the oracle expects per user per day.
+   */
+  std::vector< std::vector<double> > contentRateVec;
+  // bimap-based container to keep track of content popularity
+  std::vector<RankingTable<ContentElement*> > dailyRanking;
+  uint roundDuration;
+  bool cachingOpt;
+  
 public:
-  TopologyOracle(Topology* topo, po::variables_map vm);
+  TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~TopologyOracle();
   bool serveRequest(Flow* flow, Scheduler* scheduler);
   void addToCache(PonUser user, ContentElement* content, 
@@ -104,15 +118,30 @@ public:
   // this is a hack and should be removed
   Topology* getTopology() {return topo;}
   void printStats(uint currentRound);
-  void addContent(ContentElement* content);
-  void removeContent(ContentElement* content);
+  void addContent(ContentElement* content, uint elapsedRounds);
+  void removeContent(ContentElement* content, uint roundsElapsed);
   bool checkIfCached(PonUser user, ContentElement* content, Capacity sizeRequested);
   bool checkIfCached(Vertex lCache, ContentElement* content, Capacity sizeRequested);
   void getFromLocalCache(Vertex lCache, ContentElement* content, SimTime time);
   void removeFromCMap(ContentElement* content, PonUser user);
+  /* optimizeCaching implements the optimal caching algorithm to minimize storage
+   * space while keeping high level of locality, by ensuring that some minimal
+   * number of replicas are always available. Replicas are determined based on 
+   * popularity estimation (to be implemented). the function should be called 
+   * before adding elements to the cache, as it determines whether or not the 
+   * new element is worth storing and which elements should be erased to make
+   * space for it. It returns a pair of bool, the first of which tells whether
+   * the optimization was successful (i.e., a valid solution was found), and the
+   * second telling whether the requested element should be cached. The second
+   * boolean value should only be taken into consideration if the first is true.
+   */
+  std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, 
+      Capacity sizeRequested, SimTime time, uint currentRound);
+  
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);
   }
+  
   FlowStats getFlowStats() const {
     return this->flowStats;
   }

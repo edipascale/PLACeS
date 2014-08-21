@@ -10,13 +10,16 @@
 
 #include "PLACeS.hpp"
 #include <string>
-#include <map>
+#include "boost/multi_index_container.hpp"
+#include "boost/multi_index/ordered_index.hpp"
+#include "boost/multi_index/hashed_index.hpp"
+#include "boost/multi_index/mem_fun.hpp"
 
 class ContentElement {    
 protected:
     std::string name;
     Capacity size;
-    unsigned int viewsThisRound;
+    unsigned int viewsThisRound; // in VoD these are the pre-calculated views for this round; in IPTV we are using this as a counter for the view requests
     int releaseDay; // after the merge with VoD, also works as peakingRound
     unsigned int weeklyRank;
     // add a cache time? not used at the moment anyway
@@ -34,8 +37,16 @@ public:
     return viewsThisRound;
   }
 
-  void setViewsThisRound(unsigned int viewsThisRound) {
-    this->viewsThisRound = viewsThisRound;
+  void increaseViewsThisRound(unsigned int increase = 1) {
+    this->viewsThisRound = viewsThisRound + increase;
+  }
+  
+  void setViewsThisRound(unsigned int views) {
+    this->viewsThisRound = views;
+  }
+  
+  void resetViewsThisRound() {
+    this->viewsThisRound = 0;
   }
 
   unsigned int getWeeklyRank() const {
@@ -76,5 +87,6 @@ public:
     this->size = size;
   }
 };
+
 #endif	/* CONTENTELEMENT_HPP */
 

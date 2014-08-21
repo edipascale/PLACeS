@@ -9,6 +9,7 @@
       <itemPath>src/Flow.hpp</itemPath>
       <itemPath>src/IPTVTopologyOracle.hpp</itemPath>
       <itemPath>src/PLACeS.hpp</itemPath>
+      <itemPath>src/RankingTable.hpp</itemPath>
       <itemPath>src/RunningAvg.hpp</itemPath>
       <itemPath>src/Scheduler.hpp</itemPath>
       <itemPath>src/SimTimeInterval.hpp</itemPath>
@@ -77,12 +78,15 @@
           <incDir>
             <pElem>/usr/local/boost_1_54_0</pElem>
             <pElem>.</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
           </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
@@ -93,8 +97,12 @@
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_graph</linkerLibLibItem>
-            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
+            <linkerLibLibItem>ilocplex</linkerLibLibItem>
+            <linkerLibLibItem>cplex</linkerLibLibItem>
+            <linkerLibLibItem>concert</linkerLibLibItem>
+            <linkerLibLibItem>cplexdistmip</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
@@ -128,6 +136,8 @@
       <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/RankingTable.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/RunningAvg.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -193,12 +203,15 @@
           <incDir>
             <pElem>/usr/local/boost_1_54_0</pElem>
             <pElem>.</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
           </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic</pElem>
+            <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic</pElem>
           </linkerAddLib>
           <stripSymbols>true</stripSymbols>
           <linkerLibItems>
@@ -210,8 +223,12 @@
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>boost_graph</linkerLibLibItem>
-            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibStdlibItem>CppUnit</linkerLibStdlibItem>
+            <linkerLibLibItem>ilocplex</linkerLibLibItem>
+            <linkerLibLibItem>cplex</linkerLibLibItem>
+            <linkerLibLibItem>concert</linkerLibLibItem>
+            <linkerLibLibItem>cplexdistmip</linkerLibLibItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
@@ -233,6 +250,8 @@
       <item path="src/PLACeS.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/PLACeS.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/RankingTable.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/RunningAvg.hpp" ex="false" tool="3" flavor2="0">
       </item>

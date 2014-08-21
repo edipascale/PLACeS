@@ -9,8 +9,8 @@
 // random generator
 extern boost::mt19937 gen;
 
-VoDTopologyOracle::VoDTopologyOracle(Topology* topo, po::variables_map vm)
-    : TopologyOracle(topo, vm) {
+VoDTopologyOracle::VoDTopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration)
+    : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>();
   this->popularity = new UGCPopularity(vm["rounds"].as<uint>(), vm["perturbations"].as<bool>());
 }
@@ -36,7 +36,7 @@ void VoDTopologyOracle::populateCatalog() {
       this->atPeak.push_back(content);
     else
       this->beforePeak.push_back(content);
-    this->addContent(content);
+    this->addContent(content, 0);
   }
 }
 
