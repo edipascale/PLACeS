@@ -15,6 +15,7 @@ extern boost::mt19937 gen;
 
 TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration) {
   this->roundDuration = roundDuration;
+  this->cachingOpt = vm["optimize-caching"].as<bool>();
   this->ponCardinality = vm["pon-cardinality"].as<uint>();
   this->policy = (CachePolicy) vm["cache-policy"].as<uint>();
   this->maxCacheSize = vm["ucache-size"].as<uint>() * 8000; // input is in GB, variable in Mb
@@ -446,7 +447,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
      * Note that in the popularity estimation branch, we should try to optimize
      * only when we know enough about the content - e.g. a round.
      */
-    if (round == 0) {
+    if (round == 0 || !cachingOpt) {
       this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(), 
             round * roundDuration + time);
     } else {

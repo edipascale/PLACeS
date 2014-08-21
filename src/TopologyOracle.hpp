@@ -102,6 +102,7 @@ protected:
   // bimap-based container to keep track of content popularity
   std::vector<RankingTable<ContentElement*> > dailyRanking;
   uint roundDuration;
+  bool cachingOpt;
   
 public:
   TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);

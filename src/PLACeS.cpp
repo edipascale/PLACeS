@@ -55,7 +55,8 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -D " << vm["content-dev"].as<double>()
           << " -R " << vm["reduced-caching"].as<bool>()
           << " -m " << vm["min-flow-increase"].as<double>()
-          << " -k " << vm["peak-req-ratio"].as<uint>();
+          << " -k " << vm["peak-req-ratio"].as<uint>()
+          << " -O " << vm["optimize-caching"].as<bool>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
@@ -223,7 +224,10 @@ int main(int argc, char** argv) {
           ("pre-caching,M", po::value<bool>()->default_value(false),
               "if true stores most popular content in AS caches (reduced-caching must be false)")
           ("peak-req-ratio,k", po::value<uint>()->default_value(100),
-              "peak-to-average ratio of requests per hour, for popularity rate estimations");
+              "peak-to-average ratio of requests per hour, for popularity rate estimations")
+          ("optimize-caching,O", po::value<bool>()->default_value(true),
+              "If true, attempts to minimize storage space used for caching")
+  ;
   
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, clo), vm);
