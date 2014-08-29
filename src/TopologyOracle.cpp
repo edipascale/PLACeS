@@ -460,10 +460,10 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       if (!optResult.first || (optResult.first && optResult.second)) {
         this->addToCache(dest, flow->getContent(), flow->getSizeDownloaded(),
                 round * roundDuration + time);
-        // also record if the cache optimization was successful 
-        if (optResult.first == true)
-          flowStats.cacheOptimized.at(round)++;
       }
+      // also record if the cache optimization was successful 
+      if (optResult.first == true)
+        flowStats.cacheOptimized.at(round)++;
     }
   }
   // free resources in the topology
