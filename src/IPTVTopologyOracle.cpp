@@ -14,11 +14,11 @@ extern boost::mt19937 gen;
 IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm,
         uint roundDuration) : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
-  this->relDayDist = new boost::random::zipf_distribution<>(7, 0, 1);
   this->shiftDist = new boost::random::uniform_int_distribution<>(0,50);
   this->expDist = new boost::random::uniform_real_distribution<>(0.4, 1);
   this->rankDist = new boost::random::zipf_distribution<>(contentNum, 
           (*shiftDist)(gen), (*expDist)(gen));
+  this->relDayDist = new boost::random::zipf_distribution<>(7, 0, (*expDist)(gen));
   // allocate memory for the dailyCatalog and initialize contentRateVec
   std::vector<double> dailyRank(contentNum, 0.0);
   contentRateVec.resize(7, dailyRank);
@@ -182,6 +182,8 @@ void IPTVTopologyOracle::notifyEndRound(uint endingRound) {
   delete this->rankDist;
   this->rankDist = new boost::random::zipf_distribution<>(contentNum, 
           (*shiftDist)(gen), (*expDist)(gen));
+  delete this->relDayDist;
+  this->relDayDist = new boost::random::zipf_distribution<>(7, 0, (*expDist)(gen));
 }
 
 void IPTVTopologyOracle::preCache() {
