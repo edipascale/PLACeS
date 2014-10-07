@@ -1,8 +1,0 @@
-% 2013-Sep-30 12:04:56 - Simulation on Topology: topologies/topoGen.graphml with seed: 5489
-% Parameters: -s 1 -p 128 -c 30 -C 100 -a 1 -b 8 -u 16 -l 16384 -P 1 -L 45 -D 5 -R 1 -m 0
-Rnd AvgTot AvgCore AvgMetro AvgUp AvgDown AvgPeakCore AvgPeakMetro AvgPeakUp AvgPeakDown PeakCore PeakMetro PeakUp PeakDown
-0 92.7903 2605.37 0 76.0942 77.9771 0 0 3584 3992.08 0 0 10240 9216
-
-Rnd Completed Served Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% AvgTime AvgP2PTime AvgASTime
-0 1530906 1530906 1146573 74.8951 1497100 97.7918 0 0 33806 2.20823 0 0 18.5899 18.5524 20.2492
-
