@@ -14,8 +14,9 @@ extern boost::mt19937 gen;
 IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm,
         uint roundDuration) : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
+  double zmExp = vm["zm-exponent"].as<double>();
   this->shiftDist = new boost::random::uniform_int_distribution<>(0,50);
-  this->expDist = new boost::random::uniform_real_distribution<>(0.4, 1);
+  this->expDist = new boost::random::uniform_real_distribution<>(0.4, zmExp);
   this->rankDist = new boost::random::zipf_distribution<>(contentNum, 
           (*shiftDist)(gen), (*expDist)(gen));
   this->relDayDist = new boost::random::zipf_distribution<>(7, 0, (*expDist)(gen));

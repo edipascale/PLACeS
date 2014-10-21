@@ -227,6 +227,8 @@ int main(int argc, char** argv) {
               "peak-to-average ratio of requests per hour, for popularity rate estimations")
           ("optimize-caching,O", po::value<bool>()->default_value(true),
               "If true, attempts to minimize storage space used for caching")
+          ("zm-exponent,z", po::value<double>()->default_value(1),
+              "maximum allowed value of the ZM distribution exponent parameter")
   ;
   
   po::variables_map vm;
