@@ -56,6 +56,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -R " << vm["reduced-caching"].as<bool>()
           << " -m " << vm["min-flow-increase"].as<double>()
           << " -k " << vm["peak-req-ratio"].as<uint>()
+          << " -z " << vm["zm-exponent"].as<double>()
           << " -O " << vm["optimize-caching"].as<bool>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
@@ -99,8 +100,8 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   }
   // Print flow stats for each round
   FlowStats flowStats = oracle->getFlowStats();
-  outputF << "Rnd Completed Served Optimized Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
-          "AvgTime AvgP2PTime AvgASTime AvgUsrCache% AvgASCache%" << endl;
+  outputF << "Rnd Completed Served Optimized Optimized% Local Local% P2P P2P% AS AS% CS CS% Blocked Blocked% "
+          "AvgTime AvgP2PTime AvgASTime AvgASCache% AvgUsrCache%(r>1) AvgUsrCache%(r>2)" << endl;
   std::vector<double> localPctg, ASPctg, P2PPctg, CSPctg, blockPctg;
   localPctg.assign(rounds, 0);
   ASPctg.assign(rounds, 0);
@@ -122,6 +123,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
     outputF << i << " " << flowStats.completedRequests.at(i) << " "
             << flowStats.servedRequests.at(i) << " "
             << flowStats.cacheOptimized.at(i) << " "
+            << 100 * flowStats.cacheOptimized.at(i) / (double) flowStats.completedRequests.at(i) << " "
             << flowStats.localRequests.at(i) << " " << localPctg.at(i) << " "
             << flowStats.fromPeers.at(i) << " " << P2PPctg.at(i) << " "
             << flowStats.fromASCache.at(i) << " " << ASPctg.at(i) << " "
@@ -130,8 +132,8 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             << flowStats.avgFlowDuration.at(i) << " "
             << flowStats.avgPeerFlowDuration.at(i) << " "
             << flowStats.avgCacheFlowDuration.at(i) << " "
-            << flowStats.avgUserCacheOccupancy.at(i) << " "
-            << flowStats.avgASCacheOccupancy.at(i) 
+            << flowStats.avgASCacheOccupancy.at(i) << " " 
+            << flowStats.avgUserCacheOccupancy.at(i)
             << std::endl;
   }
   if (rounds > 1) {
@@ -140,6 +142,8 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             << accumulate(flowStats.completedRequests.begin(), flowStats.completedRequests.end(), 0) << " "
             << accumulate(flowStats.servedRequests.begin(), flowStats.servedRequests.end(), 0) << " "
             << accumulate(flowStats.cacheOptimized.begin(), flowStats.cacheOptimized.end(), 0) << " "
+            << 100 * accumulate(flowStats.cacheOptimized.begin()++, flowStats.cacheOptimized.end(), 0) / 
+              (double) accumulate(flowStats.completedRequests.begin()++, flowStats.completedRequests.end(), 0) << " "
             << accumulate(flowStats.localRequests.begin(), flowStats.localRequests.end(), 0) << " "
             << (double) (accumulate(localPctg.begin(), localPctg.end(), 0.0) / rounds) << " "
             << accumulate(flowStats.fromPeers.begin(), flowStats.fromPeers.end(), 0) << " "
@@ -153,9 +157,12 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
             << (double) (accumulate(flowStats.avgFlowDuration.begin(), flowStats.avgFlowDuration.end(), 0.0) / rounds) << " "
             << (double) (accumulate(flowStats.avgPeerFlowDuration.begin(), flowStats.avgPeerFlowDuration.end(), 0.0) / rounds) << " "
             << (double) (accumulate(flowStats.avgCacheFlowDuration.begin(), flowStats.avgCacheFlowDuration.end(), 0.0) / rounds) << " "
-            << (float) (accumulate(flowStats.avgUserCacheOccupancy.begin(), flowStats.avgUserCacheOccupancy.end(), 0.0) / rounds) << " "
-            << (float) (accumulate(flowStats.avgASCacheOccupancy.begin(), flowStats.avgASCacheOccupancy.end(), 0.0) / rounds)
-            << endl << endl;
+            << (float) (accumulate(flowStats.avgASCacheOccupancy.begin(), flowStats.avgASCacheOccupancy.end(), 0.0) / rounds) << " "
+            << (float) (accumulate(flowStats.avgUserCacheOccupancy.begin()++, flowStats.avgUserCacheOccupancy.end(), 0.0) / (rounds-1)) << " ";
+    if (rounds > 2) {
+      outputF << (float) (accumulate(flowStats.avgUserCacheOccupancy.begin()+2, flowStats.avgUserCacheOccupancy.end(), 0.0) / (rounds-2));
+    }
+    outputF << endl << endl;
   } else {
     outputF << endl;
   }

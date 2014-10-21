@@ -565,6 +565,8 @@ void TopologyOracle::printStats(uint currentRound) {
           << " locally ("
           << localPctg << "%). " << std::endl 
           << "Successful cache optimizations: " << flowStats.cacheOptimized.at(currentRound)
+          << " (" << 100 * flowStats.cacheOptimized.at(currentRound) / (double) flowStats.completedRequests.at(currentRound)
+          << "% of all completed requests)"
           << std::endl << "P2P flows: " 
           << flowStats.fromPeers.at(currentRound) << " (" << P2PPctg 
           << "%), AS Cache Flows: "
