@@ -36,7 +36,7 @@ bool Topology::addEdge(Vertex src, Vertex dest, Capacity cap, EdgeType type = CO
 }
 
 /* Builds the topology from a topology file, either from a graphml topology file
- * (which MUST have a .grapml extension) or a text file with the following conventions 
+ * (which MUST have a .graphml extension) or a text file with the following conventions 
  * (no quotes, #something means number of elements of type something, arguments
  * in brackets are optional)
  * The first line must be "#CoreNodes #CoreEdges". #CoreEdges is assumed to be 
