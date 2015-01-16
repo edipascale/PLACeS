@@ -236,6 +236,10 @@ int main(int argc, char** argv) {
               "If true, attempts to minimize storage space used for caching")
           ("zm-exponent,z", po::value<double>()->default_value(1),
               "maximum allowed value of the ZM distribution exponent parameter")
+          ("chunk-size, n", po::value<uint>()->default_value(300),
+              "size in Megabits of each content chunk")
+          ("buffer-size, B", po::value<uint>()->default_value(10),
+              "number of chunks that fit in the streaming buffer")
   ;
   
   po::variables_map vm;
