@@ -3,7 +3,7 @@
 #include "Flow.hpp"
 
 Flow::Flow(ContentElement* content, PonUser destination, Capacity sizeRequested,
-        SimTime eta, PonUser source) {
+        SimTime eta, PonUser source, FlowType flowType) {
   this->source = source;
   this->destination = destination;
   this->content = content;
@@ -14,6 +14,7 @@ Flow::Flow(ContentElement* content, PonUser destination, Capacity sizeRequested,
   this->lastUpdate = start;
   this->sizeRequested = sizeRequested;
   this->P2PFlow = true;
+  this->flowType = flowType;
 }
 
 Flow::~Flow() {
@@ -27,7 +28,8 @@ std::string Flow::toString() const {
           " c:" << this->getContent()->getName() << ", t:"
           << this->getStart() <<  "-" << this->getEta() << "; dl "
           << this->getSizeDownloaded() << " @" << this->lastUpdate
-          << ", bw:" << this->getBandwidth();
+          << ", bw:" << this->getBandwidth() << ", type: " 
+          << this->getFlowType();
   return ss.str(); 
 }
 

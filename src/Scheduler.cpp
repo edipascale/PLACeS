@@ -34,10 +34,12 @@ Scheduler::Scheduler(TopologyOracle* oracle, po::variables_map vm)
   this->roundDuration = roundDuration;
   simTime = 0;
   this->terminate = new Flow(nullptr, UNKNOWN, 0, roundDuration+1);
+  this->terminate->setFlowType(FlowType::TERMINATE);
   this->schedule(terminate);
   this->snapshotFreq = vm["snapshot-freq"].as<uint>();
   if (snapshotFreq > 0 && snapshotFreq <= roundDuration) {
-    this->snapshot = new Flow(nullptr, UNKNOWN, SNAPSHOT, snapshotFreq);
+    this->snapshot = new Flow(nullptr, UNKNOWN, 0, snapshotFreq);
+    snapshot->setFlowType(FlowType::SNAPSHOT);
     this->schedule(this->snapshot);
   } else {
     this->snapshot = nullptr;
@@ -71,8 +73,54 @@ bool Scheduler::advanceClock() {
     std::cout<<"Current simulation time: " << this->simTime << "/"
           << this->roundDuration << "\r" << std::flush;
   }
+  handleMap.erase(pendingEvents.top());
+  pendingEvents.pop();
   // Determine what kind of event is this
-  if (nextEvent->getSource() == UNKNOWN) {
+  switch(nextEvent->getFlowType()) {
+    case FlowType::TERMINATE:
+      BOOST_LOG_TRIVIAL(info) << std::endl  
+             << "Scheduler::advanceClock() - intercepted termination event";
+      delete nextEvent;
+      return false;
+    
+    case FlowType::SNAPSHOT:
+      oracle->takeSnapshot(this->getSimTime(), this->getCurrentRound());
+      delete nextEvent;
+      if (this->getSimTime() + snapshotFreq <= roundDuration) {
+        this->snapshot = new Flow(nullptr, UNKNOWN, 0,
+                this->getSimTime() + snapshotFreq);
+        snapshot->setFlowType(FlowType::SNAPSHOT);
+        this->schedule(this->snapshot);
+      } else {
+        this->snapshot = nullptr;
+      }
+      return true;
+    
+    case FlowType::REQUEST: {
+      // Change the start time to now and the eta to INF_TIME until we know the 
+      // available bandwidth 
+      nextEvent->setStart(this->getSimTime());
+      nextEvent->setEta(INF_TIME);
+      nextEvent->setLastUpdate(this->getSimTime());
+      // Ask the TopologyOracle to find a source for this content
+      // TODO: reschedule request in case of congestion
+      bool success = oracle->serveRequest(nextEvent, this);
+      // Check that the flow wasn't "virtual" (i.e. content was cached at the dest)
+      if (!success || nextEvent->getSource() == nextEvent->getDestination()) {
+        handleMap.erase(nextEvent);
+        delete nextEvent;
+      }
+      return true;
+    }
+    case FlowType::TRANSFER:
+      // Notify the oracle, which will update the cache mapping and free resources
+      // in the topology
+      oracle->notifyCompletedFlow(nextEvent, this);
+      delete nextEvent;
+      return true;
+  }  
+  
+/*  if (nextEvent->getSource() == UNKNOWN) {
     // This is a request, as the source hasn't been assigned yet
     handleMap.erase(pendingEvents.top());
     pendingEvents.pop();
@@ -86,12 +134,13 @@ bool Scheduler::advanceClock() {
       delete nextEvent;
       return false;
       } // snapshot event?
-      else if (nextEvent->getSizeRequested() == SNAPSHOT) {
+      else if (nextEvent->getFlowType() == FlowType::SNAPSHOT) {
         oracle->takeSnapshot(this->getSimTime(), this->getCurrentRound());
         delete nextEvent;
         if (this->getSimTime() + snapshotFreq <= roundDuration) {
-          this->snapshot = new Flow(nullptr, UNKNOWN, SNAPSHOT, 
+          this->snapshot = new Flow(nullptr, UNKNOWN, 0, 
                   this->getSimTime() + snapshotFreq);
+          snapshot->setFlowType(FlowType::SNAPSHOT);
           this->schedule(this->snapshot);
         }
         else {
@@ -129,6 +178,7 @@ bool Scheduler::advanceClock() {
     delete nextEvent;
     return true;
   }  
+ */ 
 }
 
 
@@ -182,9 +232,11 @@ void Scheduler::startNewRound() {
   this->simTime = 0;
   this->currentRound++;
   this->terminate = new Flow(nullptr, UNKNOWN, 0, roundDuration+1);
+  this->terminate->setFlowType(FlowType::TERMINATE);
   this->schedule(terminate);
   if (snapshotFreq > 0 && snapshotFreq <= roundDuration) {
-    this->snapshot = new Flow(nullptr, UNKNOWN, SNAPSHOT, snapshotFreq);
+    this->snapshot = new Flow(nullptr, UNKNOWN, 0, snapshotFreq);
+    snapshot->setFlowType(FlowType::SNAPSHOT);
     this->schedule(this->snapshot);
   } else {
     this->snapshot = nullptr;

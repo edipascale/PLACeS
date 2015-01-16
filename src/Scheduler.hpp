@@ -17,7 +17,6 @@ typedef typename boost::heap::binomial_heap<Flow *,
         boost::heap::compare<CompareFlowPtr> > FlowQueue;
 typedef FlowQueue::handle_type handleT;
 
-const Capacity SNAPSHOT = 1234.5;
 class Scheduler {
 protected:
   SimMode mode;

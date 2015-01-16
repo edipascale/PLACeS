@@ -199,6 +199,8 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
             << " to user " << destination.first << "," << destination.second;
   // update the number of requests for this content
   dailyRanking.at(currentDay-content->getReleaseDay()).hit(content);
+  // Set the flow as a transfer, since we are now assigning the source
+  flow->setFlowType(FlowType::TRANSFER);
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.

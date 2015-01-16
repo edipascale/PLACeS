@@ -47,7 +47,7 @@ typedef std::map<ContentElement*, std::set<PonUser> > ContentMap;
 typedef std::map<uint, ContentMap> AsidContentMap;
 typedef std::map<PonUser, ContentCache> UserCacheMap;
 typedef std::map<Vertex, ContentCache> LocalCacheMap;
-typedef std::map<PonUser, SimTimeInterval*> UserViewMap;
+
 
 struct FlowStats {
   std::vector<double> avgFlowDuration;

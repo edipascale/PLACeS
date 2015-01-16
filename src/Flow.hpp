@@ -11,6 +11,20 @@
 #include "ContentElement.hpp"
 #include "PLACeS.hpp"
 
+/* Enum to define the kind of event:
+ * REQUEST: Transfer yet to be initiated, has to get a source assigned
+ * TRANSFER: Actual data transfer between a source and a destination
+ * SNAPSHOT: take a snapshot of the network status and export it as graphml
+ * TERMINATE: end the current round
+ * WATCH: update the current watching position in the stream, for chunking
+ */
+enum class FlowType {
+  REQUEST,
+  TRANSFER,
+  SNAPSHOT,
+  TERMINATE,
+  WATCH
+};
 
 // Describes one data flow, either between peers or from a cache to the user
 class Flow {
@@ -25,10 +39,12 @@ protected:
   Capacity sizeDownloaded;
   Capacity sizeRequested; // to model zapping - partial downloads
   bool P2PFlow;
+  FlowType flowType;
 
 public:
   Flow(ContentElement* content, PonUser destination, Capacity sizeRequested,
-          SimTime eta = INF_TIME, PonUser source = UNKNOWN);  
+          SimTime eta = INF_TIME, PonUser source = UNKNOWN, 
+          FlowType flowType = FlowType::REQUEST);  
   ~Flow();
 
   SimTime getLastUpdate() const {
@@ -126,6 +142,15 @@ public:
   
   // debug method
   std::string toString() const;
+
+  FlowType getFlowType() const {
+    return flowType;
+  }
+
+  void setFlowType(FlowType flowType) {
+    this->flowType = flowType;
+  }
+
  
 };
 
