@@ -12,7 +12,7 @@
 #include "zipf_distribution.hpp"
 #include "boost/random/uniform_real_distribution.hpp"
 
-
+typedef std::map<PonUser, SimTimeInterval*> UserViewMap;
 /* The TopologyOracle keeps track of what everyone is caching and uses that
  * information to match requesters to sources with the appropriate content.
  * Essentially it serves as a global tracker (in the BitTorrent sense).
@@ -22,6 +22,10 @@
  */
 class IPTVTopologyOracle : public TopologyOracle{
 protected:
+  /* userViewMap stores, for each user in the network, the corresponding start
+   * and end instant of his consecutive video watching session for the current
+   * round, as extracted from the user behaviour distributions
+   */
   UserViewMap userViewMap;
   boost::random::zipf_distribution<>* relDayDist;
   boost::random::zipf_distribution<>* rankDist;
