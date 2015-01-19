@@ -21,13 +21,11 @@ protected:
     Capacity size;
     unsigned int viewsThisRound; // in VoD these are the pre-calculated views for this round; in IPTV we are using this as a counter for the view requests
     int releaseDay; // after the merge with VoD, also works as peakingRound
-    unsigned int weeklyRank;
     // add a cache time? not used at the moment anyway
     
 public:
   // Standard content element assumed to be 5400 Mb = 30 min at 3 Mbps
-  ContentElement(std::string name, int releaseDay, 
-          unsigned int weeklyRank, Capacity size = 5400);
+  ContentElement(std::string name, int releaseDay, Capacity size = 5400);
   
   std::string getName() const {
     return name;
@@ -47,14 +45,6 @@ public:
   
   void resetViewsThisRound() {
     this->viewsThisRound = 0;
-  }
-
-  unsigned int getWeeklyRank() const {
-    return weeklyRank;
-  }
-  
-  void setWeeklyRank(unsigned int weeklyRank) {
-    this->weeklyRank = weeklyRank;
   }
 
   void setName(std::string name) {

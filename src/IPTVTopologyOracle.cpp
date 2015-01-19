@@ -14,6 +14,8 @@ extern boost::mt19937 gen;
 IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm,
         uint roundDuration) : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
+  this->chunkSize = vm["chunk-size"].as<uint>();
+  this->bufferSize = vm["buffer-size"].as<uint>();
   double zmExp = vm["zm-exponent"].as<double>();
   this->shiftDist = new boost::random::uniform_int_distribution<>(0,50);
   this->expDist = new boost::random::uniform_real_distribution<>(0.4, zmExp);
@@ -108,7 +110,7 @@ void IPTVTopologyOracle::populateCatalog() {
     for (uint i = 0; i < contentNum; i++) {
       size = std::ceil(normDist(gen) * 60 * this->bitrate);
       ContentElement* content = new ContentElement(
-        boost::lexical_cast<string > ((day + 6) * contentNum + i), day, i, size);
+        boost::lexical_cast<string > ((day + 6) * contentNum + i), day, size);
       dailyCatalog[std::abs(day)].at(i) = content;
       dailyRanking.at(std::abs(day)).insert(content);
       this->addContent(content, 0);
@@ -137,7 +139,7 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
     size = std::ceil(normDist(gen) * 60 * this->bitrate);
     ContentElement* content = new ContentElement(
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
-            currentRound + 1, i, size);
+            currentRound + 1, size);
     dailyCatalog[0].at(i) = content;
     dailyRanking.at(0).insert(content);
     this->addContent(content, currentRound+1);   

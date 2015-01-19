@@ -43,6 +43,15 @@ protected:
    */
   std::vector< std::vector<ContentElement*> > dailyCatalog;
   
+  /* new members that are required for the chunking mechanisms:
+   * chunkSize is the size of each chunk in Megabits
+   * bufferSize is the number of chunks that can be stored in the streaming 
+   * buffer for each user
+   */
+  uint chunkSize; // in Mbits
+  uint bufferSize; // in # of chunks
+  
+  
 public:
   IPTVTopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~IPTVTopologyOracle();
