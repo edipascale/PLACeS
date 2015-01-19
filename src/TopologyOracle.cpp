@@ -149,7 +149,7 @@ void TopologyOracle::addToCache(PonUser user, ContentElement* content,
     // (the flow is not simulated as it is assumed it was cached as it transited
     // towards the user)
     Vertex lCache = topo->getLocalCache(user.first);
-    if (!localCacheMap->at(lCache).isCached(content, sizeDownloaded)) {
+    if (!localCacheMap->at(lCache).isCached(content)) {
       // debug info
       BOOST_LOG_TRIVIAL(trace) << time << ": caching content " << content->getName()
               << " at local cache " << lCache;
@@ -204,7 +204,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   // First check if the content is already in the user cache: if it is, there's
   // no need to simulate the data exchange and we only need to update the 
   // cache stats.
-  if (checkIfCached(destination, content, flow->getSizeRequested())) {
+  if (checkIfCached(destination, content)) {
     // signal to the scheduler that this flow is "virtual"
     flow->setSource(destination);
     flow->setEta(time);
@@ -235,8 +235,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   while (!randSources.empty() && !foundSource) {
     closestSource = randSources.back();
     // check if the identified source has enough content to serve this request
-    if (this->checkIfCached(closestSource, content, 
-            flow->getSizeRequested()) 
+    if (this->checkIfCached(closestSource, content) 
             && !topo->isCongested(closestSource, destination))
       foundSource = true;
     else {
@@ -253,7 +252,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     if (!reducedCaching) 
     {
       Vertex lCache = topo->getLocalCache(flow->getDestination().first);
-      if (checkIfCached(lCache, content, flow->getSizeRequested())) {
+      if (checkIfCached(lCache, content)) {
         // NOTE: We should check here if the downlink is congested, but with our
         // current hypothesis it should never be the case
         assert(topo->isCongested(std::make_pair(lCache, 0), destination) == false);
@@ -318,8 +317,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
         while (!randSources.empty() && !foundSource) {
           closestSource = randSources.back();
           // check if the identified source has enough content to serve this request
-          if (this->checkIfCached(closestSource, content, 
-                  flow->getSizeRequested()) 
+          if (this->checkIfCached(closestSource, content) 
                   && !topo->isCongested(closestSource, destination))
               foundSource = true;
           else {
@@ -351,8 +349,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // If we're in reducedCaching mode, check if the content is stored on the 
     // central cache, otherwise fetch it off-network
     if (reducedCaching) {
-      if (!checkIfCached(centralServer, content, 
-              flow->getSizeRequested())) {
+      if (!checkIfCached(centralServer, content)) {
         localCacheMap->at(centralServer).addToCache(content, 
                 content->getSize(), 
                 (scheduler->getCurrentRound()*roundDuration)+time);
@@ -401,13 +398,13 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
   SimTime time = scheduler->getSimTime();
   uint round = scheduler->getCurrentRound();
   flow->updateSizeDownloaded(time);
-  if (flow->getSizeDownloaded() < flow->getSizeRequested()) {
+  if (flow->getSizeDownloaded() < flow->getContent()->getSize()) {
     // ensure that this is a result of a discrete time scale (approximation to previous second)
-    assert(flow->getSizeRequested() - flow->getSizeDownloaded() <= flow->getBandwidth());
+    assert(flow->getContent()->getSize() - flow->getSizeDownloaded() <= flow->getBandwidth());
     BOOST_LOG_TRIVIAL(trace) << time << ": completed flow has sizeDownloaded (" << 
-              flow->getSizeDownloaded() << ") < sizeRequested (" <<
-              flow->getSizeRequested() << ") due to time approximation, fixing this";
-    flow->setSizeDownloaded(flow->getSizeRequested());
+              flow->getSizeDownloaded() << ") < Content Size (" <<
+              flow->getContent()->getSize() << ") due to time approximation, fixing this";
+    flow->setSizeDownloaded(flow->getContent()->getSize());
   }
   // update flow statistics
   SimTime flowDuration = time - flow->getStart();
@@ -454,7 +451,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
             round * roundDuration + time);
     } else {
       std::pair<bool, bool> optResult = this->optimizeCaching(dest,
-              flow->getContent(), flow->getSizeRequested(), time, round);
+              flow->getContent(), time, round);
       /* we need to add the requested element if the optimization failed OR if
        * it succeeded and it determined that we need to. The difference is that
        * in the second case elements that need to be removed have already been erased
@@ -475,7 +472,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
   // (the moment the flow was completed), but the time at which the user changes
   // channel! sizeRequested / bitrate = view duration
   time = flow->getStart() + 
-          std::floor((flow->getSizeRequested() / this->bitrate) + 0.5);
+          std::floor((flow->getContent()->getSize() / this->bitrate) + 0.5);
   assert(time >= scheduler->getSimTime());
   if (flow->getStart() >= 0) // else it's a leftover flow from an expired session
     this->generateNewRequest(dest, time, scheduler);
@@ -618,14 +615,12 @@ void TopologyOracle::removeContent(ContentElement* content, uint roundsElapsed) 
   }
 }
 
-bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content,
-        Capacity sizeRequested) {
-  return userCacheMap->at(user).isCached(content, sizeRequested);
+bool TopologyOracle::checkIfCached(PonUser user, ContentElement* content) {
+  return userCacheMap->at(user).isCached(content);
 }
 
-bool TopologyOracle::checkIfCached(Vertex lCache, ContentElement* content,
-        Capacity sizeRequested) {
-  return localCacheMap->at(lCache).isCached(content, sizeRequested);
+bool TopologyOracle::checkIfCached(Vertex lCache, ContentElement* content) {
+  return localCacheMap->at(lCache).isCached(content);
 }
 
 void TopologyOracle::getFromLocalCache(Vertex lCache, ContentElement* content, 
@@ -654,7 +649,7 @@ void TopologyOracle::removeFromCMap(ContentElement* content, PonUser user) {
 }
 
 std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
-        ContentElement* content, Capacity sizeRequested, SimTime time, 
+        ContentElement* content, SimTime time, 
         uint currentRound) {
   SimTime absTime = time + (currentRound*roundDuration);
   /* there is an inconsistence in our assumptions here, in that we add 
@@ -664,7 +659,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
    * to either make sure that this case is covered or that it never happens (e.g.,
    * by deleting it). In the next few lines I attempt to do so.
    */ 
-  if (checkIfCached(reqUser, content, 0) == true) {
+  if (checkIfCached(reqUser, content) == true) {
     userCacheMap->at(reqUser).removeFromCache(content, absTime);
     removeFromCMap(content, reqUser);
   }
@@ -763,7 +758,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       i++;
     }
     // same for the requested content
-    exp += c[cachedVec.size()] * sizeRequested;
+    exp += c[cachedVec.size()] * content->getSize();
     // add a contentRate constraint for the requested content if needed
     uint dayIndex = currentRound - content->getReleaseDay();
     assert(0 <= dayIndex && dayIndex < 7);
@@ -804,7 +799,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       }
       // if the requesting user was not already caching the content, we must add 
       // its term to the sum in case we decide to cache the requested content
-      if (userCacheMap->at(reqUser).isCached(content, content->getSize()) == false) {
+      if (userCacheMap->at(reqUser).isCached(content) == false) {
         cExp += c[cachedVec.size()]* (IloInt) (maxUploads - userCacheMap->at(reqUser).getTotalUploads()
                 + userCacheMap->at(reqUser).getCurrentUploads(content));
       }

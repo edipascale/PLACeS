@@ -61,7 +61,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/boost_1_54_0/stage/lib -L/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic -L/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic -lboost_log_setup -lboost_log -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_system -lboost_thread -lboost_graph -lcppunit -lilocplex -lcplex -lconcert -lcplexdistmip -lpthread
+LDLIBSOPTIONS=-L/usr/local/boost_1_54_0/stage/lib -L/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic -L/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic -lboost_log_setup -lboost_log -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_system -lboost_thread -lboost_graph -lcppunit -lilocplex -lcplex -lconcert -lcplexdistmip -lpthread `cppunit-config --libs`  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

@@ -37,14 +37,12 @@ protected:
   Capacity bandwidth;
   SimTime lastUpdate;
   Capacity sizeDownloaded;
-  Capacity sizeRequested; // to model zapping - partial downloads
   bool P2PFlow;
   FlowType flowType;
 
 public:
-  Flow(ContentElement* content, PonUser destination, Capacity sizeRequested,
-          SimTime eta = INF_TIME, PonUser source = UNKNOWN, 
-          FlowType flowType = FlowType::REQUEST);  
+  Flow(ContentElement* content, PonUser destination, SimTime eta = INF_TIME, 
+          PonUser source = UNKNOWN, FlowType flowType = FlowType::REQUEST);  
   ~Flow();
 
   SimTime getLastUpdate() const {
@@ -53,17 +51,6 @@ public:
 
   void setLastUpdate(SimTime lastUpdate) {
     this->lastUpdate = lastUpdate;
-  }
-  
-  Capacity getSizeRequested() const {
-    return sizeRequested;
-  }
-
-  void setSizeRequested(Capacity sizeRequested) {
-    if (this->getContent() != nullptr)
-      this->sizeRequested = std::min(sizeRequested, this->getContent()->getSize());
-    else
-      this->sizeRequested = sizeRequested;
   }
 
   Capacity getSizeDownloaded() const {
@@ -79,7 +66,7 @@ public:
   }
 
   void setSizeDownloaded(Capacity sizeDownloaded) {
-    this->sizeDownloaded = std::min(sizeDownloaded, this->getSizeRequested());
+    this->sizeDownloaded = std::min(sizeDownloaded, getContent()->getSize());
   }
 
   void updateSizeDownloaded(SimTime now); 

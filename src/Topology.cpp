@@ -725,6 +725,9 @@ void Topology::updateRouteCapacity(std::vector<Edge> route, Capacity toAdd) {
 }
 
 void Topology::updateEta(Flow* flow, Scheduler* scheduler) {
+  /* FIXME: this has to be changed now that watching and downloading are 
+   * separated as two different types of events
+   */
   /* Set the flow to end when the whole content has been downloaded or the
    * user decides to switch channel, whichever happens first
    */
@@ -732,7 +735,7 @@ void Topology::updateEta(Flow* flow, Scheduler* scheduler) {
   SimTime now = scheduler->getSimTime();
   // time at which the user is going to change channel
   userViewEta = flow->getStart() +
-          std::floor((flow->getSizeRequested() / this->bitrate) + 0.5);
+          std::floor((flow->getContent()->getSize()/ this->bitrate) + 0.5);
   // this is to prevent problems with flows carried over from previous rounds
   if (flow->getStart() > now && userViewEta > scheduler->getRoundDuration())
     userViewEta = userViewEta % scheduler->getRoundDuration();

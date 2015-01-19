@@ -120,8 +120,8 @@ public:
   void printStats(uint currentRound);
   void addContent(ContentElement* content, uint elapsedRounds);
   void removeContent(ContentElement* content, uint roundsElapsed);
-  bool checkIfCached(PonUser user, ContentElement* content, Capacity sizeRequested);
-  bool checkIfCached(Vertex lCache, ContentElement* content, Capacity sizeRequested);
+  bool checkIfCached(PonUser user, ContentElement* content);
+  bool checkIfCached(Vertex lCache, ContentElement* content);
   void getFromLocalCache(Vertex lCache, ContentElement* content, SimTime time);
   void removeFromCMap(ContentElement* content, PonUser user);
   /* optimizeCaching implements the optimal caching algorithm to minimize storage
@@ -135,8 +135,7 @@ public:
    * second telling whether the requested element should be cached. The second
    * boolean value should only be taken into consideration if the first is true.
    */
-  std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, 
-      Capacity sizeRequested, SimTime time, uint currentRound);
+  std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, SimTime time, uint currentRound);
   
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);

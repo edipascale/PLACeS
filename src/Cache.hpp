@@ -67,7 +67,7 @@ public:
   void clearCache();
   // to update metadata about the content (lastAccess, timesAccessed, uploads..)
   bool getFromCache(Content content, Timestamp time);
-  bool isCached(Content content, Size sizeReq);
+  bool isCached(Content content);
   void removeFromCache(Content content, Timestamp time); // for expired content
   bool uploadCompleted(Content content); // to decrease the upload counter
   int getCurrentUploads(Content content);
@@ -217,9 +217,9 @@ bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp ti
 }
 
 template <typename Content, typename Size, typename Timestamp>
-bool Cache<Content, Size, Timestamp>::isCached(Content content, Size sizeReq) {
+bool Cache<Content, Size, Timestamp>::isCached(Content content) {
   typename CacheMap::iterator cIt = cacheMap.find(content);
-  if (cIt != cacheMap.end() && cIt->second.size >= sizeReq)
+  if (cIt != cacheMap.end())
     return true;
   else // shall we return size instead to allow for multiple sources?
     return false;

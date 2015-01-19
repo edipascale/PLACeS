@@ -33,12 +33,12 @@ Scheduler::Scheduler(TopologyOracle* oracle, po::variables_map vm)
   this->currentRound = 0;
   this->roundDuration = roundDuration;
   simTime = 0;
-  this->terminate = new Flow(nullptr, UNKNOWN, 0, roundDuration+1);
+  this->terminate = new Flow(nullptr, UNKNOWN, roundDuration+1);
   this->terminate->setFlowType(FlowType::TERMINATE);
   this->schedule(terminate);
   this->snapshotFreq = vm["snapshot-freq"].as<uint>();
   if (snapshotFreq > 0 && snapshotFreq <= roundDuration) {
-    this->snapshot = new Flow(nullptr, UNKNOWN, 0, snapshotFreq);
+    this->snapshot = new Flow(nullptr, UNKNOWN, snapshotFreq);
     snapshot->setFlowType(FlowType::SNAPSHOT);
     this->schedule(this->snapshot);
   } else {
@@ -87,7 +87,7 @@ bool Scheduler::advanceClock() {
       oracle->takeSnapshot(this->getSimTime(), this->getCurrentRound());
       delete nextEvent;
       if (this->getSimTime() + snapshotFreq <= roundDuration) {
-        this->snapshot = new Flow(nullptr, UNKNOWN, 0,
+        this->snapshot = new Flow(nullptr, UNKNOWN,
                 this->getSimTime() + snapshotFreq);
         snapshot->setFlowType(FlowType::SNAPSHOT);
         this->schedule(this->snapshot);
@@ -231,11 +231,11 @@ void Scheduler::startNewRound() {
   flowVec.clear();
   this->simTime = 0;
   this->currentRound++;
-  this->terminate = new Flow(nullptr, UNKNOWN, 0, roundDuration+1);
+  this->terminate = new Flow(nullptr, UNKNOWN, roundDuration+1);
   this->terminate->setFlowType(FlowType::TERMINATE);
   this->schedule(terminate);
   if (snapshotFreq > 0 && snapshotFreq <= roundDuration) {
-    this->snapshot = new Flow(nullptr, UNKNOWN, 0, snapshotFreq);
+    this->snapshot = new Flow(nullptr, UNKNOWN, snapshotFreq);
     snapshot->setFlowType(FlowType::SNAPSHOT);
     this->schedule(this->snapshot);
   } else {

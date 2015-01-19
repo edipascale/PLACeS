@@ -170,7 +170,7 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     else
       reqLength = std::ceil(sessionLength4Q[indexDist(gen)] * content->getSize());
      * */
-    Flow* request = new Flow(content, user, reqLength, time);
+    Flow* request = new Flow(content, user, time);
     scheduler->schedule(request);
   }
 }
@@ -203,7 +203,7 @@ void IPTVTopologyOracle::preCache() {
         result = localCacheMap->at(as).addToCache(content, content->getSize(),0);
         assert(result.first == true);
         assert(result.second.empty() == true);
-        assert(localCacheMap->at(as).isCached(content, content->getSize() == true));
+        assert(localCacheMap->at(as).isCached(content));
       }
       else {
         isFull = true;

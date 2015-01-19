@@ -170,7 +170,7 @@ void VoDTopologyOracle::scheduleRequests(std::list<ContentElement*> list,
               minSecDist(gen); // minutes and seconds
       // generate request
       // TODO: Add support for zapping in VoD too.
-      Flow* req = new Flow(content, randPonUser, content->getSize(), reqTime);
+      Flow* req = new Flow(content, randPonUser, reqTime);
       scheduler->schedule(req);        
     }
     assignedUsers.clear();
