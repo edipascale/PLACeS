@@ -148,17 +148,26 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
         Scheduler* scheduler) {
   SimTime sessionEnd = userViewMap.at(user)->getEnd();
   if (time < sessionEnd) {
-    boost::random::uniform_int_distribution<> indexDist(0, 17);
+    // boost::random::uniform_int_distribution<> indexDist(0, 17);
     uint i = (*relDayDist)(gen);
     ContentElement* content = dailyCatalog[i].at((*rankDist)(gen));
-    Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
+    //Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
+    Capacity reqLength = content->getSize();
     // check that the new request would not go too much past the desired session
     // length; this will make all requests past midnight end at midnight :(
     SimTime reqEnd = std::ceil(time + (reqLength / this->bitrate));
     if (reqEnd > sessionEnd) {
+      /* FIXME: Once we introduce chunking, here we need to set the number of
+       * chunks to be downloaded to a number that allows us to end the session
+       * in time; but since chunking has not been implemented yet, the only way
+       * to ensure that the session will not over-extend is to terminate it now
+       */
+      return;
+      /* old code
       // new reqLength can't be less than 1 second worth of traffic
       reqLength = std::max((double)1*this->bitrate,
          reqLength - (reqEnd - sessionEnd) * this->bitrate);
+      */
     }
     /* Switching to a linear session length, this will no longer be used
     if (content->getWeeklyRank() <= this->contentNum * 0.25)
