@@ -11,6 +11,16 @@
 #include "TopologyOracle.hpp"
 #include "zipf_distribution.hpp"
 #include "boost/random/uniform_real_distribution.hpp"
+#include <queue>
+
+struct UserWatchingInfo {
+  SimTimeInterval dailySessionInterval;
+  ContentElement* content;
+  uint currentChunk;
+  uint highestChunkFetched;
+  uint lastChunkToBeWatched;
+  std::queue<ChunkPtr> buffer;
+};
 
 typedef std::map<PonUser, SimTimeInterval*> UserViewMap;
 /* The TopologyOracle keeps track of what everyone is caching and uses that

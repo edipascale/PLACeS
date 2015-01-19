@@ -30,7 +30,7 @@ void VoDTopologyOracle::populateCatalog() {
   for (uint i = 0; i < contentNum; i++) {
     size = std::ceil(normDist(gen) * 60 * this->bitrate);
     ContentElement* content = new ContentElement(boost::lexical_cast<string > (i),
-            0, size);
+            0, size, size);
     content->setPeakingRound(popularity->generatePeakRound());
     if (content->getPeakingRound() == 0)
       this->atPeak.push_back(content);

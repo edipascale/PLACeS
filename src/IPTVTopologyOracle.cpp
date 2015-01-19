@@ -110,7 +110,8 @@ void IPTVTopologyOracle::populateCatalog() {
     for (uint i = 0; i < contentNum; i++) {
       size = std::ceil(normDist(gen) * 60 * this->bitrate);
       ContentElement* content = new ContentElement(
-        boost::lexical_cast<string > ((day + 6) * contentNum + i), day, size);
+        boost::lexical_cast<string > ((day + 6) * contentNum + i), day, size, 
+              chunkSize);
       dailyCatalog[std::abs(day)].at(i) = content;
       dailyRanking.at(std::abs(day)).insert(content);
       this->addContent(content, 0);
@@ -139,7 +140,7 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
     size = std::ceil(normDist(gen) * 60 * this->bitrate);
     ContentElement* content = new ContentElement(
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
-            currentRound + 1, size);
+            currentRound + 1, size, chunkSize);
     dailyCatalog[0].at(i) = content;
     dailyRanking.at(0).insert(content);
     this->addContent(content, currentRound+1);   
