@@ -15,6 +15,10 @@
 #include "boost/multi_index/hashed_index.hpp"
 #include "boost/multi_index/mem_fun.hpp"
 
+/* forward declaration
+ */
+class ContentElement;
+
 /* A chunk is the unit of data that is transferred for a request. Each content
  * is divided into multiple chunks of the same size. Chunks have a sequential
  * index; each one has its own popularity based on the number of hits it received.
@@ -24,12 +28,14 @@ protected:
   Capacity size;
   uint index;
   uint viewsThisRound;
+  ContentElement* parent;
 
 public:
-  ContentChunk(Capacity size, uint index) {
+  ContentChunk(Capacity size, uint index, ContentElement* parent) {
     this->size = size;
     this->index = index;
     viewsThisRound = 0;
+    this->parent = parent;
   }
   
   Capacity getSize() const {
@@ -59,6 +65,11 @@ public:
   void resetViewsThisRound() {
     this->viewsThisRound = 0;
   }
+  
+  ContentElement* getContent() const {
+    return parent;
+  }
+  
 };
 
 typedef std::shared_ptr<ContentChunk> ChunkPtr;
@@ -79,6 +90,8 @@ protected:
 public:
   ContentElement(std::string name, int releaseDay, Capacity size, 
           Capacity chunkSize);
+  
+  ~ContentElement();
   
   std::string getName() const {
     return name;

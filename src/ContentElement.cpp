@@ -16,9 +16,17 @@ ContentElement::ContentElement(std::string name, int releaseDay, Capacity size,
   uint numOfChunks = std::ceil(size / chunkSize);
   chunks.reserve(numOfChunks);
   for (uint i = 0; i < numOfChunks; i++) {
-    chunks.push_back(ChunkPtr(new ContentChunk(chunkSize, i)));
+    ChunkPtr p = std::make_shared<ContentChunk>(chunkSize, i, this);
+    chunks.push_back(p);
   }
   Capacity residualSize = fmod(size, chunkSize);
   if (residualSize > 0 ) 
     chunks.at(numOfChunks-1)->setSize(residualSize);
+}
+
+ContentElement::~ContentElement() {
+  for (auto i = chunks.begin(); i != chunks.end(); i++) {
+    i->reset();
+  }
+  chunks.clear();
 }
