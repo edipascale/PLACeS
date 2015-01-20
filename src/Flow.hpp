@@ -34,6 +34,7 @@ protected:
   SimTime start;
   SimTime eta;
   ContentElement* content; 
+  uint chunkId;
   Capacity bandwidth;
   SimTime lastUpdate;
   Capacity sizeDownloaded;
@@ -42,7 +43,8 @@ protected:
 
 public:
   Flow(ContentElement* content, PonUser destination, SimTime eta = INF_TIME, 
-          PonUser source = UNKNOWN, FlowType flowType = FlowType::REQUEST);  
+          uint chunkId = 0, PonUser source = UNKNOWN, 
+          FlowType flowType = FlowType::REQUEST);  
   ~Flow();
 
   SimTime getLastUpdate() const {
@@ -136,6 +138,10 @@ public:
 
   void setFlowType(FlowType flowType) {
     this->flowType = flowType;
+  }
+  
+  uint getChunkId() const {
+    return chunkId;
   }
 
  

@@ -2,8 +2,8 @@
 
 #include "Flow.hpp"
 
-Flow::Flow(ContentElement* content, PonUser destination,
-        SimTime eta, PonUser source, FlowType flowType) {
+Flow::Flow(ContentElement* content, PonUser destination, SimTime eta,
+        uint chunkId, PonUser source, FlowType flowType) {
   this->source = source;
   this->destination = destination;
   this->content = content;
@@ -14,6 +14,7 @@ Flow::Flow(ContentElement* content, PonUser destination,
   this->lastUpdate = start;
   this->P2PFlow = true;
   this->flowType = flowType;
+  this->chunkId = chunkId;
 }
 
 Flow::~Flow() {
