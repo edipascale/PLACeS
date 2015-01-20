@@ -113,7 +113,9 @@ void IPTVTopologyOracle::populateCatalog() {
         boost::lexical_cast<string > ((day + 6) * contentNum + i), day, size, 
               chunkSize);
       dailyCatalog[std::abs(day)].at(i) = content;
-      dailyRanking.at(std::abs(day)).insert(content);
+      auto chunks = content->getChunks();
+      for (auto j = chunks.begin(); j != chunks.end(); j++)
+        dailyRanking.at(std::abs(day)).insert(*j);
       this->addContent(content, 0);
     }
   }
@@ -142,7 +144,9 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
             boost::lexical_cast<string > ((currentRound + 7) * contentNum + i),
             currentRound + 1, size, chunkSize);
     dailyCatalog[0].at(i) = content;
-    dailyRanking.at(0).insert(content);
+    auto chunks = content->getChunks();
+    for (auto j = chunks.begin(); j != chunks.end(); j++)
+      dailyRanking.at(0).insert(*j);
     this->addContent(content, currentRound+1);   
   }  
 }
@@ -211,11 +215,14 @@ void IPTVTopologyOracle::preCache() {
     content = dailyCatalog.at(day).at(index);
     for (uint as = 0; as < topo->getNumASes(); as++) {
       if (localCacheMap->at(as).fitsInCache(content->getSize())) {
-        std::pair<bool, std::set<ContentElement*> > result;
-        result = localCacheMap->at(as).addToCache(content, content->getSize(),0);
-        assert(result.first == true);
-        assert(result.second.empty() == true);
-        assert(localCacheMap->at(as).isCached(content));
+        auto chunks = content->getChunks();
+        std::pair<bool, std::set<ChunkPtr> > result;
+        for (auto j = chunks.begin(); j != chunks.end(); j++) {
+          result = localCacheMap->at(as).addToCache(*j, (*j)->getSize(), 0);
+          assert(result.first == true);
+          assert(result.second.empty() == true);
+          assert(localCacheMap->at(as).isCached(*j));
+        }
       }
       else {
         isFull = true;
@@ -224,5 +231,5 @@ void IPTVTopologyOracle::preCache() {
     }
     i++;
   }
-  BOOST_LOG_TRIVIAL(warning) << "cached " << i << " elements in AS caches";
+  BOOST_LOG_TRIVIAL(trace) << "cached " << i << " contents in AS caches";
 }

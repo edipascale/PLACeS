@@ -42,11 +42,11 @@ const double sessionLength3Q[] = {0.20, 0.30, 0.35, 0.42, 0.49, 0.53, 0.57, 0.59
 const double sessionLength4Q[] = {0.20, 0.30, 0.33, 0.37, 0.43, 0.49, 0.56, 0.60, 0.65, 0.81};
 */
 
-typedef Cache<ContentElement*, Capacity, SimTime> ContentCache;
-typedef std::map<ContentElement*, std::set<PonUser> > ContentMap;
-typedef std::map<uint, ContentMap> AsidContentMap;
-typedef std::map<PonUser, ContentCache> UserCacheMap;
-typedef std::map<Vertex, ContentCache> LocalCacheMap;
+typedef Cache<ChunkPtr, Capacity, SimTime> ChunkCache;
+typedef std::map<ChunkPtr, std::set<PonUser> > ChunkMap;
+typedef std::map<uint, ChunkMap> AsidContentMap;
+typedef std::map<PonUser, ChunkCache> UserCacheMap;
+typedef std::map<Vertex, ChunkCache> LocalCacheMap;
 
 
 struct FlowStats {
@@ -100,7 +100,7 @@ protected:
    */
   std::vector< std::vector<double> > contentRateVec;
   // bimap-based container to keep track of content popularity
-  std::vector<RankingTable<ContentElement*> > dailyRanking;
+  std::vector<RankingTable<ChunkPtr> > dailyRanking;
   uint roundDuration;
   bool cachingOpt;
   
@@ -108,11 +108,10 @@ public:
   TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);
   ~TopologyOracle();
   bool serveRequest(Flow* flow, Scheduler* scheduler);
-  void addToCache(PonUser user, ContentElement* content, 
-      Capacity sizeDownloaded, SimTime time);
+  void addToCache(PonUser user, ChunkPtr chunk, SimTime time);
   void clearUserCache();
   void clearLocalCache();
-  std::set<PonUser> getSources(ContentElement* content, uint asid);
+  std::set<PonUser> getSources(ChunkPtr chunk, uint asid);
   void notifyCompletedFlow(Flow* flow, Scheduler* scheduler);
   void notifyEndRound(uint endingRound);
   // this is a hack and should be removed
@@ -120,14 +119,14 @@ public:
   void printStats(uint currentRound);
   void addContent(ContentElement* content, uint elapsedRounds);
   void removeContent(ContentElement* content, uint roundsElapsed);
-  bool checkIfCached(PonUser user, ContentElement* content);
-  bool checkIfCached(Vertex lCache, ContentElement* content);
-  void getFromLocalCache(Vertex lCache, ContentElement* content, SimTime time);
-  void removeFromCMap(ContentElement* content, PonUser user);
+  bool checkIfCached(PonUser user, ChunkPtr chunk);
+  bool checkIfCached(Vertex lCache, ChunkPtr chunk);
+  void getFromLocalCache(Vertex lCache, ChunkPtr chunk, SimTime time);
+  void removeFromCMap(ChunkPtr chunk, PonUser user);
   /* optimizeCaching implements the optimal caching algorithm to minimize storage
    * space while keeping high level of locality, by ensuring that some minimal
    * number of replicas are always available. Replicas are determined based on 
-   * popularity estimation (to be implemented). the function should be called 
+   * popularity estimation. the function should be called 
    * before adding elements to the cache, as it determines whether or not the 
    * new element is worth storing and which elements should be erased to make
    * space for it. It returns a pair of bool, the first of which tells whether
@@ -135,7 +134,8 @@ public:
    * second telling whether the requested element should be cached. The second
    * boolean value should only be taken into consideration if the first is true.
    */
-  std::pair<bool, bool> optimizeCaching(PonUser user, ContentElement* content, SimTime time, uint currentRound);
+  std::pair<bool, bool> optimizeCaching(PonUser user, ChunkPtr chunk, 
+      SimTime time, uint currentRound);
   
   void takeSnapshot(SimTime time, uint round) const {
     this->topo->printTopology(time, round);
