@@ -2,7 +2,11 @@
 #include "TopologyOracle.hpp"
 #include <math.h>
 
-ContentElement::ContentElement(std::string name, int releaseDay,Capacity size,
+/* When a new content is created, divide it into chunks of the specified size
+ * (the last chunk is allowed to be smaller) and save shared pointers to those
+ * chunks in a vector. The chunks are what is actually going to be transferred
+ */
+ContentElement::ContentElement(std::string name, int releaseDay, Capacity size,
         Capacity chunkSize) {
   this->name = name;
   this->releaseDay = releaseDay;

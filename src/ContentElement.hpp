@@ -15,6 +15,10 @@
 #include "boost/multi_index/hashed_index.hpp"
 #include "boost/multi_index/mem_fun.hpp"
 
+/* A chunk is the unit of data that is transferred for a request. Each content
+ * is divided into multiple chunks of the same size. Chunks have a sequential
+ * index; each one has its own popularity based on the number of hits it received.
+ */
 class ContentChunk {
 protected:
   Capacity size;
@@ -59,6 +63,10 @@ public:
 
 typedef std::shared_ptr<ContentChunk> ChunkPtr;
 
+/* A ContentElement is a video from the multimedia catalog, e.g., a movie, TV
+ * show etc. A user selects one of these contents, but the VoD service actually
+ * requests "chunks", i.e., pieces of this video.
+ */
 class ContentElement {    
 protected:
     std::string name;
