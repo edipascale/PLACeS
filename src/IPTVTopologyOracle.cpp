@@ -39,10 +39,7 @@ IPTVTopologyOracle::~IPTVTopologyOracle() {
     list.clear();
   }
   dailyCatalog.clear();
-  for (UserViewMap::iterator it = userViewMap.begin(); it != userViewMap.end(); it++) {
-    delete (it->second);
-  }
-  userViewMap.clear();
+  userWatchMap.clear();
   delete this->relDayDist;
   delete this->rankDist;
   delete this->expDist;
@@ -52,7 +49,6 @@ IPTVTopologyOracle::~IPTVTopologyOracle() {
 void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
   uint roundDuration = scheduler->getRoundDuration();
   double totalHours = 0, randomHours;
-  userViewMap.clear();
   boost::random::normal_distribution<> userSessionDist(avgHoursPerUser);
   boost::random::discrete_distribution<> hourDist(usrPctgByHour);
   boost::random::uniform_int_distribution<> minSecDist(0, 3599);
@@ -84,14 +80,20 @@ void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
         sessionStart = 0;
       else if (sessionStart + sessionLength >= roundDuration)
         sessionStart = roundDuration - sessionLength;
-      std::pair<PonUser, SimTimeInterval*> userViewMapEntry; 
-      userViewMapEntry.first = std::make_pair(v,i);
-      userViewMapEntry.second = new SimTimeInterval(sessionStart, 
-              sessionStart + sessionLength);
-      userViewMap.insert(userViewMapEntry);
+      SimTimeInterval interval(sessionStart, sessionStart + sessionLength);
+      PonUser user = std::make_pair(v,i);
+      if (scheduler->getCurrentRound() == 0) {
+        //first round, populate userWatchMap
+        std::pair<PonUser, UserWatchingInfo> userWatchMapEntry; 
+        userWatchMapEntry.first = user;
+        userWatchMapEntry.second = UserWatchingInfo(interval);
+        userWatchMap.insert(userWatchMapEntry);
+      } else {
+        // subsequent rounds, just store the new interval
+        userWatchMap.at(user).dailySessionInterval = interval;
+      }
       // generate first request and schedule it
-      this->generateNewRequest(userViewMapEntry.first, 
-              userViewMapEntry.second->getStart(), scheduler);
+      this->generateNewRequest(user, interval->getStart(), scheduler);
     }
   }
   BOOST_LOG_TRIVIAL(info) << "Total hours of scheduled viewing for the current day: "
@@ -151,51 +153,44 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   }  
 }
 
+/* selects a movie to be requested according to the popularity distributions,
+ * determines how long the user is going to be watching it (because of zapping)
+ * and stores the required information in the userWatchMap, then creates a new
+ * Flow and schedules it.
+ */
 void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time, 
         Scheduler* scheduler) {
-  SimTime sessionEnd = userViewMap.at(user)->getEnd();
+  SimTime sessionEnd = userWatchMap.at(user).dailySessionInterval.getEnd();
   if (time < sessionEnd) {
-    // boost::random::uniform_int_distribution<> indexDist(0, 17);
+    boost::random::uniform_int_distribution<> indexDist(0, 17);
     uint i = (*relDayDist)(gen);
     ContentElement* content = dailyCatalog[i].at((*rankDist)(gen));
-    //Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
-    Capacity reqLength = content->getSize();
-    // check that the new request would not go too much past the desired session
+    Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
+    /* calculate the time it takes for the user to be done with this content */
+    SimTime watchingTime = std::ceil(reqLength / this->bitrate);
+    // check that the new request would not go past the desired session
     // length; this will make all requests past midnight end at midnight :(
-    SimTime reqEnd = std::ceil(time + (reqLength / this->bitrate));
-    if (reqEnd > sessionEnd) {
-      /* FIXME: Once we introduce chunking, here we need to set the number of
-       * chunks to be downloaded to a number that allows us to end the session
-       * in time; but since chunking has not been implemented yet, the only way
-       * to ensure that the session will not over-extend is to terminate it now
-       */
-      return;
-      /* old code
+    if (time + watchingTime > sessionEnd) {
       // new reqLength can't be less than 1 second worth of traffic
-      reqLength = std::max((double)1*this->bitrate,
-         reqLength - (reqEnd - sessionEnd) * this->bitrate);
-      */
+      watchingTime = std::max(1, sessionEnd - time);
     }
-    /* Switching to a linear session length, this will no longer be used
-    if (content->getWeeklyRank() <= this->contentNum * 0.25)
-      reqLength = std::ceil(sessionLength1Q[indexDist(gen)] * content->getSize());
-    else if (content->getWeeklyRank() <= this->contentNum * 0.50)
-      reqLength = std::ceil(sessionLength2Q[indexDist(gen)] * content->getSize());
-    else if (content->getWeeklyRank() <= this->contentNum * 0.75)
-      reqLength = std::ceil(sessionLength3Q[indexDist(gen)] * content->getSize());
-    else
-      reqLength = std::ceil(sessionLength4Q[indexDist(gen)] * content->getSize());
-     * */
-    Flow* request = new Flow(content, user, time);
-    scheduler->schedule(request);
+    UserWatchingMap::iterator wIt = userWatchMap.find(user);
+    assert (wIt != userWatchMap.end());
+    wIt->second.content = content;
+    wIt->second.videoWatchingTime = watchingTime;
+    /* Request enough chunks to fill the buffer. Note that I'm waiting one 
+     * second between each chunks to make it more likely that chunks arrive in
+     * order and to avoid congestion for the first chunk, which is critical - 
+     * this has to be evaluated and possibly revised.
+     */
+    for (uint i = 0; i < bufferSize; i++) {
+      Flow* request = new Flow(content, user, time+i, i);
+      scheduler->schedule(request);
+    }
   }
 }
 
 void IPTVTopologyOracle::notifyEndRound(uint endingRound) {
-  for (UserViewMap::iterator it = userViewMap.begin(); it != userViewMap.end(); it++) {
-    delete it->second;
-  }
-  this->userViewMap.clear();
   delete this->rankDist;
   this->rankDist = new boost::random::zipf_distribution<>(contentNum, 
           (*shiftDist)(gen), (*expDist)(gen));

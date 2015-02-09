@@ -28,20 +28,6 @@ const double dayWeights[] = {0.8, 0.9, 1, 0.8, 1.2, 1.3, 1.2};
 const std::vector<double> sessionLength = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
         1, 1, 1, 1, 1, 1, 1, 1}; // 50% linear zapping, 50% entire content 
 
-/* Switching to a linear session length, this will no longer be used
-// average session length (percentage) for the 0-25% quartile (most popular)
-const double sessionLength1Q[] = {0.18, 0.20, 0.23, 0.27, 0.30, 0.32, 0.39, 0.48, 0.57, 0.70};
-
-// average session length (percentage) for the 25-50% quartile
-const double sessionLength2Q[] = {0.19, 0.21, 0.29, 0.33, 0.36, 0.45, 0.54, 0.59, 0.63, 0.70};
-
-// average session length (percentage) for the 50-75% quartile
-const double sessionLength3Q[] = {0.20, 0.30, 0.35, 0.42, 0.49, 0.53, 0.57, 0.59, 0.63, 0.80};
-
-// average session length (percentage) for the 75-100% quartile (least popular)
-const double sessionLength4Q[] = {0.20, 0.30, 0.33, 0.37, 0.43, 0.49, 0.56, 0.60, 0.65, 0.81};
-*/
-
 typedef Cache<ChunkPtr, Capacity, SimTime> ChunkCache;
 typedef std::map<ChunkPtr, std::set<PonUser> > ChunkMap;
 typedef std::map<uint, ChunkMap> AsidContentMap;
@@ -64,6 +50,33 @@ struct FlowStats {
   std::vector<uint> congestionBlocked;
   std::vector<uint> cacheOptimized;
 };
+
+class UserWatchingInfo {
+public:
+  SimTimeInterval dailySessionInterval;
+  ContentElement* content;
+  uint currentChunk;
+  uint highestChunkFetched;
+  SimTime videoWatchingTime;
+  std::queue<ChunkPtr> buffer;
+  
+  UserWatchingInfo(SimTimeInterval interval) {
+    this->dailySessionInterval = interval;
+    content = nullptr;
+    currentChunk = 0;
+    highestChunkFetched = 0;
+    videoWatchingTime = 0;
+  }
+  
+  void reset() {
+    dailySessionInterval = SimTimeInterval(0,0);
+    content = nullptr;
+    currentChunk = 0;
+    highestChunkFetched = 0;
+    videoWatchingTime = 0;
+  }
+};
+typedef std::map<PonUser, UserWatchingInfo> UserWatchingMap;
 
 /* The TopologyOracle keeps track of what everyone is caching and uses that
  * information to match requesters to sources with the appropriate content.
@@ -103,6 +116,15 @@ protected:
   std::vector<RankingTable<ChunkPtr> > dailyRanking;
   uint roundDuration;
   bool cachingOpt;
+  
+   /* userWatchMap stores, for each user in the network, the corresponding 
+   * information on its streaming session, including the beginning and end
+   * instants of his consecutive video watching session for the current
+   * round (as extracted from the user behaviour distributions), the content
+   * it is currently streaming, its fetching buffer, the id of the chunk it is
+   * watching, the id of the highest chunk it has fetched so far.
+   */
+  UserWatchingMap userWatchMap;
   
 public:
   TopologyOracle(Topology* topo, po::variables_map vm, uint roundDuration);

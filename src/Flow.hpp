@@ -43,8 +43,8 @@ protected:
 
 public:
   Flow(ContentElement* content, PonUser destination, SimTime eta = INF_TIME, 
-          uint chunkId = 0, PonUser source = UNKNOWN, 
-          FlowType flowType = FlowType::REQUEST);  
+          uint chunkId = 0, FlowType flowType = FlowType::REQUEST,
+          PonUser source = UNKNOWN);  
   ~Flow();
 
   SimTime getLastUpdate() const {

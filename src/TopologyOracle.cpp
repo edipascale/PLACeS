@@ -413,91 +413,97 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
 }
 
 void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
-  // TODO: check the FlowType and act accordingly
   SimTime time = scheduler->getSimTime();
   uint round = scheduler->getCurrentRound();
   ChunkPtr chunk = flow->getContent()->getChunkById(flow->getChunkId());
-  flow->updateSizeDownloaded(time);
-  if (flow->getSizeDownloaded() < chunk->getSize()) {
-    // ensure that this is a result of a discrete time scale (approximation to previous second)
-    assert(chunk->getSize() - flow->getSizeDownloaded() <= flow->getBandwidth());
-    BOOST_LOG_TRIVIAL(trace) << time << ": completed flow has sizeDownloaded (" << 
-              flow->getSizeDownloaded() << ") < Chunk Size (" <<
-              chunk->getSize() << ") due to time approximation, fixing this";
-    flow->setSizeDownloaded(chunk->getSize());
-  }
-  // update flow statistics
-  SimTime flowDuration = time - flow->getStart();
-  // Update average flow duration stats, both generic and p2p / cache ones
-  flowStats.avgFlowDuration.at(round) = (flowStats.avgFlowDuration.at(round) 
-          * flowStats.completedRequests.at(round) 
-          + flowDuration) / (flowStats.completedRequests.at(round) +1);
-  flowStats.completedRequests.at(round)++;
-  
-  if (flow->isP2PFlow()) {
-    flowStats.avgPeerFlowDuration.at(round) = (flowStats.avgPeerFlowDuration.at(round) 
-            * flowStats.fromPeers.at(round) 
-          + flowDuration) / (flowStats.fromPeers.at(round) +1);
-    flowStats.fromPeers.at(round)++;
-  } else {
-    flowStats.avgCacheFlowDuration.at(round) = (flowStats.avgCacheFlowDuration.at(round) * 
-            (flowStats.fromASCache.at(round) + flowStats.fromCentralServer.at(round)) + flowDuration) 
-            / (flowStats.fromASCache.at(round) +flowStats.fromCentralServer.at(round) +1);
-    if (flow->getSource().first == topo->getCentralServer() &&
-            flow->getSource().second == 1)
-      flowStats.fromCentralServer.at(round)++;
-    else
-      flowStats.fromASCache.at(round)++;
-  }
-  topo->updateLoadMap(flow);
-  // notify the source cache that it has completed this upload
-  PonUser source = flow->getSource();
-  if (flow->isP2PFlow())
-    userCacheMap->at(source).uploadCompleted(chunk);
-  else
-    localCacheMap->at(source.first).uploadCompleted(chunk);
-  // update cache info (unless the content has expired, e.g. a flow carried over
-  // from the previous round)
-  /* FIXME: checking for a nullptr here does not make any sense, as we have 
-   already accessed it earlier in the method - check the code to see if we need
-   to do it earlier or it's not needed at all*/
-  PonUser dest = flow->getDestination();
-  if (flow->getContent() != nullptr) {
-    /* here we need to ask the oracle to decide whether we should cache the new
-     * chunk. Because the optimization will also tell us what to delete, we
-     * have to remove those chunks manually before invoking addToCache
-     * Note that in the popularity estimation branch, we should try to optimize
-     * only when we know enough about the content - e.g. a round.
-     */
-    if (round == 0 || !cachingOpt) {
-      this->addToCache(dest, chunk, round * roundDuration + time);
-    } else {
-      std::pair<bool, bool> optResult = this->optimizeCaching(dest, chunk,
-              time, round);
-      /* we need to add the requested element if the optimization failed OR if
-       * it succeeded and it determined that we need to. The difference is that
-       * in the second case elements that need to be removed have already been erased
-       */
-      if (!optResult.first || (optResult.first && optResult.second)) {
-        this->addToCache(dest, chunk, round * roundDuration + time);
+  switch(flow->getFlowType()) {
+    case FlowType::REQUEST:
+      flow->updateSizeDownloaded(time);
+      if (flow->getSizeDownloaded() < chunk->getSize()) {
+        // ensure that this is a result of a discrete time scale (approximation to previous second)
+        assert(chunk->getSize() - flow->getSizeDownloaded() <= flow->getBandwidth());
+        BOOST_LOG_TRIVIAL(trace) << time << ": completed flow has sizeDownloaded (" <<
+                flow->getSizeDownloaded() << ") < Chunk Size (" <<
+                chunk->getSize() << ") due to time approximation, fixing this";
+        flow->setSizeDownloaded(chunk->getSize());
       }
-      // also record if the cache optimization was successful 
-      if (optResult.first == true)
-        flowStats.cacheOptimized.at(round)++;
-    }
+      // update flow statistics
+      SimTime flowDuration = time - flow->getStart();
+      // Update average flow duration stats, both generic and p2p / cache ones
+      flowStats.avgFlowDuration.at(round) = (flowStats.avgFlowDuration.at(round)
+              * flowStats.completedRequests.at(round)
+              + flowDuration) / (flowStats.completedRequests.at(round) + 1);
+      flowStats.completedRequests.at(round)++;
+
+      if (flow->isP2PFlow()) {
+        flowStats.avgPeerFlowDuration.at(round) = (flowStats.avgPeerFlowDuration.at(round)
+                * flowStats.fromPeers.at(round)
+                + flowDuration) / (flowStats.fromPeers.at(round) + 1);
+        flowStats.fromPeers.at(round)++;
+      } else {
+        flowStats.avgCacheFlowDuration.at(round) = (flowStats.avgCacheFlowDuration.at(round) *
+                (flowStats.fromASCache.at(round) + flowStats.fromCentralServer.at(round)) + flowDuration)
+                / (flowStats.fromASCache.at(round) + flowStats.fromCentralServer.at(round) + 1);
+        if (flow->getSource().first == topo->getCentralServer() &&
+                flow->getSource().second == 1)
+          flowStats.fromCentralServer.at(round)++;
+        else
+          flowStats.fromASCache.at(round)++;
+      }
+      topo->updateLoadMap(flow);
+      // notify the source cache that it has completed this upload
+      PonUser source = flow->getSource();
+      PonUser dest = flow->getDestination();
+      if (flow->isP2PFlow())
+        userCacheMap->at(source).uploadCompleted(chunk);
+      else
+        localCacheMap->at(source.first).uploadCompleted(chunk);
+      // add this chunk to the streaming buffer of the user
+      userWatchMap.at(dest).buffer.push(chunk);
+      // update cache info (unless the content has expired, e.g. a flow carried over
+      // from the previous round)
+      /* FIXME: checking for a nullptr here does not make any sense, as we have 
+       already accessed it earlier in the method - check the code to see if we need
+       to do it earlier or it's not needed at all*/
+      if (flow->getContent() != nullptr) {
+        /* here we need to ask the oracle to decide whether we should cache the new
+         * chunk. Because the optimization will also tell us what to delete, we
+         * have to remove those chunks manually before invoking addToCache
+         * Note that in the popularity estimation branch, we should try to optimize
+         * only when we know enough about the content - e.g. a round.
+         */
+        if (round == 0 || !cachingOpt) {
+          this->addToCache(dest, chunk, round * roundDuration + time);
+        } else {
+          std::pair<bool, bool> optResult = this->optimizeCaching(dest, chunk,
+                  time, round);
+          /* we need to add the requested element if the optimization failed OR if
+           * it succeeded and it determined that we need to. The difference is that
+           * in the second case elements that need to be removed have already been erased
+           */
+          if (!optResult.first || (optResult.first && optResult.second)) {
+            this->addToCache(dest, chunk, round * roundDuration + time);
+          }
+          // also record if the cache optimization was successful 
+          if (optResult.first == true)
+            flowStats.cacheOptimized.at(round)++;
+        }
+      }
+      // free resources in the topology
+      topo->updateCapacity(flow, scheduler, false);
+      // generate new request if this user's session is not over
+      // TODO: here is where we check whether we need to fetch more chunks
+      // NOTE: the start time for the new request is not necessarily the current time  
+      // (the moment the flow was completed), but the time at which the user changes
+      // channel! sizeRequested / bitrate = view duration
+      time = flow->getStart() +
+              std::floor((chunk->getSize() / this->bitrate) + 0.5);
+      assert(time >= scheduler->getSimTime());
+      if (flow->getStart() >= 0) // else it's a leftover flow from an expired session
+        this->generateNewRequest(dest, time, scheduler);
+      
   }
-  // free resources in the topology
-  topo->updateCapacity(flow, scheduler, false);
-  // generate new request if this user's session is not over
-  // TODO: here is where we check whether we need to fetch more chunks
-  // NOTE: the start time for the new request is not necessarily the current time  
-  // (the moment the flow was completed), but the time at which the user changes
-  // channel! sizeRequested / bitrate = view duration
-  time = flow->getStart() + 
-          std::floor((chunk->getSize() / this->bitrate) + 0.5);
-  assert(time >= scheduler->getSimTime());
-  if (flow->getStart() >= 0) // else it's a leftover flow from an expired session
-    this->generateNewRequest(dest, time, scheduler);
+  
 }
 
 // Implemented for future use (e.g. distributed cache updates between rounds)

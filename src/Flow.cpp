@@ -3,7 +3,7 @@
 #include "Flow.hpp"
 
 Flow::Flow(ContentElement* content, PonUser destination, SimTime eta,
-        uint chunkId, PonUser source, FlowType flowType) {
+        uint chunkId, FlowType flowType, PonUser source) {
   this->source = source;
   this->destination = destination;
   this->content = content;
