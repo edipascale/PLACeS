@@ -14,8 +14,6 @@ extern boost::mt19937 gen;
 IPTVTopologyOracle::IPTVTopologyOracle(Topology* topo, po::variables_map vm,
         uint roundDuration) : TopologyOracle(topo, vm, roundDuration) {
   this->contentNum = vm["contents"].as<uint>() * vm["channels"].as<uint>();
-  this->chunkSize = vm["chunk-size"].as<uint>();
-  this->bufferSize = vm["buffer-size"].as<uint>();
   double zmExp = vm["zm-exponent"].as<double>();
   this->shiftDist = new boost::random::uniform_int_distribution<>(0,50);
   this->expDist = new boost::random::uniform_real_distribution<>(0.4, zmExp);
@@ -166,19 +164,22 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     uint i = (*relDayDist)(gen);
     ContentElement* content = dailyCatalog[i].at((*rankDist)(gen));
     Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
-    /* calculate the time it takes for the user to be done with this content */
-    SimTime watchingTime = std::ceil(reqLength / this->bitrate);
+    /* calculate the time at which the user will be done with this content */
+    SimTime endTime = time + std::ceil(reqLength / this->bitrate);
     // check that the new request would not go past the desired session
     // length; this will make all requests past midnight end at midnight :(
-    if (time + watchingTime > sessionEnd) {
+    if (endTime > sessionEnd) {
       // new reqLength can't be less than 1 second worth of traffic
-      watchingTime = std::max(1, sessionEnd - time);
+      endTime = std::max(time + 1, sessionEnd);
     }
     UserWatchingMap::iterator wIt = userWatchMap.find(user);
     assert (wIt != userWatchMap.end());
     wIt->second.content = content;
-    wIt->second.videoWatchingTime = watchingTime;
-    /* Request enough chunks to fill the buffer. Note that I'm waiting one 
+    wIt->second.watchingEndTime = endTime;
+    // we are waiting for the first chunk to be downloaded
+    wIt->second.waiting = true;
+    /* Request enough chunks to fill the buffer. 
+     * FIXME: Note that I'm waiting one 
      * second between each chunks to make it more likely that chunks arrive in
      * order and to avoid congestion for the first chunk, which is critical - 
      * this has to be evaluated and possibly revised.
