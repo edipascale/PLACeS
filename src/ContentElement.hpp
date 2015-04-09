@@ -82,7 +82,7 @@ class ContentElement {
 protected:
     std::string name;
     Capacity size;
-    Capacity chunkSize;
+    unsigned int totalChunks;
     unsigned int viewsThisRound; // in VoD these are the pre-calculated views for this round; in IPTV we are using this as a counter for the view requests
     int releaseDay; // after the merge with VoD, also works as peakingRound
     std::vector<ChunkPtr> chunks;    
@@ -143,8 +143,8 @@ public:
     this->size = size;
   }
   
-  Capacity getChunkSize() const {
-    return chunkSize;
+  unsigned int getTotalChunks() const {
+    return totalChunks;
   }
   
   std::vector<ChunkPtr> getChunks() const {
