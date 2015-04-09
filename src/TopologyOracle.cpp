@@ -29,6 +29,9 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm, uint roundD
   this->peakReqRatio = vm["peak-req-ratio"].as<uint>();
   this->bitrate = vm["bitrate"].as<uint>();
   this->preCaching = vm["pre-caching"].as<bool>();
+  //FIXME: chunkSize is integer here but we compare it with sizeDownloaded which is double
+  this->chunkSize = vm["chunk-size"].as<uint>();
+  this->bufferSize = vm["buffer-size"].as<uint>();
   //FIXME: this assumes constant bitrate for upload and a 10GPON
   this->maxUploads = std::floor(10240 / (ponCardinality * bitrate));
   this->avgReqLength = (avgContentLength * 60 *  // in seconds
@@ -413,19 +416,20 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
 }
 
 void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
+  PonUser user = flow->getDestination();
   SimTime time = scheduler->getSimTime();
   uint round = scheduler->getCurrentRound();
   ChunkPtr chunk = flow->getContent()->getChunkById(flow->getChunkId());
   switch(flow->getFlowType()) {
     case FlowType::REQUEST:
       flow->updateSizeDownloaded(time);
-      if (flow->getSizeDownloaded() < chunk->getSize()) {
+      if (flow->getSizeDownloaded() < chunkSize) {
         // ensure that this is a result of a discrete time scale (approximation to previous second)
         assert(chunk->getSize() - flow->getSizeDownloaded() <= flow->getBandwidth());
         BOOST_LOG_TRIVIAL(trace) << time << ": completed flow has sizeDownloaded (" <<
                 flow->getSizeDownloaded() << ") < Chunk Size (" <<
-                chunk->getSize() << ") due to time approximation, fixing this";
-        flow->setSizeDownloaded(chunk->getSize());
+                chunkSize << ") due to time approximation, fixing this";
+        flow->setSizeDownloaded(chunkSize);
       }
       // update flow statistics
       SimTime flowDuration = time - flow->getStart();
@@ -491,17 +495,38 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       }
       // free resources in the topology
       topo->updateCapacity(flow, scheduler, false);
-      // generate new request if this user's session is not over
-      // TODO: here is where we check whether we need to fetch more chunks
-      // NOTE: the start time for the new request is not necessarily the current time  
-      // (the moment the flow was completed), but the time at which the user changes
-      // channel! sizeRequested / bitrate = view duration
-      time = flow->getStart() +
-              std::floor((chunk->getSize() / this->bitrate) + 0.5);
-      assert(time >= scheduler->getSimTime());
-      if (flow->getStart() >= 0) // else it's a leftover flow from an expired session
-        this->generateNewRequest(dest, time, scheduler);
       
+      /* here we generated a new request, but this is no longer related to 
+       * downloads, rather to watching. the only thing we need to do is starting
+       * a watch event if the user was waiting for the chunk we just downloaded
+       */
+      if (userWatchMap.at(user).waiting && 
+              userWatchMap.at(user).currentChunk+1 == chunk->getIndex()) {
+        //TODO: start a new watch event for this chunk
+      }
+      
+      break;
+    
+    case FlowType::WATCH:
+      uint completedChunk = userWatchMap.at(user).currentChunk;
+      // free space in the buffer now that the chunk has been watched
+      userWatchMap.at(user).buffer.erase(flow->getContent()->getChunkById(completedChunk));
+      //TODO: here is where we check whether we need to fetch more chunks
+      //TODO: where do we store the information on whether we've watched enough?
+      
+      // check if we've got the next one
+      if (completedChunk != flow->getContent()->getTotalChunks()-1
+              && userWatchMap.at(user).buffer.find(flow->getContent()->getChunkById(completedChunk+1))) {
+        // update the currently watched chunk
+        userWatchMap.at(user).currentChunk++;
+        // start a new watching flow
+        SimTime eta = scheduler->getSimTime() + 
+                std::ceil(flow->getContent()->getChunkById(completedChunk+1)->getSize() / this->bitrate);
+        Flow* watchEvent = new Flow(flow->getContent(), user, eta, completedChunk+1, 
+                FlowType::WATCH);
+        scheduler->schedule(watchEvent);
+      }       
+      break;
   }
   
 }
