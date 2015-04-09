@@ -14,6 +14,7 @@
 #include <fstream>
 #include "Cache.hpp"
 #include "RankingTable.hpp"
+#include <unordered_set>
 
 
 // % of requests taking places at a give hour, starting from midnight
@@ -51,21 +52,31 @@ struct FlowStats {
   std::vector<uint> cacheOptimized;
 };
 
+/* UserWatchingInfo is the one-stop shop for everything related to the current
+ * watching session of a customer, from the total viewing session interval to
+ * the chunk currently being watched. It also manages the buffer where the pre-
+ * fetched chunks are stored waiting to be consumed.
+ */
 class UserWatchingInfo {
 public:
-  SimTimeInterval dailySessionInterval;
-  ContentElement* content;
-  uint currentChunk;
-  uint highestChunkFetched;
-  SimTime videoWatchingTime;
-  std::queue<ChunkPtr> buffer;
+  SimTimeInterval dailySessionInterval; // continuous watching session for the round
+  ContentElement* content; // content being watched
+  uint currentChunk; // chunk currently being watched
+  uint highestChunkFetched; // ID of the highest sequential chunk to have been fetched
+  /* time at which the user will change content (either due to zapping, because
+   * the content has been completed. or because the watching session ended)  
+   */
+  SimTime watchingEndTime; 
+  bool waiting; // is the user waiting for a chunk to be downloaded (i.e. rebuffering?)
+  std::unordered_set<ChunkPtr> buffer; // stores chunks for streaming
   
   UserWatchingInfo(SimTimeInterval interval) {
     this->dailySessionInterval = interval;
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
-    videoWatchingTime = 0;
+    watchingEndTime = 0;
+    waiting = false;
   }
   
   void reset() {
@@ -73,7 +84,9 @@ public:
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
-    videoWatchingTime = 0;
+    watchingEndTime = 0;
+    buffer.clear();
+    waiting = false;
   }
 };
 typedef std::map<PonUser, UserWatchingInfo> UserWatchingMap;
@@ -117,7 +130,15 @@ protected:
   uint roundDuration;
   bool cachingOpt;
   
-   /* userWatchMap stores, for each user in the network, the corresponding 
+  /* new members that are required for the chunking mechanisms:
+   * chunkSize is the size of each chunk in Megabits
+   * bufferSize is the number of chunks that can be stored in the streaming 
+   * buffer for each user
+   */
+  uint chunkSize; // in Mbits
+  uint bufferSize; // in # of chunks
+  
+  /* userWatchMap stores, for each user in the network, the corresponding 
    * information on its streaming session, including the beginning and end
    * instants of his consecutive video watching session for the current
    * round (as extracted from the user behaviour distributions), the content
