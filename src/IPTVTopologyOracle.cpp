@@ -45,6 +45,7 @@ IPTVTopologyOracle::~IPTVTopologyOracle() {
 }
 
 void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
+  BOOST_LOG_TRIVIAL(debug) << "entering generateUserViewMap";
   uint roundDuration = scheduler->getRoundDuration();
   double totalHours = 0, randomHours;
   boost::random::normal_distribution<> userSessionDist(avgHoursPerUser);
@@ -115,6 +116,7 @@ void IPTVTopologyOracle::populateCatalog() {
       for (auto j = chunks.begin(); j != chunks.end(); j++)
         dailyRanking.at(std::abs(day)).insert(*j);
       this->addContent(content, 0);
+      BOOST_LOG_TRIVIAL(debug) << "generated content " << content->getName();
     }
   }
 }
@@ -177,18 +179,17 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     // we are waiting for the first chunk to be downloaded
     wIt->second.waiting = true;
     /* Request enough chunks to fill the buffer. 
-     * FIXME: Note that I'm waiting one 
-     * second between each chunks to make it more likely that chunks arrive in
-     * order and to avoid congestion for the first chunk, which is critical - 
-     * this has to be evaluated and possibly revised.
      */
     for (uint i = 0; i < bufferSize; i++) {
       // stop if we fetched all the chunks of this content
       if (i >= content->getTotalChunks())
         continue;
-      Flow* request = new Flow(content, user, time+i, i);
+      Flow* request = new Flow(content, user, time, i);
       scheduler->schedule(request);
+      wIt->second.highestChunkFetched = i;
     }
+    BOOST_LOG_TRIVIAL(debug) << "generated request from user " << user.first
+            << "," << user.second << " for content " << content->getName();
   }
 }
 
