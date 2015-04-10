@@ -82,16 +82,14 @@ void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
       PonUser user = std::make_pair(v,i);
       if (scheduler->getCurrentRound() == 0) {
         //first round, populate userWatchMap
-        std::pair<PonUser, UserWatchingInfo> userWatchMapEntry; 
-        userWatchMapEntry.first = user;
-        userWatchMapEntry.second = UserWatchingInfo(interval);
+        std::pair<PonUser, UserWatchingInfo> userWatchMapEntry = std::make_pair(user, UserWatchingInfo(interval)); 
         userWatchMap.insert(userWatchMapEntry);
       } else {
         // subsequent rounds, just store the new interval
         userWatchMap.at(user).dailySessionInterval = interval;
       }
       // generate first request and schedule it
-      this->generateNewRequest(user, interval->getStart(), scheduler);
+      this->generateNewRequest(user, interval.getStart(), scheduler);
     }
   }
   BOOST_LOG_TRIVIAL(info) << "Total hours of scheduled viewing for the current day: "
@@ -185,6 +183,9 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
      * this has to be evaluated and possibly revised.
      */
     for (uint i = 0; i < bufferSize; i++) {
+      // stop if we fetched all the chunks of this content
+      if (i >= content->getTotalChunks())
+        continue;
       Flow* request = new Flow(content, user, time+i, i);
       scheduler->schedule(request);
     }
