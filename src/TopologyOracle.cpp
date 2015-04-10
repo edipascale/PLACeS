@@ -496,8 +496,8 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       // free resources in the topology
       topo->updateCapacity(flow, scheduler, false);
       
-      /* here we generated a new request, but this is no longer related to 
-       * downloads, rather to watching. the only thing we need to do is starting
+      /* here we generated a new request, however this is no longer related to 
+       * downloads, but rather to watching. the only thing we need to do is starting
        * a watch event if the user was waiting for the chunk we just downloaded
        */
       if (userWatchMap.at(dest).waiting && 
@@ -519,12 +519,10 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       if (time >= userWatchMap.at(dest).watchingEndTime) {
         // yes, we are; free buffer and reset watching info
         userWatchMap.at(dest).reset();
-        // what about the daily session?
-        if (time < userWatchMap.at(dest).dailySessionInterval.getEnd()) {
-          // nope, request a new content
-          this->generateNewRequest(dest, time, scheduler);
-        } else // nothing else to be done here
-          return;
+        // generate a new request (if the daily session is over, it's going to be checked there)
+        this->generateNewRequest(dest, time, scheduler);
+        // and that's all
+        return;
       }
       // still more watching to do for this content
       uint completedChunk = userWatchMap.at(dest).currentChunk;
