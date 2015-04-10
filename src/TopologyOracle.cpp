@@ -8,7 +8,7 @@
 #include <cmath>
 #define ILOUSESTL
 #define IL_STD
-#include <ilcplex/ilocplex.h>
+#include "ilcplex/ilocplex.h"
 
 // random generator
 extern boost::mt19937 gen;
@@ -416,12 +416,13 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
 }
 
 void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
-  PonUser user = flow->getDestination();
+  PonUser dest = flow->getDestination();
   SimTime time = scheduler->getSimTime();
   uint round = scheduler->getCurrentRound();
   ChunkPtr chunk = flow->getContent()->getChunkById(flow->getChunkId());
   switch(flow->getFlowType()) {
-    case FlowType::REQUEST:
+    case FlowType::TRANSFER:
+    {
       flow->updateSizeDownloaded(time);
       if (flow->getSizeDownloaded() < chunkSize) {
         // ensure that this is a result of a discrete time scale (approximation to previous second)
@@ -457,13 +458,12 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       topo->updateLoadMap(flow);
       // notify the source cache that it has completed this upload
       PonUser source = flow->getSource();
-      PonUser dest = flow->getDestination();
       if (flow->isP2PFlow())
         userCacheMap->at(source).uploadCompleted(chunk);
       else
         localCacheMap->at(source.first).uploadCompleted(chunk);
       // add this chunk to the streaming buffer of the user
-      userWatchMap.at(dest).buffer.push(chunk);
+      userWatchMap.at(dest).buffer.insert(chunk);
       // update cache info (unless the content has expired, e.g. a flow carried over
       // from the previous round)
       /* FIXME: checking for a nullptr here does not make any sense, as we have 
@@ -500,33 +500,72 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
        * downloads, rather to watching. the only thing we need to do is starting
        * a watch event if the user was waiting for the chunk we just downloaded
        */
-      if (userWatchMap.at(user).waiting && 
-              userWatchMap.at(user).currentChunk+1 == chunk->getIndex()) {
-        //TODO: start a new watch event for this chunk
+      if (userWatchMap.at(dest).waiting && 
+              userWatchMap.at(dest).currentChunk+1 == chunk->getIndex()) {
+        // start a new watching flow for the chunk we just got
+        SimTime eta = scheduler->getSimTime() + 
+                std::ceil(chunk->getSize() / this->bitrate);
+        Flow* watchEvent = new Flow(flow->getContent(), dest, eta, chunk->getIndex(), 
+                FlowType::WATCH);
+        scheduler->schedule(watchEvent);
+        userWatchMap.at(dest).waiting = false;          
       }
-      
-      break;
+    } 
+    break;
     
     case FlowType::WATCH:
-      uint completedChunk = userWatchMap.at(user).currentChunk;
+    {
+      // are we done with this content?
+      if (time >= userWatchMap.at(dest).watchingEndTime) {
+        // yes, we are; free buffer and reset watching info
+        userWatchMap.at(dest).reset();
+        // what about the daily session?
+        if (time < userWatchMap.at(dest).dailySessionInterval.getEnd()) {
+          // nope, request a new content
+          this->generateNewRequest(dest, time, scheduler);
+        } else // nothing else to be done here
+          return;
+      }
+      // still more watching to do for this content
+      uint completedChunk = userWatchMap.at(dest).currentChunk;
       // free space in the buffer now that the chunk has been watched
-      userWatchMap.at(user).buffer.erase(flow->getContent()->getChunkById(completedChunk));
-      //TODO: here is where we check whether we need to fetch more chunks
-      //TODO: where do we store the information on whether we've watched enough?
+      userWatchMap.at(dest).buffer.erase(flow->getContent()->getChunkById(completedChunk));
+      // here is where we check whether we need to fetch more chunks
+      if (userWatchMap.at(dest).highestChunkFetched < flow->getContent()->getTotalChunks()-1) {
+        // pre-fetch a new chunk, since there's space in the buffer now
+        Flow* requestChunk = new Flow(flow->getContent(), dest, time, 
+                userWatchMap.at(dest).highestChunkFetched+1);
+        scheduler->schedule(requestChunk);
+        userWatchMap.at(dest).highestChunkFetched++;
+      }      
       
-      // check if we've got the next one
-      if (completedChunk != flow->getContent()->getTotalChunks()-1
-              && userWatchMap.at(user).buffer.find(flow->getContent()->getChunkById(completedChunk+1))) {
+      // first make sure that we calculated correctly the watchingEndTime
+      assert(completedChunk != flow->getContent()->getTotalChunks()-1);
+      // check if we've got the next chunk so we can start watching straight away
+      if (userWatchMap.at(dest).buffer.find(flow->getContent()->getChunkById(completedChunk+1)) 
+              != userWatchMap.at(dest).buffer.end()) {
         // update the currently watched chunk
-        userWatchMap.at(user).currentChunk++;
+        userWatchMap.at(dest).currentChunk++;
         // start a new watching flow
         SimTime eta = scheduler->getSimTime() + 
                 std::ceil(flow->getContent()->getChunkById(completedChunk+1)->getSize() / this->bitrate);
-        Flow* watchEvent = new Flow(flow->getContent(), user, eta, completedChunk+1, 
+        Flow* watchEvent = new Flow(flow->getContent(), dest, eta, completedChunk+1, 
                 FlowType::WATCH);
         scheduler->schedule(watchEvent);
-      }       
-      break;
+        // and remove the waiting status in case it was set
+        userWatchMap.at(dest).waiting = false;
+      } else {
+        // there are chunks we want to watch and we do not have them. ALARM!
+        BOOST_LOG_TRIVIAL(warning) << "User " << dest.first << "," << dest.second
+                << " is now waiting for chunk " << completedChunk+1 << " of content "
+                << flow->getContent()->getName();
+        userWatchMap.at(dest).waiting = true;
+      }      
+    }
+    break;
+    default:
+      BOOST_LOG_TRIVIAL(error) << "notifyCompletedFlow for non TRANSFER, non WATCH event.";
+      abort();
   }
   
 }
