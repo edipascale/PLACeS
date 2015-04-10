@@ -62,7 +62,6 @@ bool Scheduler::advanceClock() {
             << ", content: " << nextEvent->getContent()->getName()
             << std::endl;
     abort();
-    //exit(ERR_EVENT_IN_THE_PAST);
   }
   // Update the clock with the current event time (if > previous time)
   else if (nextEvent->getSimTime() > this->getSimTime()) {
@@ -113,11 +112,12 @@ bool Scheduler::advanceClock() {
       return true;
     }
     case FlowType::TRANSFER:
+    case FlowType::WATCH:
       // Notify the oracle, which will update the cache mapping and free resources
       // in the topology
       oracle->notifyCompletedFlow(nextEvent, this);
       delete nextEvent;
-      return true;
+      return true;      
   }  
   
 /*  if (nextEvent->getSource() == UNKNOWN) {
