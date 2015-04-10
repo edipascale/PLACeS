@@ -70,8 +70,7 @@ public:
   bool waiting; // is the user waiting for a chunk to be downloaded (i.e. rebuffering?)
   std::unordered_set<ChunkPtr> buffer; // stores chunks for streaming
   
-  UserWatchingInfo(SimTimeInterval interval) {
-    this->dailySessionInterval = interval;
+  UserWatchingInfo(const SimTimeInterval interval) : dailySessionInterval(interval) {
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
@@ -80,7 +79,7 @@ public:
   }
   
   void reset() {
-    dailySessionInterval = SimTimeInterval(0,0);
+    //dailySessionInterval = SimTimeInterval(0,0);
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
