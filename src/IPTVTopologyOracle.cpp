@@ -46,6 +46,13 @@ IPTVTopologyOracle::~IPTVTopologyOracle() {
 
 void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
   BOOST_LOG_TRIVIAL(debug) << "entering generateUserViewMap";
+  /* fetching video chunks takes time, so we get delays with respect to the 
+   * session defined here; hence I'm introducing a guardThreshold so that we 
+   * have enough time to complete all the flows before midnight (hopefully)
+  
+  uint guardThreshold = 60;
+  uint roundDuration = scheduler->getRoundDuration() - guardThreshold;
+   *  */
   uint roundDuration = scheduler->getRoundDuration();
   double totalHours = 0, randomHours;
   boost::random::normal_distribution<> userSessionDist(avgHoursPerUser);
@@ -56,6 +63,12 @@ void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
 
   BOOST_FOREACH(Vertex v, topo->getPonNodes()) {
     for (uint i = 0; i < topo->getPonCustomers(v); i++) {
+      PonUser user = std::make_pair(v,i);
+      // populate userWatchMap for the first time if it's round 0
+      if (scheduler->getCurrentRound() == 0) {
+        std::pair<PonUser, UserWatchingInfo> userWatchMapEntry = std::make_pair(user, UserWatchingInfo()); 
+        userWatchMap.insert(userWatchMapEntry);
+      }
       randomHours = userSessionDist(gen);
       // daily sessions can't be longer than a day, duh
       if (randomHours > 24)
@@ -80,15 +93,8 @@ void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
       else if (sessionStart + sessionLength >= roundDuration)
         sessionStart = roundDuration - sessionLength;
       SimTimeInterval interval(sessionStart, sessionStart + sessionLength);
-      PonUser user = std::make_pair(v,i);
-      if (scheduler->getCurrentRound() == 0) {
-        //first round, populate userWatchMap
-        std::pair<PonUser, UserWatchingInfo> userWatchMapEntry = std::make_pair(user, UserWatchingInfo(interval)); 
-        userWatchMap.insert(userWatchMapEntry);
-      } else {
-        // subsequent rounds, just store the new interval
-        userWatchMap.at(user).dailySessionInterval = interval;
-      }
+      // store the new interval
+      userWatchMap.at(user).dailySessionInterval = interval;
       // generate first request and schedule it
       this->generateNewRequest(user, interval.getStart(), scheduler);
     }
@@ -160,19 +166,23 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     boost::random::uniform_int_distribution<> indexDist(0, 17);
     uint i = (*relDayDist)(gen);
     ContentElement* content = dailyCatalog[i].at((*rankDist)(gen));
-    Capacity reqLength = sessionLength[indexDist(gen)] * content->getSize();
+    double watchingPortion = sessionLength[indexDist(gen)];
+    Capacity reqLength =  watchingPortion * content->getSize();
     /* calculate the time at which the user will be done with this content */
     SimTime endTime = time + std::ceil(reqLength / this->bitrate);
     // check that the new request would not go past the desired session
     // length; this will make all requests past midnight end at midnight :(
     if (endTime > sessionEnd) {
-      // new reqLength can't be less than 1 second worth of traffic
-      endTime = std::max(time + 1, sessionEnd);
+      endTime = sessionEnd;
     }
+    // determine the number of chunks to be watched for this content
+    uint watchingChunks = std::ceil(watchingPortion * content->getTotalChunks());
+    if (watchingChunks > content->getTotalChunks())
+      watchingChunks = content->getTotalChunks();
     UserWatchingMap::iterator wIt = userWatchMap.find(user);
     assert (wIt != userWatchMap.end());
     wIt->second.content = content;
-    wIt->second.watchingEndTime = endTime;
+    wIt->second.chunksToBeWatched = watchingChunks;
     // we are waiting for the first chunk to be downloaded
     wIt->second.waiting = true;
     /* Request enough chunks to fill the buffer. 

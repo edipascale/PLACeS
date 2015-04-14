@@ -61,20 +61,28 @@ class UserWatchingInfo {
 public:
   SimTimeInterval dailySessionInterval; // continuous watching session for the round
   ContentElement* content; // content being watched
-  uint currentChunk; // chunk currently being watched
+  uint currentChunk; // chunk currently being watched (or that we are waiting for)
   uint highestChunkFetched; // ID of the highest sequential chunk to have been fetched
   /* time at which the user will change content (either due to zapping, because
    * the content has been completed. or because the watching session ended)  
    */
-  SimTime watchingEndTime; 
+  uint chunksToBeWatched; 
   bool waiting; // is the user waiting for a chunk to be downloaded (i.e. rebuffering?)
   std::unordered_set<ChunkPtr> buffer; // stores chunks for streaming
+  
+  UserWatchingInfo() : dailySessionInterval(0,1) {
+    content = nullptr;
+    currentChunk = 0;
+    highestChunkFetched = 0;
+    chunksToBeWatched = 0;
+    waiting = false;
+  }
   
   UserWatchingInfo(const SimTimeInterval interval) : dailySessionInterval(interval) {
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
-    watchingEndTime = 0;
+    chunksToBeWatched = 0;
     waiting = false;
   }
   
@@ -83,7 +91,7 @@ public:
     content = nullptr;
     currentChunk = 0;
     highestChunkFetched = 0;
-    watchingEndTime = 0;
+    chunksToBeWatched = 0;
     buffer.clear();
     waiting = false;
   }

@@ -502,9 +502,12 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       /* here we generated a new request, however this is no longer related to 
        * downloads, but rather to watching. the only thing we need to do is starting
        * a watch event if the user was waiting for the chunk we just downloaded
+       * Note that we do not do this if the flow is carried over from the previous round
        */
-      if (userWatchMap.at(dest).waiting && 
-              userWatchMap.at(dest).currentChunk+1 == chunk->getIndex()) {
+      if (flow->getContent() == userWatchMap.at(dest).content 
+              && userWatchMap.at(dest).waiting  
+              && userWatchMap.at(dest).currentChunk == chunk->getIndex()
+              && chunk->getIndex() < userWatchMap.at(dest).chunksToBeWatched) {
         // start a new watching flow for the chunk we just got
         SimTime eta = scheduler->getSimTime() + 
                 std::ceil(chunk->getSize() / this->bitrate);
@@ -518,8 +521,21 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
     
     case FlowType::WATCH:
     {
+      // is it a carried over flow?
+      if (flow->getContent() != userWatchMap.at(dest).content) {
+        /* the userWatchMap for this watching session has been overwritten now,
+         * and a new session has been programmed, so there is no reason to 
+         * keep going with this but to complete the flows that were still hanging
+         */
+        BOOST_LOG_TRIVIAL(info) << "carried over watch flow for content " <<
+                flow->getContent()->getName() << ", currently watching " <<
+                userWatchMap.at(dest).content->getName();
+        return;
+      }
       // are we done with this content?
-      if (time >= userWatchMap.at(dest).watchingEndTime) {
+      uint completedChunk = userWatchMap.at(dest).currentChunk;
+      if (time >= userWatchMap.at(dest).dailySessionInterval.getEnd() ||
+              completedChunk == userWatchMap.at(dest).chunksToBeWatched-1) {
         // yes, we are; free buffer and reset watching info
         userWatchMap.at(dest).reset();
         // generate a new request (if the daily session is over, it's going to be checked there)
@@ -528,7 +544,6 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
         return;
       }
       // still more watching to do for this content
-      uint completedChunk = userWatchMap.at(dest).currentChunk;
       // free space in the buffer now that the chunk has been watched
       userWatchMap.at(dest).buffer.erase(flow->getContent()->getChunkById(completedChunk));
       // here is where we check whether we need to fetch more chunks
@@ -539,14 +554,14 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
         scheduler->schedule(requestChunk);
         userWatchMap.at(dest).highestChunkFetched++;
       }      
-      
-      // first make sure that we calculated correctly the watchingEndTime
+           
+      // first make sure that we are not attempting to fetch a chunk that does not exist
       assert(completedChunk != flow->getContent()->getTotalChunks()-1);
+      // update the chunk we are currently interested into
+      userWatchMap.at(dest).currentChunk++;
       // check if we've got the next chunk so we can start watching straight away
       if (userWatchMap.at(dest).buffer.find(flow->getContent()->getChunkById(completedChunk+1)) 
               != userWatchMap.at(dest).buffer.end()) {
-        // update the currently watched chunk
-        userWatchMap.at(dest).currentChunk++;
         // start a new watching flow
         SimTime eta = scheduler->getSimTime() + 
                 std::ceil(flow->getContent()->getChunkById(completedChunk+1)->getSize() / this->bitrate);
@@ -557,8 +572,9 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
         userWatchMap.at(dest).waiting = false;
       } else {
         // there are chunks we want to watch and we do not have them. ALARM!
-        BOOST_LOG_TRIVIAL(warning) << "User " << dest.first << "," << dest.second
-                << " is now waiting for chunk " << completedChunk+1 << " of content "
+        BOOST_LOG_TRIVIAL(warning) << "At time " << scheduler->getSimTime() 
+                << " user " << dest.first << "," << dest.second
+                << " started waiting for chunk " << completedChunk+1 << " of content "
                 << flow->getContent()->getName();
         userWatchMap.at(dest).waiting = true;
       }      
