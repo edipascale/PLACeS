@@ -81,7 +81,7 @@ TopologyOracle::TopologyOracle(Topology* topo, po::variables_map vm, uint roundD
   }
   
   //Initialize dailyRanking
-  RankingTable<ChunkPtr> ranking;
+  RankingTable<ContentElement*> ranking;
   dailyRanking.resize(7, ranking);
   
 }
@@ -214,8 +214,11 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for chunk " << chunkId
             << " of content " << contentName
             << " to user " << destination.first << "," << destination.second;
-  // update the number of requests for this chunk
-  dailyRanking.at(currentDay-content->getReleaseDay()).hit(chunk);
+  // update the number of requests for this content if it's the first chunk
+  if (chunk->getIndex() == 0)
+    dailyRanking.at(currentDay-content->getReleaseDay()).hit(content);
+  // also increase the number of hits of the chunk (currently not used)
+  chunk->increaseViewsThisRound();
   // Set the flow as a transfer, since we are now assigning the source
   flow->setFlowType(FlowType::TRANSFER);
   // First check if the content is already in the user cache: if it is, there's
@@ -833,7 +836,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
         i++;
         continue;
       }
-      uint rank = dailyRanking.at(dayIndex).getRankOf(chunkIt);
+      uint rank = dailyRanking.at(dayIndex).getRankOf(contIt);
       double rate = contentRateVec.at(dayIndex).at(rank);
       double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
           (topo->getASCustomers(asid) / topo->getNumCustomers());      
@@ -880,7 +883,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
     if (dayIndex == 0 && hour < 6) {
       constraints.add(c[cachedVec.size()] == 1);
     } else {
-      uint rank = dailyRanking.at(dayIndex).getRankOf(chunk);
+      uint rank = dailyRanking.at(dayIndex).getRankOf(chunk->getContent());
       double rate = contentRateVec.at(dayIndex).at(rank);
       double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
               (topo->getASCustomers(asid) / topo->getNumCustomers());

@@ -73,53 +73,53 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/places: ${OBJECTFILES}
 
 ${OBJECTDIR}/src/ContentElement.o: src/ContentElement.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ContentElement.o src/ContentElement.cpp
 
 ${OBJECTDIR}/src/Flow.o: src/Flow.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Flow.o src/Flow.cpp
 
 ${OBJECTDIR}/src/IPTVTopologyOracle.o: src/IPTVTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/IPTVTopologyOracle.o src/IPTVTopologyOracle.cpp
 
 ${OBJECTDIR}/src/PLACeS.o: src/PLACeS.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/PLACeS.o src/PLACeS.cpp
 
 ${OBJECTDIR}/src/Scheduler.o: src/Scheduler.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Scheduler.o src/Scheduler.cpp
 
 ${OBJECTDIR}/src/SimTimeInterval.o: src/SimTimeInterval.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/SimTimeInterval.o src/SimTimeInterval.cpp
 
 ${OBJECTDIR}/src/Topology.o: src/Topology.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Topology.o src/Topology.cpp
 
 ${OBJECTDIR}/src/TopologyOracle.o: src/TopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/TopologyOracle.o src/TopologyOracle.cpp
 
 ${OBJECTDIR}/src/UGCPopularity.o: src/UGCPopularity.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/UGCPopularity.o src/UGCPopularity.cpp
 
 ${OBJECTDIR}/src/VoDTopologyOracle.o: src/VoDTopologyOracle.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/local/boost_1_54_0 -I. -I/home/dipascae/ibm/CPLEX_Studio126/cplex/include -I/home/dipascae/ibm/CPLEX_Studio126/concert/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/VoDTopologyOracle.o src/VoDTopologyOracle.cpp
 
 # Subprojects
 .build-subprojects:

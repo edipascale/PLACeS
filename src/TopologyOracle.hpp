@@ -125,7 +125,7 @@ protected:
    */
   std::vector< std::vector<double> > contentRateVec;
   // bimap-based container to keep track of content popularity
-  std::vector<RankingTable<ChunkPtr> > dailyRanking;
+  std::vector<RankingTable<ContentElement*> > dailyRanking;
   uint roundDuration;
   bool cachingOpt;
   
