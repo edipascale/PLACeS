@@ -413,6 +413,10 @@ Vertex Topology::getCentralServer() {
 
 void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
         bool addNotRemove) {
+  if (flow->getFlowType() != FlowType::TRANSFER) {
+    BOOST_LOG_TRIVIAL(warning) << "Topology::updateCapacity() called for a non TRANSFER flow";
+    return;
+  }
   SimTime now = scheduler->getSimTime();
   std::vector<Edge> flowRoute = this->getRoute(flow->getSource(), 
           flow->getDestination());
