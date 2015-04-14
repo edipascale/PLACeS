@@ -221,6 +221,10 @@ void Scheduler::startNewRound() {
       f->setContent(nullptr);
       std::cout << "WARNING - Scheduler::startNewRound() - carried over flow "
               "with expired content will not be completed" << std::endl;
+      if (f->getFlowType() == FlowType::TRANSFER) {
+        // this is hacky, but needs to be done. Ideally we should not get here at all.
+        oracle->getTopology()->updateCapacity(f, this, false);
+      }
     } else
       flowVec.push_back(f);
   }
