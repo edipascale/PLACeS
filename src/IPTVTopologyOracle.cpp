@@ -69,6 +69,9 @@ void IPTVTopologyOracle::generateUserViewMap(Scheduler* scheduler) {
         std::pair<PonUser, UserWatchingInfo> userWatchMapEntry = std::make_pair(user, UserWatchingInfo()); 
         userWatchMap.insert(userWatchMapEntry);
       }
+      else {
+        userWatchMap.at(user).reset();
+      }
       randomHours = userSessionDist(gen);
       // daily sessions can't be longer than a day, duh
       if (randomHours > 24)
