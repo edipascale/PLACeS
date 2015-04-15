@@ -12,8 +12,8 @@ void Scheduler::schedule(Flow* event) {
   handleT handle = this->pendingEvents.push(event);
   if (handleMap.insert(std::make_pair(event, handle)).second != true)
   {
-    std::cerr << "ERROR: Scheduler::schedule() - could not insert new handle in "
-            "handleMap" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "Scheduler::schedule() - could not insert new handle in "
+            "handleMap";
     exit(ERR_HANDLEMAP_INSERT);
   }
 }
@@ -26,7 +26,7 @@ Scheduler::Scheduler(TopologyOracle* oracle, po::variables_map vm)
   else if (this->mode == VoD)
     this->roundDuration = 604800; // 1 week
   else {
-    std::cerr << "ERROR: Scheduler::Scheduler() - unrecognized SimMode" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "Scheduler::Scheduler() - unrecognized SimMode";
     abort();
   }
   this->oracle = oracle;
@@ -48,19 +48,17 @@ Scheduler::Scheduler(TopologyOracle* oracle, po::variables_map vm)
 
 bool Scheduler::advanceClock() {
   if (pendingEvents.size() == 0) {
-    std::cerr << "WARNING: Scheduler::advanceClock() - Empty event queue before "
+    BOOST_LOG_TRIVIAL(warning) << "Scheduler::advanceClock() - Empty event queue before "
             "reaching the termination event" << std::endl;
     return false;
   }
   Flow* nextEvent = const_cast<Flow*> (pendingEvents.top());
   // Check that the event is not scheduled in the past
   if (nextEvent->getSimTime() < this->getSimTime()) {
-    std::cerr << "Scheduler::advanceClock() - Event scheduled in the past!" << 
-            std::endl;
-    std::cerr << "Simulation time: " << this->getSimTime()
+    BOOST_LOG_TRIVIAL(error) << "Scheduler::advanceClock() - Event scheduled in the past!";
+    BOOST_LOG_TRIVIAL(error) << "Simulation time: " << this->getSimTime()
             << ", event time: " << nextEvent->getSimTime()
-            << ", content: " << nextEvent->getContent()->getName()
-            << std::endl;
+            << ", content: " << nextEvent->getContent()->getName();
     abort();
   }
   // Update the clock with the current event time (if > previous time)
@@ -192,9 +190,8 @@ void Scheduler::updateSchedule(Flow* flow, SimTime oldEta) {
       return;
   }
   else {
-    std::cerr << "Scheduler::updateSchedule() - could not find handle for flow "
-            << flow->getSource().first << "->" << flow->getDestination().first
-            << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "Scheduler::updateSchedule() - could not find handle for flow "
+            << flow->getSource().first << "->" << flow->getDestination().first;
     exit(ERR_NO_EVENT_HANDLE);
   }    
 }
@@ -210,8 +207,8 @@ void Scheduler::startNewRound() {
     f->setStart(f->getStart() - this->roundDuration); // negative
     SimTime oldEta = f->getEta();
     if (oldEta < this->roundDuration) {
-      std::cerr << "ERROR: Scheduler::startNewRound() - unresolved event has eta "
-              << oldEta << " < roundDuration" << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "Scheduler::startNewRound() - unresolved event has eta "
+              << oldEta << " < roundDuration";
       abort();
     }
     f->setEta(oldEta - this->roundDuration);
@@ -219,8 +216,8 @@ void Scheduler::startNewRound() {
       // expired contents in IPTV will be deleted so flows can't be completed, 
       // this event should have been truncated last round
       f->setContent(nullptr);
-      std::cout << "WARNING - Scheduler::startNewRound() - carried over flow "
-              "with expired content will not be completed" << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "Scheduler::startNewRound() - carried over flow "
+              "with expired content will not be completed";
       if (f->getFlowType() == FlowType::TRANSFER) {
         // this is hacky, but needs to be done. Ideally we should not get here at all.
         oracle->getTopology()->updateCapacity(f, this, false);
