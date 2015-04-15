@@ -514,7 +514,14 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
         Flow* watchEvent = new Flow(flow->getContent(), dest, eta, chunk->getIndex(), 
                 FlowType::WATCH);
         scheduler->schedule(watchEvent);
-        userWatchMap.at(dest).waiting = false;          
+        userWatchMap.at(dest).waiting = false;
+        // if it was not the first chunk, display a debugging message to track rebuffering events
+        if (chunk->getIndex() > 0) {
+          BOOST_LOG_TRIVIAL(warning) << "At time " << scheduler->getSimTime() 
+                << " user " << dest.first << "," << dest.second
+                << " stopped waiting for chunk " << chunk->getIndex() << " of content "
+                << chunk->getContent()->getName();
+        }
       }
     } 
     break;
@@ -546,13 +553,15 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       // still more watching to do for this content
       // free space in the buffer now that the chunk has been watched
       userWatchMap.at(dest).buffer.erase(flow->getContent()->getChunkById(completedChunk));
-      // here is where we check whether we need to fetch more chunks
-      if (userWatchMap.at(dest).highestChunkFetched < flow->getContent()->getTotalChunks()-1) {
-        // pre-fetch a new chunk, since there's space in the buffer now
+      // pre-fetch as many new chunks as we can, since there's space in the buffer now
+      uint bufferSlots = this->bufferSize - userWatchMap.at(dest).buffer.size();
+      while (bufferSlots > 0 && 
+              userWatchMap.at(dest).highestChunkFetched < flow->getContent()->getTotalChunks()-1) {        
         Flow* requestChunk = new Flow(flow->getContent(), dest, time, 
                 userWatchMap.at(dest).highestChunkFetched+1);
         scheduler->schedule(requestChunk);
         userWatchMap.at(dest).highestChunkFetched++;
+        bufferSlots--;
       }      
            
       // first make sure that we are not attempting to fetch a chunk that does not exist
