@@ -465,8 +465,6 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
         userCacheMap->at(source).uploadCompleted(chunk);
       else
         localCacheMap->at(source.first).uploadCompleted(chunk);
-      // add this chunk to the streaming buffer of the user
-      userWatchMap.at(dest).buffer.insert(chunk);
       // update cache info (unless the content has expired, e.g. a flow carried over
       // from the previous round)
       /* FIXME: checking for a nullptr here does not make any sense, as we have 
@@ -498,29 +496,31 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       }
       // free resources in the topology
       topo->updateCapacity(flow, scheduler, false);
-      
-      /* here we generated a new request, however this is no longer related to 
-       * downloads, but rather to watching. the only thing we need to do is starting
-       * a watch event if the user was waiting for the chunk we just downloaded
-       * Note that we do not do this if the flow is carried over from the previous round
-       */
-      if (flow->getContent() == userWatchMap.at(dest).content 
-              && userWatchMap.at(dest).waiting  
-              && userWatchMap.at(dest).currentChunk == chunk->getIndex()
-              && chunk->getIndex() < userWatchMap.at(dest).chunksToBeWatched) {
-        // start a new watching flow for the chunk we just got
-        SimTime eta = scheduler->getSimTime() + 
-                std::ceil(chunk->getSize() / this->bitrate);
-        Flow* watchEvent = new Flow(flow->getContent(), dest, eta, chunk->getIndex(), 
-                FlowType::WATCH);
-        scheduler->schedule(watchEvent);
-        userWatchMap.at(dest).waiting = false;
-        // if it was not the first chunk, display a debugging message to track rebuffering events
-        if (chunk->getIndex() > 0) {
-          BOOST_LOG_TRIVIAL(warning) << "At time " << scheduler->getSimTime() 
-                << " user " << dest.first << "," << dest.second
-                << " stopped waiting for chunk " << chunk->getIndex() << " of content "
-                << chunk->getContent()->getName();
+      // if the flow is carried over from the previous round, the rest should be skipped
+      if (flow->getContent() == userWatchMap.at(dest).content) {
+        // add this chunk to the streaming buffer of the user
+        userWatchMap.at(dest).buffer.insert(chunk);
+        /* here we previously generated a new request, however this is no longer related to 
+         * downloads, but rather to watching. the only thing we need to do is starting
+         * a watch event if the user was waiting for the chunk we just downloaded
+         */      
+        if (userWatchMap.at(dest).waiting
+                && userWatchMap.at(dest).currentChunk == chunk->getIndex()
+                && chunk->getIndex() < userWatchMap.at(dest).chunksToBeWatched) {
+          // start a new watching flow for the chunk we just got
+          SimTime eta = scheduler->getSimTime() +
+                  std::ceil(chunk->getSize() / this->bitrate);
+          Flow* watchEvent = new Flow(flow->getContent(), dest, eta, chunk->getIndex(),
+                  FlowType::WATCH);
+          scheduler->schedule(watchEvent);
+          userWatchMap.at(dest).waiting = false;
+          // if it was not the first chunk, display a debugging message to track rebuffering events
+          if (chunk->getIndex() > 0) {
+            BOOST_LOG_TRIVIAL(warning) << "At time " << scheduler->getSimTime()
+                    << " user " << dest.first << "," << dest.second
+                    << " stopped waiting for chunk " << chunk->getIndex() << " of content "
+                    << chunk->getContent()->getName();
+          }
         }
       }
     } 
