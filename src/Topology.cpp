@@ -519,7 +519,9 @@ void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
             this->updateRouteCapacity(fRoute, -increase);
             f->updateSizeDownloaded(now);
             f->setBandwidth(maxBneckBw);
-            this->updateEta(f, scheduler);
+            // this if clause was added to prevent a failed assertion due to flows carried over from previous rounds
+            if (now <= scheduler->getRoundDuration())
+              this->updateEta(f, scheduler);
           }
           fRoute.clear();
         }
