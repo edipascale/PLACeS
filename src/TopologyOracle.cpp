@@ -426,6 +426,9 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
   switch(flow->getFlowType()) {
     case FlowType::TRANSFER:
     {
+      BOOST_LOG_TRIVIAL(debug) << "At time " << time << " user " << dest.first
+              << "," << dest.second << " completed download of chunk "
+              << chunk->getIndex() << " of content " << chunk->getContent()->getName();
       flow->updateSizeDownloaded(time);
       if (flow->getSizeDownloaded() < chunkSize) {
         // ensure that this is a result of a discrete time scale (approximation to previous second)
@@ -499,7 +502,9 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       // if the flow is carried over from the previous round, the rest should be skipped
       if (flow->getContent() == userWatchMap.at(dest).content) {
         // add this chunk to the streaming buffer of the user
-        userWatchMap.at(dest).buffer.insert(chunk);
+        // FIXME: we are not checking if the buffer is full, although we do check when we fetch
+        auto insResult = userWatchMap.at(dest).buffer.insert(chunk);
+        assert(insResult.second == true);
         /* here we previously generated a new request, however this is no longer related to 
          * downloads, but rather to watching. the only thing we need to do is starting
          * a watch event if the user was waiting for the chunk we just downloaded
@@ -508,6 +513,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
                 && userWatchMap.at(dest).currentChunk == chunk->getIndex()
                 && chunk->getIndex() < userWatchMap.at(dest).chunksToBeWatched) {
           // start a new watching flow for the chunk we just got
+          BOOST_LOG_TRIVIAL(debug) << "User was waiting for this chunk, starting a WATCH flow";
           SimTime eta = scheduler->getSimTime() +
                   std::ceil(chunk->getSize() / this->bitrate);
           Flow* watchEvent = new Flow(flow->getContent(), dest, eta, chunk->getIndex(),
@@ -528,6 +534,9 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
     
     case FlowType::WATCH:
     {
+      BOOST_LOG_TRIVIAL(debug) << "At time " << time << " user " << dest.first
+              << "," << dest.second << " finished watching chunk "
+              << chunk->getIndex() << " of content " << chunk->getContent()->getName();
       // is it a carried over flow?
       if (flow->getContent() != userWatchMap.at(dest).content) {
         /* the userWatchMap for this watching session has been overwritten now,
@@ -544,6 +553,10 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       if (time >= userWatchMap.at(dest).dailySessionInterval.getEnd() ||
               completedChunk == userWatchMap.at(dest).chunksToBeWatched-1) {
         // yes, we are; free buffer and reset watching info
+        BOOST_LOG_TRIVIAL(debug) << "At time " << time << " user " << dest.first
+                << "," << dest.second << " finished watching content " 
+                << flow->getContent()->getName() << " with chunk " 
+                << completedChunk << "/" << flow->getContent()->getTotalChunks()-1;
         userWatchMap.at(dest).reset();
         // generate a new request (if the daily session is over, it's going to be checked there)
         this->generateNewRequest(dest, time, scheduler);
@@ -556,7 +569,9 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       // pre-fetch as many new chunks as we can, since there's space in the buffer now
       uint bufferSlots = this->bufferSize - userWatchMap.at(dest).buffer.size();
       while (bufferSlots > 0 && 
-              userWatchMap.at(dest).highestChunkFetched < flow->getContent()->getTotalChunks()-1) {        
+              userWatchMap.at(dest).highestChunkFetched < flow->getContent()->getTotalChunks()-1) {    
+        BOOST_LOG_TRIVIAL(debug) << "There's " << bufferSlots << " slots in the buffer, "
+                "pre-fetching chunk " << userWatchMap.at(dest).highestChunkFetched+1;                
         Flow* requestChunk = new Flow(flow->getContent(), dest, time, 
                 userWatchMap.at(dest).highestChunkFetched+1);
         scheduler->schedule(requestChunk);
@@ -572,6 +587,8 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       if (userWatchMap.at(dest).buffer.find(flow->getContent()->getChunkById(completedChunk+1)) 
               != userWatchMap.at(dest).buffer.end()) {
         // start a new watching flow
+        BOOST_LOG_TRIVIAL(debug) << "We had the next chunk (" << completedChunk+1
+                << ") in the buffer, starting a new WATCH flow";
         SimTime eta = scheduler->getSimTime() + 
                 std::ceil(flow->getContent()->getChunkById(completedChunk+1)->getSize() / this->bitrate);
         Flow* watchEvent = new Flow(flow->getContent(), dest, eta, completedChunk+1, 
@@ -585,6 +602,8 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
                 << " user " << dest.first << "," << dest.second
                 << " started waiting for chunk " << completedChunk+1 << " of content "
                 << flow->getContent()->getName();
+        BOOST_LOG_TRIVIAL(warning) << "Highest chunk fetched so far: "
+                << userWatchMap.at(dest).highestChunkFetched;
         userWatchMap.at(dest).waiting = true;
       }      
     }
@@ -608,7 +627,7 @@ void TopologyOracle::notifyEndRound(uint endingRound) {
               endingRound) + dailyRanking.at(day).getRoundHitsByRank(i))/(endingRound+1);
     }
   }
-  BOOST_LOG_TRIVIAL(debug) << "old rate for day 0 rank 0: " << old << ", new: "
+  BOOST_LOG_TRIVIAL(trace) << "old rate for day 0 rank 0: " << old << ", new: "
           << contentRateVec.at(0).at(0) << ", daily hits: " << dailyRanking.at(0).getHitsByRank(0);
   return;
 }
@@ -865,13 +884,13 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       double rate = contentRateVec.at(dayIndex).at(rank);
       double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
           (topo->getASCustomers(asid) / topo->getNumCustomers());      
-      BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour(" << contIt->getName() << 
+      BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << contIt->getName() << 
               ":" << chunkIt->getIndex() << "," << hour
               << ") = (" << rate << " * " << usrPctgByHour.at(hour)
               << " / 100) * (" << topo->getASCustomers(asid) << " / " << topo->getNumCustomers()
               << ") = " << avgReqPerHour;
       if (avgReqPerHour < 1) {
-        BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour for chunk " << chunkIt->getIndex()
+        BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour for chunk " << chunkIt->getIndex()
               << " of content " << contIt->getName()
               << " is less than 1 (" << avgReqPerHour << "), setting it to 1";
         avgReqPerHour = 1;
@@ -881,7 +900,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       chunkRate = std::min(chunkRate, static_cast<int>(topo->getASCustomers(asid)));
       // ensure that we keep at least one copy of each content in each AS
       chunkRate = std::max(1, chunkRate);
-      BOOST_LOG_TRIVIAL(debug) << "chunkRate = std::floor((" << peakReqRatio 
+      BOOST_LOG_TRIVIAL(trace) << "chunkRate = std::floor((" << peakReqRatio 
               << " * " << avgReqPerHour
               << " * " << avgReqLength << " / 3600) + 0.5) = " << chunkRate;
       IloNumExpr cExp(env, 0);
@@ -912,13 +931,13 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       double rate = contentRateVec.at(dayIndex).at(rank);
       double avgReqPerHour = (rate * usrPctgByHour.at(hour) / 100) *
               (topo->getASCustomers(asid) / topo->getNumCustomers());
-      BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour(" << chunk->getContent()->getName() 
+      BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour(" << chunk->getContent()->getName() 
               << ":" << chunk->getIndex() << "," << hour
               << ") = (" << rate << " * " << usrPctgByHour.at(hour)
               << " / 100) * (" << topo->getASCustomers(asid) << " / " << topo->getNumCustomers()
               << ") = " << avgReqPerHour;
       if (avgReqPerHour < 1) {
-        BOOST_LOG_TRIVIAL(debug) << "avgReqPerHour for chunk " << chunk->getIndex()
+        BOOST_LOG_TRIVIAL(trace) << "avgReqPerHour for chunk " << chunk->getIndex()
               << " of content " << chunk->getContent()->getName()
               << " is less than 1 (" << avgReqPerHour << "), setting it to 1";
         avgReqPerHour = 1;
@@ -928,7 +947,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
       chunkRate = std::min(chunkRate, static_cast<int>(topo->getASCustomers(asid)));
       // ensure that we keep at least one copy of each content in each AS
       chunkRate = std::max(1, chunkRate);
-      BOOST_LOG_TRIVIAL(debug) << "chunkRate = std::floor((" << peakReqRatio
+      BOOST_LOG_TRIVIAL(trace) << "chunkRate = std::floor((" << peakReqRatio
               << " * " << avgReqPerHour
               << " * " << avgReqLength << " / 3600) + 0.5) = " << chunkRate;
       IloNumExpr cExp(env, 0);
@@ -964,7 +983,7 @@ std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser,
     IloCplex cplex(model);
     cplex.setOut(env.getNullStream());
     if (!cplex.solve()) {
-      BOOST_LOG_TRIVIAL(debug) << "Failed to optimize caching for chunk " <<
+      BOOST_LOG_TRIVIAL(trace) << "Failed to optimize caching for chunk " <<
               chunk->getIndex() << " of content " << 
               chunk->getContent()->getName() << " at user " << reqUser.first << "," <<
               reqUser.second << "; reverting to standard cache policies";

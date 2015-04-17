@@ -124,7 +124,7 @@ void IPTVTopologyOracle::populateCatalog() {
       // insert the content (NOTE: not the chunks) in the daily ranking
       dailyRanking.at(std::abs(day)).insert(content);
       this->addContent(content, 0);
-      BOOST_LOG_TRIVIAL(debug) << "generated content " << content->getName();
+      // BOOST_LOG_TRIVIAL(trace) << "generated content " << content->getName();
     }
   }
 }
@@ -170,15 +170,22 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     uint i = (*relDayDist)(gen);
     ContentElement* content = dailyCatalog[i].at((*rankDist)(gen));
     double watchingPortion = sessionLength[indexDist(gen)];
+    BOOST_LOG_TRIVIAL(debug) << "At time " << time 
+            << " generated request from user " << user.first
+            << "," << user.second << " for content " << content->getName()
+            << ", watchingPortion = " << watchingPortion;
+    /*
     Capacity reqLength =  watchingPortion * content->getSize();
-    /* calculate the time at which the user will be done with this content */
+    // calculate the time at which the user will be done with this content 
     SimTime endTime = time + std::ceil(reqLength / this->bitrate);
     // check that the new request would not go past the desired session
     // length; this will make all requests past midnight end at midnight :(
     if (endTime > sessionEnd) {
       endTime = sessionEnd;
     }
+    */
     // determine the number of chunks to be watched for this content
+    // TODO: reduce the number of chunks to be watched if we're going past the sessionEnd deadline
     uint watchingChunks = std::ceil(watchingPortion * content->getTotalChunks());
     if (watchingChunks > content->getTotalChunks())
       watchingChunks = content->getTotalChunks();
@@ -194,12 +201,15 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
       // stop if we fetched all the chunks of this content
       if (i >= content->getTotalChunks())
         continue;
-      Flow* request = new Flow(content, user, time, i);
-      scheduler->schedule(request);
-      wIt->second.highestChunkFetched = i;
+      else {
+        Flow* request = new Flow(content, user, time, i);
+        scheduler->schedule(request);
+        wIt->second.highestChunkFetched = i;
+        BOOST_LOG_TRIVIAL(debug) << "Fetching chunk " << i << " of content "
+                << content->getName() << ", highestChunkFetched = "
+                << userWatchMap.at(user).highestChunkFetched;
+      }
     }
-    BOOST_LOG_TRIVIAL(debug) << "generated request from user " << user.first
-            << "," << user.second << " for content " << content->getName();
   }
 }
 
