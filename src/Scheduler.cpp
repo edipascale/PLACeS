@@ -103,7 +103,14 @@ bool Scheduler::advanceClock() {
       // TODO: reschedule request in case of congestion
       bool success = oracle->serveRequest(nextEvent, this);
       // Check that the flow wasn't "virtual" (i.e. content was cached at the dest)
-      if (!success || nextEvent->getSource() == nextEvent->getDestination()) {
+      // also in that case we need to put the chunk in the watching buffer
+      if (nextEvent->getSource() == nextEvent->getDestination()) {
+        oracle->notifyCompletedFlow(nextEvent, this);
+        handleMap.erase(nextEvent);
+        delete nextEvent;
+      }
+      else if (!success) {
+        //TODO: retry to fetch the content at a later time
         handleMap.erase(nextEvent);
         delete nextEvent;
       }
@@ -202,6 +209,14 @@ void Scheduler::startNewRound() {
   while (pendingEvents.empty() == false) {
     Flow* f = const_cast<Flow*> (pendingEvents.top());
     pendingEvents.pop();
+    if (f->getFlowType() == FlowType::WATCH) {
+      // there is no point in carrying over watch flows, as they will be discarded
+      BOOST_LOG_TRIVIAL(trace) << "Deleting watch flow for chunk" << f->getChunkId()
+              << " of content " << f->getContent()->getName() << " for user "
+              << f->getDestination().first << "," << f->getDestination().second;
+      delete f;
+      continue;
+    }
     f->updateSizeDownloaded(this->roundDuration);
     f->setLastUpdate(0);
     f->setStart(f->getStart() - this->roundDuration); // negative
