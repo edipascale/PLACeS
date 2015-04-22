@@ -324,8 +324,10 @@ Topology::Topology(string fileName, po::variables_map vm) {
             boost::weight_map(boost::get(&NetworkEdge::length, topology)).
             predecessor_map(&pVec[0]).
             distance_map(&dVec[0]));
-    assert(dMap.insert(std::make_pair(v, dVec)).second == true);
-    assert(pMap.insert(std::make_pair(vIt, pVec)).second == true);
+    auto rValue = dMap.insert(std::make_pair(v, dVec));
+    assert (rValue.second == true);
+    auto rValue2 = pMap.insert(std::make_pair(vIt, pVec));
+    assert(rValue2.second == true);
   }
   // Initialize Network statistics
   BOOST_FOREACH(Edge e, boost::edges(topology)) {

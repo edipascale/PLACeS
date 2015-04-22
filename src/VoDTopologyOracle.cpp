@@ -150,7 +150,8 @@ void VoDTopologyOracle::scheduleRequests(std::list<ContentElement*> list,
       randUser = userDist(gen);
       if (assignedUsers.insert(randUser).second == false) {
         randUser = j;
-        assert(assignedUsers.insert(randUser).second == true);
+        auto rValue = assignedUsers.insert(randUser);
+        assert(rValue.second == true);
       }
       /* this worked very well when all PONs had the same # of customers, now
        * we are forced to go through the following loop to map a planar integer 
