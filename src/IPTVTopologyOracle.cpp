@@ -193,6 +193,7 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     assert (wIt != userWatchMap.end());
     wIt->second.content = content;
     wIt->second.chunksToBeWatched = watchingChunks;
+    wIt->second.currentChunk = 0;
     // we are waiting for the first chunk to be downloaded
     wIt->second.waiting = true;
     /* Request enough chunks to fill the buffer. 
@@ -200,7 +201,7 @@ void IPTVTopologyOracle::generateNewRequest(PonUser user, SimTime time,
     for (uint i = 0; i < bufferSize; i++) {
       // stop if we fetched all the chunks of this content
       if (i >= content->getTotalChunks())
-        continue;
+        break;
       else {
         Flow* request = new Flow(content, user, time, i);
         scheduler->schedule(request);
