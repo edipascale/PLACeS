@@ -57,7 +57,9 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
           << " -m " << vm["min-flow-increase"].as<double>()
           << " -k " << vm["peak-req-ratio"].as<uint>()
           << " -z " << vm["zm-exponent"].as<double>()
-          << " -O " << vm["optimize-caching"].as<bool>();
+          << " -O " << vm["optimize-caching"].as<bool>()
+          << " -n " << vm["chunk-size"].as<uint>()
+          << " -B " << vm["buffer-size"].as<uint>();
   outputF << "% Parameters: " << ss.str() << endl;
   uint rounds = vm["rounds"].as<uint>();
   NetworkStats stats = topo->getNetworkStats();
