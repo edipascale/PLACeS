@@ -26,6 +26,7 @@
       <itemPath>topologies/GermanTopology_Inf.txt</itemPath>
       <itemPath>topologies/IrishTopology.graphml</itemPath>
       <itemPath>topologies/MetroTestTopology.graphml</itemPath>
+      <itemPath>topologies/MinTestTopo.graphml</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -75,7 +76,7 @@
           <standard>8</standard>
           <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/usr/local/boost_1_54_0</pElem>
+            <pElem>/usr/local/boost_1_58_0</pElem>
             <pElem>.</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
@@ -84,7 +85,7 @@
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic</pElem>
           </linkerAddLib>
@@ -179,6 +180,8 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="topologies/MinTestTopo.graphml" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Performance" type="1">
       <toolsSet>
@@ -201,15 +204,16 @@
           <developmentMode>5</developmentMode>
           <standard>8</standard>
           <incDir>
-            <pElem>/usr/local/boost_1_54_0</pElem>
+            <pElem>/usr/local/boost_1_58_0</pElem>
             <pElem>.</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
           </incDir>
+          <commandLine>-DNDEBUG</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/local/boost_1_54_0/stage/lib</pElem>
+            <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic</pElem>
           </linkerAddLib>
@@ -292,6 +296,8 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="topologies/MinTestTopo.graphml" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
