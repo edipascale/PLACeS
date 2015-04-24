@@ -106,12 +106,10 @@ bool Scheduler::advanceClock() {
       // also in that case we need to put the chunk in the watching buffer
       if (nextEvent->getSource() == nextEvent->getDestination()) {
         oracle->notifyCompletedFlow(nextEvent, this);
-        handleMap.erase(nextEvent);
         delete nextEvent;
       }
       else if (!success) {
         //TODO: retry to fetch the content at a later time
-        handleMap.erase(nextEvent);
         delete nextEvent;
       }
       return true;
