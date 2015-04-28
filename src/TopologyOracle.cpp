@@ -661,7 +661,7 @@ void TopologyOracle::printStats(uint currentRound) {
           (double) (flowStats.servedRequests.at(currentRound) +
           flowStats.congestionBlocked.at(currentRound));
   // check how much caching space is used on average in user caches
-  float avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0), temp(0.0);
+  double avgUserCacheOccupancy(0.0), avgMetroCacheOccupancy(0.0), temp(0.0);
   uint numCaches = 0;
   SimTime extTime = (currentRound + 1 ) * roundDuration;
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
