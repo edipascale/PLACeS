@@ -667,6 +667,7 @@ void TopologyOracle::printStats(uint currentRound) {
   for (auto uIt = userCacheMap->begin(); uIt != userCacheMap->end() &&
           this->maxCacheSize > 0; uIt++) {
     temp = uIt->second.getAvgOccupancy(extTime);
+    assert(temp != DBL_MAX);
     BOOST_LOG_TRIVIAL(trace) << "User " << uIt->first.first << "," <<  uIt->first.second
               << " has a cache occupancy of " << temp << "% (currentSize: " 
               << uIt->second.getCurrentSize() << ", maxSize: "
@@ -688,6 +689,7 @@ void TopologyOracle::printStats(uint currentRound) {
     // central server cache should not be included in the average computation
     if (uIt->first != topo->getCentralServer()) {
       temp = uIt->second.getAvgOccupancy(extTime);
+      assert(temp != DBL_MAX);
       BOOST_LOG_TRIVIAL(trace) << "AS cache " << uIt->first 
               << " has a cache occupancy of " << temp << "% (currentSize: " 
               << uIt->second.getCurrentSize() << ", maxSize: "
