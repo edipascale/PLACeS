@@ -149,6 +149,12 @@ public:
 
 struct CompareFlowPtr : public std::binary_function < Flow*, Flow*, bool> {
   bool operator()(Flow* x, Flow * y) const {
+    if (x->getSimTime() == y->getSimTime()) {
+      if (x->getFlowType() == FlowType::TERMINATE)
+        return true;
+      else if (y->getFlowType() == FlowType::TERMINATE)
+        return false;
+    }
     return x->getSimTime() > y->getSimTime();
   }
 };
