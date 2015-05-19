@@ -446,6 +446,8 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
               * flowStats.completedRequests.at(round)
               + flowDuration) / (flowStats.completedRequests.at(round) + 1);
       flowStats.completedRequests.at(round)++;
+      BOOST_LOG_TRIVIAL(trace) << "Flow duration: " << flowDuration <<
+              "; avgFlowDuration: " << flowStats.avgFlowDuration.at(round);
 
       if (flow->isP2PFlow()) {
         flowStats.avgPeerFlowDuration.at(round) = (flowStats.avgPeerFlowDuration.at(round)
