@@ -36,10 +36,10 @@ std::string Flow::toString() const {
 void Flow::updateSizeDownloaded(SimTime now) {
   if (now > this->lastUpdate)
     this->sizeDownloaded += ((now - this->lastUpdate) * this->bandwidth);
-  if (this->sizeDownloaded > this->content->getSize()) {
+  if (this->sizeDownloaded > this->getChunkSize()) {
     /* This is inevitable due to approximations and having a discrete time scale
      */
-    this->sizeDownloaded = this->content->getSize();
+    this->sizeDownloaded = this->getChunkSize();
   }
   this->setLastUpdate(now);
 }
