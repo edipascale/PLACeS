@@ -25,8 +25,8 @@ Flow::~Flow() {
 std::string Flow::toString() const {
   std::stringstream ss;
   ss << "s" << this->getSource().first << "d" << this->getDestination().first <<
-          " c:" << this->getContent()->getName() << ", t:"
-          << this->getStart() <<  "-" << this->getEta() << "; dl "
+          ", c" << this->getContent()->getName() << ":" << this->getChunkId() <<
+          ", t:" << this->getStart() <<  "-" << this->getEta() << "; dl "
           << this->getSizeDownloaded() << " @" << this->lastUpdate
           << ", bw:" << this->getBandwidth() << ", type: " 
           << (int) this->getFlowType();
