@@ -128,7 +128,7 @@ public:
       return this->getRoute(source.first, destination.first);
     }
     void updateCapacity(Flow* flow, Scheduler* scheduler, 
-          bool addNotRemove = true);
+          bool addNotRemove);
     void printNetworkStats(uint currentRound, uint roundDuration);
     void resetFlows();
     void updateLoadMap(Flow* flow);
