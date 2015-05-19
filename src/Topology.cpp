@@ -733,23 +733,14 @@ void Topology::updateRouteCapacity(std::vector<Edge> route, Capacity toAdd) {
 }
 
 void Topology::updateEta(Flow* flow, Scheduler* scheduler) {
-  /* FIXME: this has to be changed now that watching and downloading are 
-   * separated as two different types of events
+  /* This is only called by Topology::updateCapacity() and only applies to
+   * FlowType::TRANSFER flows, no need to worry about zapping.
    */
-  /* Set the flow to end when the whole content has been downloaded or the
-   * user decides to switch channel, whichever happens first
-   */
-  SimTime userViewEta, downloadEta, oldEta(flow->getEta());
-  SimTime now = scheduler->getSimTime();
-  // time at which the user is going to change channel
-  userViewEta = flow->getStart() +
-          std::floor((flow->getContent()->getSize()/ this->bitrate) + 0.5);
-  // this is to prevent problems with flows carried over from previous rounds
-  if (flow->getStart() > now && userViewEta > scheduler->getRoundDuration())
-    userViewEta = userViewEta % scheduler->getRoundDuration();
-  downloadEta = now + std::floor(((flow->getContent()->getSize() - flow->getSizeDownloaded())
+  SimTime downloadEta, oldEta(flow->getEta());
+  SimTime now = scheduler->getSimTime();  
+  downloadEta = now + std::floor(((flow->getChunkSize() - flow->getSizeDownloaded())
           / flow->getBandwidth()) + 0.5);
-  flow->setEta(std::min(userViewEta, downloadEta));
+  flow->setEta(downloadEta);
   // Ensure that at least 1 second of flow is simulated
   if (flow->getEta() == flow->getStart())
     flow->setEta(flow->getStart() + 1);
