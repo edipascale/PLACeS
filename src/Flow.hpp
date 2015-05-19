@@ -144,7 +144,11 @@ public:
     return chunkId;
   }
 
- 
+  Capacity getChunkSize() const {
+    auto chunk = this->content->getChunkById(this->chunkId);
+    return chunk->getSize();
+  } 
+  
 };
 
 struct CompareFlowPtr : public std::binary_function < Flow*, Flow*, bool> {
