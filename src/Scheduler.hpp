@@ -11,9 +11,9 @@
 #include "Flow.hpp"
 #include "TopologyOracle.hpp"
 #include <map>
-#include "boost/heap/binomial_heap.hpp"
+#include "boost/heap/pairing_heap.hpp"
 
-typedef typename boost::heap::binomial_heap<Flow *, 
+typedef typename boost::heap::pairing_heap<Flow *, 
         boost::heap::compare<CompareFlowPtr> > FlowQueue;
 typedef FlowQueue::handle_type handleT;
 
