@@ -94,10 +94,10 @@ bool Scheduler::advanceClock() {
       return true;
     
     case FlowType::REQUEST: {
-      // Change the start time to now and the eta to INF_TIME until we know the 
+      // Change the start time to now and the eta to +1s until we know the 
       // available bandwidth 
       nextEvent->setStart(this->getSimTime());
-      nextEvent->setEta(INF_TIME);
+      nextEvent->setEta(this->getSimTime()+1);
       nextEvent->setLastUpdate(this->getSimTime());
       // Ask the TopologyOracle to find a source for this content
       // TODO: reschedule request in case of congestion
