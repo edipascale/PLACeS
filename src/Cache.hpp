@@ -66,7 +66,8 @@ public:
       Size size, Timestamp time);
   void clearCache();
   // to update metadata about the content (lastAccess, timesAccessed, uploads..)
-  bool getFromCache(Content content, Timestamp time);
+  // if local==true the content is not uploaded (it's the user itself who requested it again)
+  bool getFromCache(Content content, Timestamp time, bool local);
   bool isCached(Content content);
   void removeFromCache(Content content, Timestamp time); // for expired content
   bool uploadCompleted(Content content); // to decrease the upload counter
@@ -204,12 +205,14 @@ void Cache<Content, Size, Timestamp>::clearCache() {
 }
 
 template <typename Content, typename Size, typename Timestamp>
-bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp time) {
+bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp time,
+        bool local) {
   typename CacheMap::iterator it = cacheMap.find(content);
   if (it != cacheMap.end()) {
     it->second.lastAccessed = time;
     it->second.timesServed++;
-    it->second.uploads++;
+    if (!local)
+      it->second.uploads++;
     return true;
   } 
   else
