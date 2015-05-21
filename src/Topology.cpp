@@ -419,6 +419,9 @@ void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
     BOOST_LOG_TRIVIAL(warning) << "Topology::updateCapacity() called for a non TRANSFER flow";
     return;
   }
+  // if the chunk is smaller than MAX_FLOW_SPEED, that is the maximum bandwidth
+  // we should be able to get in Mbps!
+  Capacity MaxBwAchievable = std::min(flow->getChunkSize(), MAX_FLOW_SPEED);
   SimTime now = scheduler->getSimTime();
   std::vector<Edge> flowRoute = this->getRoute(flow->getSource(), 
           flow->getDestination());
@@ -435,10 +438,10 @@ void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
         bottleneck = e;
       }
     }
-    if (minSpareCapacity >= MAX_FLOW_SPEED) {
+    if (minSpareCapacity >= MaxBwAchievable) {
       // there's enough spare capacity, no need to reduce other flows' bw
-      flow->setBandwidth(MAX_FLOW_SPEED);
-      this->updateRouteCapacity(flowRoute, -MAX_FLOW_SPEED);
+      flow->setBandwidth(MaxBwAchievable);
+      this->updateRouteCapacity(flowRoute, -MaxBwAchievable);
       this->updateEta(flow, scheduler);
       return;
     } else {
@@ -500,13 +503,15 @@ void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
       // rounding to prevent capacity overflow, but need to ensure that we
       // don't round to 0!
       if (std::floor(maxBneckBw) > 0)
-        maxBneckBw = std::floor(maxBneckBw); 
+        maxBneckBw = std::floor(maxBneckBw);
       maxBneckBw = std::min (MAX_FLOW_SPEED, maxBneckBw); 
       std::vector<Edge> fRoute;
       BOOST_FOREACH (Flow* f, topology[bottleneck].activeFlows) {
         // check if there's room to increase this flow bw (basing only on the
         // removed flow bottleneck, hence not optimal as the previous method)
-        Capacity increase = maxBneckBw - f->getBandwidth();
+        // remember that we can only get the chunk's size worth of bw
+        MaxBwAchievable = std::min(f->getChunkSize(), maxBneckBw);
+        Capacity increase = MaxBwAchievable - f->getBandwidth();
         if (increase > this->minFlowIncrease) {
           fRoute = this->getRoute(f->getSource(), f->getDestination());
           bool safeToGrow = true;
@@ -520,7 +525,7 @@ void Topology::updateCapacity(Flow* flow, Scheduler* scheduler,
             // we've got enough capacity to increase this flow's bw
             this->updateRouteCapacity(fRoute, -increase);
             f->updateSizeDownloaded(now);
-            f->setBandwidth(maxBneckBw);
+            f->setBandwidth(MaxBwAchievable);
             // this if clause was added to prevent a failed assertion due to flows carried over from previous rounds
             if (now <= scheduler->getRoundDuration())
               this->updateEta(f, scheduler);
@@ -742,18 +747,14 @@ void Topology::updateEta(Flow* flow, Scheduler* scheduler) {
           / flow->getBandwidth()) + 0.5);
   flow->setEta(downloadEta);
   // Ensure that at least 1 second of flow is simulated
-  if (flow->getEta() == flow->getStart())
+  if (flow->getEta() <= flow->getStart())
     flow->setEta(flow->getStart() + 1);
- /*
-  std::cout << now << ": oldEta: " << oldEta << " newEta: " << flow->getEta()
-                << " sizeReq: " << flow->getSizeRequested() << " sizeDow: "
-                << flow->getSizeDownloaded() << " bw: " << flow->getBandwidth()
-                << " downloadEta: " << downloadEta << " userViewEta: "
-                << userViewEta << " content: " << flow->getContent()->getName()
-                << std::endl;
-  */
   assert(flow->getEta() >= now);
-  scheduler->updateSchedule(flow, oldEta);
+  if (flow->getEta() != oldEta) {
+    scheduler->updateSchedule(flow, oldEta);
+    BOOST_LOG_TRIVIAL(debug) << " At time " << now << " updated ETA of flow "
+          << flow->toString() << " from " << oldEta << " to " << flow->getEta();
+  }
 }
 
 /* Prints a snapshot of the network topology in graphml format, so that it can
