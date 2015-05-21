@@ -127,10 +127,12 @@ void TopologyOracle::addToCache(PonUser user, ChunkPtr chunk, SimTime time) {
           " at User " << user.first << "," << user.second;
   addResult = userCacheMap->at(user).addToCache(chunk, chunk->getSize(), time);
   if (!addResult.first) {
-    if (userCacheMap->at(user).getMaxSize() >= chunk->getSize())
-      BOOST_LOG_TRIVIAL(warning) << time << ": WARNING: failed to cache content " 
+    if (userCacheMap->at(user).getMaxSize() >= chunk->getSize()) {
+      BOOST_LOG_TRIVIAL(warning) << time << ": WARNING: failed to cache chunk "
+            << chunk->getIndex() << " of content " 
             << content->getName() 
             << " at User "  << user.first << "," << user.second;
+    }
   } else {
    /* if caching at the user was successful, add the user to the asidCacheMap
     * for its AS (cIt is the iterator to the right position in the map, see above)
@@ -230,7 +232,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     flow->setEta(time);
     // update this user's cacheMap entry (for LRU/LFU)
     bool result = userCacheMap->at(destination).getFromCache(chunk,
-            (scheduler->getCurrentRound()+1)*time);
+            (scheduler->getCurrentRound()+1)*time, true);
     assert(result);
     flowStats.servedRequests.at(scheduler->getCurrentRound())++;
     flowStats.completedRequests.at(scheduler->getCurrentRound())++;
@@ -392,7 +394,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
     // p2p flow, update user cache statistics (for LFU/LRU purposes)
     flow->setP2PFlow(true);
     bool result = userCacheMap->at(closestSource).getFromCache(chunk,
-            (scheduler->getCurrentRound()+1)*time);
+            (scheduler->getCurrentRound()+1)*time, false);
     assert(result);
     // check for locality is done here to avoid central server to be mistakenly
     // identified as local
@@ -467,10 +469,12 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
       topo->updateLoadMap(flow);
       // notify the source cache that it has completed this upload
       PonUser source = flow->getSource();
+      bool retValue(false);
       if (flow->isP2PFlow())
-        userCacheMap->at(source).uploadCompleted(chunk);
+        retValue = userCacheMap->at(source).uploadCompleted(chunk);
       else
-        localCacheMap->at(source.first).uploadCompleted(chunk);
+        retValue = localCacheMap->at(source.first).uploadCompleted(chunk);
+      assert(retValue);
       // update cache info (unless the content has expired, e.g. a flow carried over
       // from the previous round)
       /* FIXME: checking for a nullptr here does not make any sense, as we have 
@@ -800,7 +804,7 @@ void TopologyOracle::getFromLocalCache(Vertex lCache, ChunkPtr chunk,
   // used to update LFU/LRU stats when content is grabbed directly from the
   // local cache
   if (localCacheMap->at(lCache).getMaxSize() >= chunk->getSize()) {
-    bool result = localCacheMap->at(lCache).getFromCache(chunk, time);
+    bool result = localCacheMap->at(lCache).getFromCache(chunk, time, false);
     // the central server should have inifinite capacity but this is not implemented
     // so we should not get worried if the result is false
     if (lCache != topo->getCentralServer())
