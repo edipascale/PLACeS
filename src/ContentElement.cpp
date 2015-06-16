@@ -12,6 +12,13 @@ ContentElement::ContentElement(std::string name, int releaseDay, Capacity size,
   this->releaseDay = releaseDay;
   this->size = size;
   this->viewsThisRound = 0;
+  // if chunkSize==0 then we are not using chunking (i.e., one chunk per content)
+  if (chunkSize == 0) {
+    this->totalChunks = 1;
+    ChunkPtr p = std::make_shared<ContentChunk>(size, 0, this);
+    chunks.push_back(p);
+    return;
+  }
   this->totalChunks = std::ceil(size / chunkSize);
   chunks.reserve(totalChunks);
   for (uint i = 0; i < totalChunks; i++) {
