@@ -228,12 +228,12 @@ void Scheduler::startNewRound() {
     if (this->mode == IPTV && f->getContent()->getReleaseDay() <= currentRound-6) {
       // expired contents in IPTV will be deleted so flows can't be completed, 
       // this event should have been truncated last round
-      f->setContent(nullptr);
       BOOST_LOG_TRIVIAL(info) << "Scheduler::startNewRound() - carried over flow "
               "with expired content will not be completed";
       if (f->getFlowType() == FlowType::TRANSFER) {
         // this is hacky, but needs to be done. Ideally we should not get here at all.
         oracle->getTopology()->updateCapacity(f, this, false);
+        f->setContent(nullptr);
       }
     } else
       flowVec.push_back(f);
