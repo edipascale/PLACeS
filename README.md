@@ -13,7 +13,7 @@ Video on Demand and time-shifted IPTV over a LRPON-based network.
 It was written for academic purposes and it's most likely
 unfit for usage in any production environment. 
 
-The project requires Boost libraries version 1.57.0.
+The project requires Boost libraries version 1.58.0.
 The latest updates also require the ILOCPLEX libraries from IBM's CPLEX.
 PLACeS was tested only on Ubuntu and Debian, both 32 and 64 bit.
 
