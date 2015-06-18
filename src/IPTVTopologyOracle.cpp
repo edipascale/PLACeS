@@ -138,8 +138,8 @@ void IPTVTopologyOracle::updateCatalog(uint currentRound) {
   }
   for (uint day = 6; day > 0; day--) {
     dailyCatalog[day] = dailyCatalog[day - 1];
-    dailyRanking.at(day).resetRoundHits();
     dailyRanking.at(day) = dailyRanking.at(day-1);
+    dailyRanking.at(day).resetRoundHits();
   }
   dailyRanking.at(0).clear();
   // normal distribution to generate content length in minutes
