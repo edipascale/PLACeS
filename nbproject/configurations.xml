@@ -51,7 +51,9 @@
                    displayName="Important Files"
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>LICENSE.txt</itemPath>
       <itemPath>Makefile</itemPath>
+      <itemPath>README.md</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -118,6 +120,33 @@
           <linkerLibItems>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibLibItem>cunit</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <incFile>
+            <pElem>/usr/local/boost_1_58_0</pElem>
+          </incFile>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerAddLib>
+            <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </folder>
@@ -238,6 +267,26 @@
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
+      <folder path="TestFiles/f1">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <commandLine>`cppunit-config --cflags`</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
       <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
