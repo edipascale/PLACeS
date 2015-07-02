@@ -71,6 +71,7 @@
             <pElem>.</pElem>
             <pElem>.</pElem>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </cTool>
@@ -82,14 +83,16 @@
             <pElem>.</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
+            <pElem>.</pElem>
           </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
+          <commandLine>`cppunit-config --cflags` -pg</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/lib/x86-64_linux/static_pic</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/lib/x86-64_linux/static_pic</pElem>
+            <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerLibLibItem>boost_log_setup</linkerLibLibItem>
@@ -107,8 +110,10 @@
             <linkerLibLibItem>cplexdistmip</linkerLibLibItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
           </linkerLibItems>
-          <commandLine>-lrt -static</commandLine>
+          <commandLine>-lrt -static -pg</commandLine>
         </linkerTool>
       </compileType>
       <folder path="TestFiles">
@@ -120,33 +125,6 @@
           <linkerLibItems>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibLibItem>cunit</linkerLibLibItem>
-          </linkerLibItems>
-        </linkerTool>
-      </folder>
-      <folder path="TestFiles/f1">
-        <cTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
-        </cTool>
-        <ccTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <incFile>
-            <pElem>/usr/local/boost_1_58_0</pElem>
-          </incFile>
-          <commandLine>`cppunit-config --cflags`</commandLine>
-        </ccTool>
-        <linkerTool>
-          <output>${TESTDIR}/TestFiles/f1</output>
-          <linkerAddLib>
-            <pElem>/usr/local/boost_1_58_0/stage/lib</pElem>
-          </linkerAddLib>
-          <linkerLibItems>
-            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
-            <linkerLibLibItem>boost_log</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </folder>
@@ -226,6 +204,7 @@
             <pElem>.</pElem>
             <pElem>.</pElem>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </cTool>
@@ -237,8 +216,9 @@
             <pElem>.</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/cplex/include</pElem>
             <pElem>/home/dipascae/ibm/CPLEX_Studio126/concert/include</pElem>
+            <pElem>.</pElem>
           </incDir>
-          <commandLine>-DNDEBUG</commandLine>
+          <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
@@ -263,30 +243,11 @@
             <linkerLibLibItem>cplexdistmip</linkerLibLibItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
+            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
           </linkerLibItems>
           <commandLine>-lrt -static</commandLine>
         </linkerTool>
       </compileType>
-      <folder path="TestFiles/f1">
-        <cTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
-        </cTool>
-        <ccTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <commandLine>`cppunit-config --cflags`</commandLine>
-        </ccTool>
-        <linkerTool>
-          <output>${TESTDIR}/TestFiles/f1</output>
-          <linkerLibItems>
-            <linkerOptionItem>`cppunit-config --libs`</linkerOptionItem>
-          </linkerLibItems>
-        </linkerTool>
-      </folder>
       <item path="src/Cache.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ContentElement.cpp" ex="false" tool="1" flavor2="0">
