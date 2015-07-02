@@ -49,7 +49,7 @@ class RunningAvg {
      * cannot be preserved. The caller can round it in whatever way he requires
      * if need be. Returns DBL_MAX if currentTime is less than the last timestamp
      */
-    double extract (Timestamp currentTime) {
+    double extract (Timestamp currentTime) const {
       if (currentTime == start && lastEntry.second == start)
         return avg;
       else if (currentTime < lastEntry.second)
