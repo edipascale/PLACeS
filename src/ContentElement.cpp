@@ -31,8 +31,8 @@ ContentElement::ContentElement(std::string name, int releaseDay, Capacity size,
 }
 
 ContentElement::~ContentElement() {
-  for (auto i = chunks.begin(); i != chunks.end(); i++) {
-    i->reset();
-  }
+//  for (auto i = chunks.begin(); i != chunks.end(); i++) {
+//    i->reset();
+//  }
   chunks.clear();
 }

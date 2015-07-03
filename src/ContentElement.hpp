@@ -27,14 +27,14 @@ class ContentChunk {
 protected:
   Capacity size;
   uint index;
-  uint viewsThisRound;
+  // uint viewsThisRound;
   ContentElement* parent;
 
 public:
   ContentChunk(Capacity size, uint index, ContentElement* parent) {
     this->size = size;
     this->index = index;
-    viewsThisRound = 0;
+    // viewsThisRound = 0;
     this->parent = parent;
   }
   
@@ -53,7 +53,7 @@ public:
   void setIndex(uint index) {
     this->index = index;
   }
-  
+ /* 
   uint getViewsThisRound() const {
     return this->viewsThisRound;
   }
@@ -65,7 +65,7 @@ public:
   void resetViewsThisRound() {
     this->viewsThisRound = 0;
   }
-  
+  */
   ContentElement* getContent() const {
     return parent;
   }
