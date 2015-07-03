@@ -62,23 +62,23 @@ protected:
 public:
   friend class CacheTestClass;
   Cache(Size maxSize, CachePolicy policy = LRU);
-  std::pair<bool, std::set<Content> > addToCache(Content content, 
-      Size size, Timestamp time);
+  std::pair<bool, std::set<Content> > addToCache(const Content content, 
+      const Size size, const Timestamp time);
   void clearCache();
   // to update metadata about the content (lastAccess, timesAccessed, uploads..)
   // if local==true the content is not uploaded (it's the user itself who requested it again)
-  bool getFromCache(Content content, Timestamp time, bool local);
-  bool isCached(Content content);
-  void removeFromCache(Content content, Timestamp time); // for expired content
-  bool uploadCompleted(Content content); // to decrease the upload counter
-  int getCurrentUploads(Content content);
-  int getTotalUploads();
-  double getAvgOccupancy(Timestamp time) {
+  bool getFromCache(const Content& content, const Timestamp time, const bool local);
+  bool isCached(const Content& content) const;
+  void removeFromCache(const Content& content, const Timestamp time); // for expired content
+  bool uploadCompleted(const Content& content); // to decrease the upload counter
+  int getCurrentUploads(const Content& content) const;
+  int getTotalUploads() const;
+  double getAvgOccupancy(const Timestamp time) const {
     double avg = cacheOccupancy.extract(time);
     return avg;
   }
   
-  void resetOccupancy(Timestamp time) {
+  void resetOccupancy(const Timestamp time) {
     double value = 100 * currentSize / maxSize;
     cacheOccupancy.reset(value, time);
   }
@@ -100,7 +100,7 @@ public:
     return maxSize;
   }
   
-  bool fitsInCache(Size size) const {
+  bool fitsInCache(const Size size) const {
     if (maxSize - currentSize >= size)
       return true;
     else
@@ -205,8 +205,8 @@ void Cache<Content, Size, Timestamp>::clearCache() {
 }
 
 template <typename Content, typename Size, typename Timestamp>
-bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp time,
-        bool local) {
+bool Cache<Content, Size, Timestamp>::getFromCache(const Content& content, 
+        const Timestamp time, const bool local) {
   typename CacheMap::iterator it = cacheMap.find(content);
   if (it != cacheMap.end()) {
     it->second.lastAccessed = time;
@@ -220,17 +220,18 @@ bool Cache<Content, Size, Timestamp>::getFromCache(Content content, Timestamp ti
 }
 
 template <typename Content, typename Size, typename Timestamp>
-bool Cache<Content, Size, Timestamp>::isCached(Content content) {
-  typename CacheMap::iterator cIt = cacheMap.find(content);
+bool Cache<Content, Size, Timestamp>::isCached(const Content& content) const {
+  typename CacheMap::const_iterator cIt = cacheMap.find(content);
   if (cIt != cacheMap.end())
     return true;
-  else // shall we return size instead to allow for multiple sources?
+  else 
     return false;
 }
 
 template <typename Content, typename Size, typename Timestamp>
-void Cache<Content, Size, Timestamp>::removeFromCache(Content content, Timestamp time) {
-  typename CacheMap::iterator it = cacheMap.find(content);
+void Cache<Content, Size, Timestamp>::removeFromCache(const Content& content, 
+        const Timestamp time) {
+  typename CacheMap::const_iterator it = cacheMap.find(content);
   if (it != cacheMap.end()) {
     this->currentSize -= it->second.size;
     assert(this->currentSize >= 0);
@@ -240,7 +241,7 @@ void Cache<Content, Size, Timestamp>::removeFromCache(Content content, Timestamp
 }
 
 template <typename Content, typename Size, typename Timestamp>
-bool Cache<Content, Size, Timestamp>::uploadCompleted(Content content) {
+bool Cache<Content, Size, Timestamp>::uploadCompleted(const Content& content) {
   typename CacheMap::iterator it = cacheMap.find(content);
   if (it != cacheMap.end()) {
     it->second.uploads = it->second.uploads - 1;
@@ -252,8 +253,8 @@ bool Cache<Content, Size, Timestamp>::uploadCompleted(Content content) {
 }
 
 template <typename Content, typename Size, typename Timestamp>
-int Cache<Content, Size, Timestamp>::getCurrentUploads(Content content) {
-  typename CacheMap::iterator it = cacheMap.find(content);
+int Cache<Content, Size, Timestamp>::getCurrentUploads(const Content& content) const {
+  typename CacheMap::const_iterator it = cacheMap.find(content);
   if (it != cacheMap.end()) {
     return it->second.uploads;
   } else {
@@ -262,9 +263,9 @@ int Cache<Content, Size, Timestamp>::getCurrentUploads(Content content) {
 }
 
 template <typename Content, typename Size, typename Timestamp>
-int Cache<Content, Size, Timestamp>::getTotalUploads() {
+int Cache<Content, Size, Timestamp>::getTotalUploads() const {
   int uploads = 0;
-  for (typename CacheMap::iterator it = cacheMap.begin(); it != cacheMap.end(); it++)
+  for (typename CacheMap::const_iterator it = cacheMap.begin(); it != cacheMap.end(); it++)
     uploads += it->second.uploads;
   return uploads;
 }
