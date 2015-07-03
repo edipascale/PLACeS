@@ -23,6 +23,7 @@ const std::vector<double> usrPctgByHour = {
 //0  1   2    3   4   5    6   7  8   9   10  11 12 13  14   15  16 17 18 19  20  21  22  23
 };
 // weight of the days of the week when determining request scheduling (M->S)
+// only used for VoD, which I haven't tested in ages
 const double dayWeights[] = {0.8, 0.9, 1, 0.8, 1.2, 1.3, 1.2};
 //                            M    T   W   T    F    S    S
 
@@ -161,7 +162,7 @@ public:
   void addToCache(PonUser user, ChunkPtr chunk, SimTime time);
   void clearUserCache();
   void clearLocalCache();
-  std::set<PonUser> getSources(ChunkPtr chunk, uint asid);
+  std::set<PonUser> getSources(const ChunkPtr& chunk, uint asid);
   void notifyCompletedFlow(Flow* flow, Scheduler* scheduler);
   void notifyEndRound(uint endingRound);
   // this is a hack and should be removed
@@ -169,10 +170,10 @@ public:
   void printStats(uint currentRound);
   void addContent(ContentElement* content, uint elapsedRounds);
   void removeContent(ContentElement* content, uint roundsElapsed);
-  bool checkIfCached(PonUser user, ChunkPtr chunk);
-  bool checkIfCached(Vertex lCache, ChunkPtr chunk);
-  void getFromLocalCache(Vertex lCache, ChunkPtr chunk, SimTime time);
-  void removeFromCMap(ChunkPtr chunk, PonUser user);
+  bool checkIfCached(PonUser user, const ChunkPtr& chunk);
+  bool checkIfCached(Vertex lCache, const ChunkPtr& chunk);
+  void getFromLocalCache(Vertex lCache, const ChunkPtr& chunk, SimTime time);
+  void removeFromCMap(const ChunkPtr& chunk, PonUser user);
   /* optimizeCaching implements the optimal caching algorithm to minimize storage
    * space while keeping high level of locality, by ensuring that some minimal
    * number of replicas are always available. Replicas are determined based on 
@@ -184,7 +185,7 @@ public:
    * second telling whether the requested element should be cached. The second
    * boolean value should only be taken into consideration if the first is true.
    */
-  std::pair<bool, bool> optimizeCaching(PonUser user, ChunkPtr chunk, 
+  std::pair<bool, bool> optimizeCaching(PonUser user, const ChunkPtr& chunk, 
       SimTime time, uint currentRound);
   
   void takeSnapshot(SimTime time, uint round) const {

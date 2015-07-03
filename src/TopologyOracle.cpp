@@ -212,7 +212,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   ContentElement* content = flow->getContent();
   std::string contentName = content->getName();
   uint chunkId = flow->getChunkId();
-  ChunkPtr chunk = content->getChunkById(chunkId);
+  const ChunkPtr chunk = content->getChunkById(chunkId);
   BOOST_LOG_TRIVIAL(trace) << time << ": fetching source for chunk " << chunkId
             << " of content " << contentName
             << " to user " << destination.first << "," << destination.second;
@@ -220,7 +220,7 @@ bool TopologyOracle::serveRequest(Flow* flow, Scheduler* scheduler) {
   if (chunk->getIndex() == 0)
     dailyRanking.at(currentDay-content->getReleaseDay()).hit(content);
   // also increase the number of hits of the chunk (currently not used)
-  chunk->increaseViewsThisRound();
+  // chunk->increaseViewsThisRound();
   // Set the flow as a transfer, since we are now assigning the source
   flow->setFlowType(FlowType::TRANSFER);
   // First check if the content is already in the user cache: if it is, there's
@@ -424,7 +424,7 @@ void TopologyOracle::notifyCompletedFlow(Flow* flow, Scheduler* scheduler) {
   PonUser dest = flow->getDestination();
   SimTime time = scheduler->getSimTime();
   uint round = scheduler->getCurrentRound();
-  ChunkPtr chunk = flow->getContent()->getChunkById(flow->getChunkId());
+  const ChunkPtr chunk = flow->getContent()->getChunkById(flow->getChunkId());
   switch(flow->getFlowType()) {
     case FlowType::TRANSFER:
     {
@@ -648,7 +648,7 @@ void TopologyOracle::notifyEndRound(uint endingRound) {
   return;
 }
 
-std::set<PonUser> TopologyOracle::getSources(ChunkPtr chunk,
+std::set<PonUser> TopologyOracle::getSources(const ChunkPtr& chunk,
         uint asid) {
   return asidContentMap->at(asid).at(chunk);
 }
@@ -791,15 +791,15 @@ void TopologyOracle::removeContent(ContentElement* content, uint roundsElapsed) 
   }
 }
 
-bool TopologyOracle::checkIfCached(PonUser user, ChunkPtr chunk) {
+bool TopologyOracle::checkIfCached(PonUser user, const ChunkPtr& chunk) {
   return userCacheMap->at(user).isCached(chunk);
 }
 
-bool TopologyOracle::checkIfCached(Vertex lCache, ChunkPtr chunk) {
+bool TopologyOracle::checkIfCached(Vertex lCache, const ChunkPtr& chunk) {
   return localCacheMap->at(lCache).isCached(chunk);
 }
 
-void TopologyOracle::getFromLocalCache(Vertex lCache, ChunkPtr chunk, 
+void TopologyOracle::getFromLocalCache(Vertex lCache, const ChunkPtr& chunk, 
         SimTime time) {  
   // used to update LFU/LRU stats when content is grabbed directly from the
   // local cache
@@ -812,7 +812,7 @@ void TopologyOracle::getFromLocalCache(Vertex lCache, ChunkPtr chunk,
   }
 }
 
-void TopologyOracle::removeFromCMap(ChunkPtr chunk, PonUser user) {
+void TopologyOracle::removeFromCMap(const ChunkPtr& chunk, PonUser user) {
   uint asid = topo->getAsid(user);  
   std::set<PonUser>::iterator uIt = asidContentMap->at(asid).at(chunk).find(user);
   if (uIt == asidContentMap->at(asid).at(chunk).end()) {
@@ -825,7 +825,7 @@ void TopologyOracle::removeFromCMap(ChunkPtr chunk, PonUser user) {
 }
 
 std::pair<bool, bool> TopologyOracle::optimizeCaching(PonUser reqUser, 
-        ChunkPtr chunk, SimTime time, uint currentRound) {
+        const ChunkPtr& chunk, SimTime time, uint currentRound) {
   SimTime absTime = time + (currentRound*roundDuration);
   /* This should no longer apply as chunks are either cached entirely or not cached
    * 
