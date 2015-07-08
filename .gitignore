@@ -5,3 +5,7 @@
 /dist/
 /results
 /*.sh
+/profiling3.txt
+/profiling2.txt
+/gmon.out
+/profiling.txt

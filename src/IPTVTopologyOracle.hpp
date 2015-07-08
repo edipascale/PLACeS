@@ -16,12 +16,8 @@
 
 
 
-/* The TopologyOracle keeps track of what everyone is caching and uses that
- * information to match requesters to sources with the appropriate content.
- * Essentially it serves as a global tracker (in the BitTorrent sense).
- * We keep both a map of all the user caching a particular content (to fetch
- * potential sources quickly) and a map of what each individual user is caching
- * (to be able to simulate finite-size caching).
+/** 
+ * IPTV specialization of the Locality Oracle for the current Topology.
  */
 class IPTVTopologyOracle : public TopologyOracle{
 protected:
