@@ -21,7 +21,10 @@ Flow::~Flow() {
   content = nullptr;
 }
 
-// debug method
+/**
+ * @deprecated Debug method, no longer used.
+ * @return A string with a concatation of some of the interal fields of the class.
+ */
 std::string Flow::toString() const {
   std::stringstream ss;
   ss << "s" << this->getSource().first << "d" << this->getDestination().first <<
@@ -33,6 +36,12 @@ std::string Flow::toString() const {
   return ss.str(); 
 }
 
+/**
+ * Updates Flow::sizeDownloaded by taking the previous value and adding to it
+ * the Capacity that has been downloaded with the current Flow::bandwidth
+ * between Flow::lastUpdate and now. 
+ * @param now current SimTime.
+ */
 void Flow::updateSizeDownloaded(SimTime now) {
   if (now > this->lastUpdate)
     this->sizeDownloaded += ((now - this->lastUpdate) * this->bandwidth);
