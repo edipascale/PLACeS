@@ -801,8 +801,6 @@ bool TopologyOracle::checkIfCached(Vertex lCache, const ChunkPtr& chunk) {
 
 void TopologyOracle::getFromLocalCache(Vertex lCache, const ChunkPtr& chunk, 
         SimTime time) {  
-  // used to update LFU/LRU stats when content is grabbed directly from the
-  // local cache
   if (localCacheMap->at(lCache).getMaxSize() >= chunk->getSize()) {
     bool result = localCacheMap->at(lCache).getFromCache(chunk, time, false);
     // the central server should have inifinite capacity but this is not implemented
