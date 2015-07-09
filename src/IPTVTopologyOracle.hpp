@@ -22,16 +22,31 @@
 class IPTVTopologyOracle : public TopologyOracle{
 protected:
  
+  /**
+   * Zipf distribution used to select a release day for a new content request.
+   * Content released more recently have higher probability of being selected.
+   */
   boost::random::zipf_distribution<>* relDayDist;
+  /**
+   * Zipf-Mandelbrot distribution used to select a content item from those
+   * released on the selected day; lower ranks indicate a higher popularity.
+   * The parameters of this distribution are extracted each day from shiftDist
+   * and expDist.
+   */
   boost::random::zipf_distribution<>* rankDist;
-  /* the following distributions are used to generate the parameters for the
-   * Zipf-Mandelbrot popularity distribution, which is going to change each
-   * day.
+  /**
+   * Distribution from which we extract the shift parameter for the
+   * Zipf-Mandelbrot popularity distribution, which is going to change each day.
    */
   boost::random::uniform_int_distribution<>* shiftDist;
+  /**
+   * Distribution from which we extract the exponent parameter for the
+   * Zipf-Mandelbrot popularity distribution, which is going to change each day.
+   */
   boost::random::uniform_real_distribution<>* expDist;
   
-  /* the daily catalog contains all the available contents sorted by day of
+  /**
+   * The daily catalog contains all the available contents sorted by day of
    * release, with dailyCatalog[0] being the content released in the current
    * day and dailyCatalog[6] the content released 6 days ago (and thus about 
    * to expire).
