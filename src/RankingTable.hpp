@@ -19,7 +19,9 @@ using uint = unsigned int;
  * useful for example to track the popularity of items in a catalog, where each
  * hit represents a request. Most operations can be performed either using the Element
  * itself or its rank as the key, thanks to the bi-directional map that is at
- * the base of the class.
+ * the base of the class. Beside keeping track of the total hits an Element receives,
+ * the RankingTable also allows tracking of hits received in a round, which can be
+ * reset without affecting the total number of hits and hence the ranking.
  */
 template <class Element> 
 class RankingTable {
@@ -232,17 +234,36 @@ void RankingTable<Element>::hit(Element e) {
     }
 }
 
+/**
+ * Returns the total number of hits received by a given Element.
+ * @param e The Element we want to retrieve the hits of.
+ * @return The total number of hits received by Element e so far.
+ * @throw An int exception (-1) if the Element could not be found in the catalog.
+ */
 template <class Element>
 uint RankingTable<Element>::getHits(Element e) const {
     uint rank = getRankOf(e);
     return hits.at(rank);
 }
+
+/**
+ * Returns the number of hits received by a given Element during the current round.
+ * @param e The Element we want to retrieve the hits of.
+ * @return The number of hits received by Element e in the current round.
+ * @throw An int exception (-1) if the Element could not be found in the catalog.
+ */
 template <class Element>
 uint RankingTable<Element>::getRoundHits(Element e) const {
     uint rank = getRankOf(e);
     return roundHits.at(rank);
 }
 
+/**
+ * Returns the total number of hits received by the Element with a given rank.
+ * @param rank The rank of the Element we want to retrieve the hits of.
+ * @return The total number of hits received by the Element with the given rank.
+ * @throw An int exception (-1) if no Element with the given rank could not be found in the catalog.
+ */
 template <class Element>
 uint RankingTable<Element>::getHitsByRank(uint rank) const {
     if (rank >= 0 && rank < hits.size())
@@ -251,6 +272,12 @@ uint RankingTable<Element>::getHitsByRank(uint rank) const {
         throw -1;
 }
 
+/**
+ * Returns the number of hits received during the current round by the Element with a given rank.
+ * @param rank The rank of the Element we want to retrieve the hits of.
+ * @return The number of hits received during the current round by the Element with the given rank.
+ * @throw An int exception (-1) if no Element with the given rank could not be found in the catalog.
+ */
 template <class Element>
 uint RankingTable<Element>::getRoundHitsByRank(uint rank) const {
     if (rank >= 0 && rank < hits.size())
@@ -259,6 +286,10 @@ uint RankingTable<Element>::getRoundHitsByRank(uint rank) const {
         throw -1;
 }
 
+/**
+ * Resets the number of hits received by all Elements during the current round (i.e., to signal
+ * the start of a new round). Does not affect the total number of hits received by the Elements of the catalog.
+ */
 template <class Element>
 void RankingTable<Element>::resetRoundHits() {
   roundHits.assign(roundHits.size(), 0);

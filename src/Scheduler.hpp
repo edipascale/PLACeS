@@ -17,9 +17,15 @@ typedef typename boost::heap::pairing_heap<Flow *,
         boost::heap::compare<CompareFlowPtr> > FlowQueue;
 typedef FlowQueue::handle_type handleT;
 
+/**
+ * The Scheduler manages the event queue of the simulation; it is responsible for
+ * scheduling new events (in the form of Flows), keeping them sorted by increasing
+ * ETAs, processing them one at a time and moving the clock forward whenever 
+ * there are no more events at the current simulation time.
+ */
 class Scheduler {
 protected:
-  SimMode mode;
+  SimMode mode; /**< Determines the simulation mode, i.e., VoD or IPTV. */
   SimTime simTime;
   FlowQueue pendingEvents;
   TopologyOracle* oracle;
