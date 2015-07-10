@@ -11,6 +11,16 @@
 #include <vector>
 using uint = unsigned int;
 
+/**
+ * A class to rank elements dynamically based on the number of "hits" they receive.
+ * 
+ * Elements in the RankingTable are sorted by decreasing number of hits, i.e.,
+ * with items with lower rank having a larger number of hits. The class can be
+ * useful for example to track the popularity of items in a catalog, where each
+ * hit represents a request. Most operations can be performed either using the Element
+ * itself or its rank as the key, thanks to the bi-directional map that is at
+ * the base of the class.
+ */
 template <class Element> 
 class RankingTable {
 public:
@@ -19,10 +29,10 @@ public:
     typedef typename RankingBimap::right_map RightMap;
     typedef typename RankingBimap::left_map LeftMap;
 protected:
-    std::vector<uint> hits;
-    std::vector<uint> roundHits;
-    RankingBimap catalog;
-    bool swap(uint a, uint b);
+    std::vector<uint> hits; /**< The metric used to determine the rank of an item; the more hits an item receives, the lower its rank. */
+    std::vector<uint> roundHits; /**< The number of hits received by each item in the current round. */
+    RankingBimap catalog; /**< The bi-directional map that represents the actual ranking table. */
+    bool swap(uint a, uint b); 
 public:
     RankingTable(){};
     void insert(Element e);
@@ -48,6 +58,12 @@ public:
     }
 };
 
+
+/**
+ * Attempts to insert a new Element at the bottom the RankingTable. Will not do
+ * anything if the Element is already in the RankingTable.
+ * @param e The Element to be inserted.
+ */
 template <class Element>
 void RankingTable<Element>::insert(Element e) {
     // check if the element is already in the catalog
@@ -62,6 +78,11 @@ void RankingTable<Element>::insert(Element e) {
     assert(hits.size() == roundHits.size());    
 }
 
+/**
+ * Attempts to erase an Element from the RankingTable, if it is there. Does not 
+ * do anything if the element cannot be found.
+ * @param e The Element to be erased.
+ */
 template <class Element>
 void RankingTable<Element>::erase(Element e) {
   try {
@@ -71,6 +92,11 @@ void RankingTable<Element>::erase(Element e) {
   }
 }
 
+/**
+ * Attempts to erase the Element with a given rank. Does not do anything if there
+ * is no Element with that rank.
+ * @param rank The rank of the Element we are trying to erase.
+ */
 template <class Element>
 void RankingTable<Element>::eraseByRank(uint rank) {
     auto init = catalog.right.find(rank);
@@ -88,6 +114,12 @@ void RankingTable<Element>::eraseByRank(uint rank) {
     }        
 }
 
+/**
+ * Fetches the Element that has the specified rank, if such element exists.
+ * @param rank The rank of the Element we are fetching.
+ * @return The Element that has the rank specified.
+ * @throw An int exception (-1) if no Element with the given rank could be found.
+ */
 template <class Element>
 Element RankingTable<Element>::getElementByRank(uint rank) const {
     auto rit = catalog.right.find(rank);
@@ -107,6 +139,12 @@ const typename RankingTable<Element>::LeftMap RankingTable<Element>::getLeftMap(
     return catalog.left;
 }
 
+/**
+ * Returns the rank of a given Element.
+ * @param e The Element we want to know the rank of.
+ * @return The rank of the given Element.
+ * @throw An int exception (-1) if the specified Element could not be found.
+ */
 template <class Element>
 uint RankingTable<Element>::getRankOf(Element e) const {
     auto rit = catalog.left.find(e);
@@ -116,6 +154,11 @@ uint RankingTable<Element>::getRankOf(Element e) const {
         throw -1;       
 }
 
+/**
+ * Checks whether the specified Element is in the RankingTable.
+ * @param e The Element we are fetching.
+ * @return True if the Element e is in the RankingTable, False otherwise.
+ */
 template <class Element>
 bool RankingTable<Element>::isInCatalog(Element e) const {
     return (catalog.left.find(e) != catalog.left.end());
@@ -133,6 +176,12 @@ void RankingTable<Element>::clear() {
     roundHits.clear();
 }
 
+/**
+ *  A utility method to swap the rank of two items, while at the same time upgrading the rank of all the intermediate ones.
+ * @param a The rank of the first item.
+ * @param b The rank of the second item.
+ * @return True if the swap was successful, False otherwise.
+ */
 template <class Element>
 bool RankingTable<Element>::swap(uint a, uint b) {
     uint temp = hits.size();
@@ -159,6 +208,11 @@ bool RankingTable<Element>::swap(uint a, uint b) {
     return true;
 }
 
+/**
+ * Increases the number of hits received by the specified Element by 1, and 
+ * updates the ranking if required.
+ * @param e The Element that just received an additional hit.
+ */
 template <class Element>
 void RankingTable<Element>::hit(Element e) {
     auto it = catalog.left.find(e);
