@@ -24,30 +24,32 @@ class Flow;
 
 using std::string;
 
-/* enum to differentiate upstream, downstream and core (symmetric) links;
- * note that this is not assigned to the edge, but rather computed through the
+/**
+ * enum to differentiate upstream, downstream, metro and core (symmetric) links.
+ * Note that this is not assigned to the edge, but rather computed through the
  * values of ponCustomers of the two vertices connected by the edge. 
  */
 enum EdgeType {UPSTREAM, DOWNSTREAM, METRO, CORE, UNKNOWN_TYPE};
 
-// Create structs to define bundled properties for the graph
+/**
+ *  A struct used to define bundled properties for nodes in the topology graph.
+ */
 struct NetworkNode {
-  /* number of customers attached to this PON node. if == 0, then this is a core
-   * node and not a PON.
-   */
-    int ponCustomers;
-  /* all the PONs attached to the same (set of) core node(s) belong to the same 
-   * AS (this is needed to compute locality in terms of access sections)
-   */
-    int asid;
+    int ponCustomers; /**< number of customers attached to this PON node. if == 0, then this is a core node and not a PON. */
+    int asid; /**< All the PONs attached to the same (set of) core node(s) belong to the same Access Section (AS). This is needed to compute locality. */
 };
+/**
+ * A struct used to define bundled properties for edges in the topology graph.
+ * Note that edges are uni-directional, i.e., a link is a composed by a pair
+ * of edges with opposite directions.
+ */
 struct NetworkEdge {
-    double length;
-    Capacity maxCapacity;
-    Capacity spareCapacity;
-    std::set<Flow*> activeFlows;
-    Capacity peakCapacity;
-    EdgeType type;
+    double length; /**< The length of the edge in meters. */
+    Capacity maxCapacity; /**< The maximum bandwidth available on this edge. */
+    Capacity spareCapacity; /**< The amount of bandwidth currently availabe on this edge, i.e., after substracting the capacity already used by Flows transiting on it. */
+    std::set<Flow*> activeFlows; /**< The set of Flows actively using this edge at the moment. */
+    Capacity peakCapacity; /**< The highest bandwidth collectively used by Flows on this edge at any given time in the current simulation round. */
+    EdgeType type; /**< The EdgeType of this edge. Used to differentiate between core, metro and access traffic. */
 };
 
 // Our graph template
