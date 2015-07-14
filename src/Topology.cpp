@@ -35,33 +35,6 @@ bool Topology::addEdge(Vertex src, Vertex dest, Capacity cap, EdgeType type = CO
   return result.second;
 }
 
-/* Builds the topology from a topology file, either from a graphml topology file
- * (which MUST have a .graphml extension) or a text file with the following conventions 
- * (no quotes, #something means number of elements of type something, arguments
- * in brackets are optional)
- * The first line must be "#CoreNodes #CoreEdges". #CoreEdges is assumed to be 
- * the number of undirected core edges, there will actually be 2*#CoreEdges in 
- * the graph (see below). 
- * Then #CoreNodes lines should follow with the format: 
- * "asid #PONNodes AvgPONCustomers DevPONCustomers downstreamCapacity upstreamCapacity (cs)"
- * asid is the identifier of the metro/core node and its relative Access Segment;
- * it is currently ignored and assumed to be a progressive integer starting from 0.
- * #PONNodes is the number of PONs attached to that metro/core node;
- * AvgPONCustomers is the mean value of a gaussian distribution describing the
- * number of customers attached to each of this node's PONs;
- * DevPONCustomers is the standard deviation of the above mentioned distribution;
- * downstreamCapacity and upstreamCapacity are the capacities in Mbps of each PON;
- * cs (optional) indicates that this metro/core node hosts the central repository
- * server.
- * After this, #CoreEdges lines should follow, each defining an edge between 
- * two metro/core nodes, in the following format: 
- * "sourceId destId capacity capacityRev"
- * The two capacities are used to define respectively the capacities
- * of the sourceId->destId edge and the destId->sourceId edge (to account for 
- * asymmetric links); if negative, it is assumed to be infinite.
- * The graph is directed but for each pair of vertices, sourceId and destId, two 
- * links (one per direction) are created.
- */
 Topology::Topology(string fileName, po::variables_map vm) {
   this->minFlowIncrease = std::max(vm["min-flow-increase"].as<double>(),0.0);
   this->fileName = fileName;
