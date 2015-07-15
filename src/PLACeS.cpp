@@ -19,10 +19,24 @@
 #include <boost/log/core/core.hpp>
 #include <boost/log/expressions.hpp>
 
-// random generator (global because multiple classes need to access it)
+/**
+ *  Mersenne-Twister pseudo-random generator. Global because multiple classes need to access it.
+ */
 boost::mt19937 gen;
 
-/* Output collected statistics from a simulation into a file 
+/**
+ * Outputs the results of the simulation to file. It is called at the very end
+ * of the simulation, so if the execution is stopped before that nothing is 
+ * saved to file. The aggregate statistics are also computed here if more than
+ * a single round of simulation was run.
+ * 
+ * @param vm The set of command-line options specified by the user of the simulator.
+ * @param topo The Topology over which the simulation was run.
+ * @param oracle The TopologyOracle responsible for the simulation in question.
+ * @todo{Some of the aggregate statistics, particularly those that do not span
+ *       the entirety ofthe simulation like the successful optimizations, are 
+ *       not computed correctly at the moment, and need to be computed manually
+ *       instead. This should be fixed!}
  */
 void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
   using namespace std;
@@ -172,7 +186,7 @@ void printToFile(po::variables_map vm, Topology* topo, TopologyOracle* oracle) {
 }
 
 /*
- *
+ * 
  */
 int main(int argc, char** argv) {
   using namespace std;
