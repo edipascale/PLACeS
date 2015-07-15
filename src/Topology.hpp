@@ -108,10 +108,10 @@ protected:
     DistanceMap dMap; /**< A map keeping track of the distance between vertices, used for routing purposes. */
     PredecessorMap pMap; /**< A map of predecessors in the pre-computed shourtest path routes, used for routing purposes. */
     Vertex centralServer; /**< The core network vertex where we are placing the central repository, i.e., the source of all ContentElement when they are first introduced in the catalog or when there is no other source available. */
-    VertexMap asCacheMap; /**< */
+    VertexMap asCacheMap; /**< A map matching each AS identifier with the vertex where the CDN server is located. */
     NetworkStats stats; /**< A collection of statistic measurements of the traffic circulating over this topology. @see NetworkStats */
-    VertexVec ponNodes; /**< */
-    string fileName; /**< */
+    VertexVec ponNodes; /**< A vector of all the graph vertices with a non-zero number of NetworkNode::ponCustomers attached to them. These vertices will have a single link connecting them to a metro or metro/core node, representing the shared fiber tree of a PON. */
+    string fileName; /**< The name of the input file used to generate the topology. */
     LoadMap loadMap; /**< A Map associating to each edge the total traffic it has observed. Used to compute the traffic statistics at the end of each round. */
     uint bitrate; /**< While not technically a topology parameter, the bitrate of the encoded content is required both in updateCapacity to estimate the time at which users will change channel (and thus to set the userViewEta) and to figure out if there's enough capacity to serve a new customer.*/
     Capacity minFlowIncrease;/**< minFlowIncrease is used in updateCapacity when adding bandwidth to a flow
@@ -150,7 +150,8 @@ public:
      * Builds the topology from a topology file. The recommended option is to
      * specify a graphml topology file (which MUST have a .graphml extension). 
      * Look at some of the default graphml topologies in the Topologies folder
-     * for examples of the properties recognized by the simulator.
+     * for examples of the properties recognized by the simulator. Comments 
+     * inside the constructor's code itself can also be useful in this regard.
      * 
      * Alternatively, the topology can be specified using a text file with the following conventions 
      * (no quotes, #something means number of elements of type something, arguments
@@ -182,40 +183,172 @@ public:
      * @param vm the set of simulation parameters specified at command line by the user.
      */
     Topology(string fileName, po::variables_map vm);
+    /**
+     * Retrieves all the vertices with customers attached to them.
+     * In other words, all the vertices with a non-zero value of
+     * NetworkNode::ponCustomers. 
+     * @return a vector of vertices with end-users attached to them.
+     */
     VertexVec getPonNodes() const;
+    /**
+     * Computes the hop-distance between two vertices.
+     * @param source The source vertex of the route.
+     * @param dest The destination vertex of the route.
+     * @return The number of hops required to go from source to dest over the shortest route.
+     */
     uint getDistance(uint source, uint dest) const;
-    std::vector<Edge> getRoute(uint source, uint dest);
-    // utility method after the addition of PonUsers
-    std::vector<Edge> getRoute(PonUser source, PonUser destination) {
+    /**
+     * Retrieves the shortest path between a source and a destination Vertex.
+     * @param source The source vertex of the route.
+     * @param dest The destination vertex of the route.
+     * @return A vector of Edges that constitute the shortest route between source and dest.
+     */
+    std::vector<Edge> getRoute(uint source, uint dest) const;
+    /**
+     * Retrieves the shortest path between a source and a destination user.
+     * @param source The source user of the route.
+     * @param dest The destination user of the route.
+     * @return A vector of Edges that constitute the shortest route between source and dest.
+     */
+    std::vector<Edge> getRoute(PonUser source, PonUser destination) const {
       return this->getRoute(source.first, destination.first);
     }
+    /**
+     * Updates the available capacity over the edges of the topology after the 
+     * addition or removal of a data Flow. 
+     * A centralized bandwidth sharing algorithm is implemented here. Each streaming 
+     * flow transiting over a particular link is entitled to at least an equal share 
+     * of the available capacity of that link. This process is repeated across each 
+     * link of the flow's route to identify the tightest capacity constraint 
+     * (i.e., the bottleneck), which determines the capacity assigned to the flow. 
+     * This capacity is updated dynamically whenever a flow enters (respectively leaves) 
+     * the network; however, only the bottleneck for the new (respectively leaving) 
+     * flow is used to calculate the new capacity allocation. This is done to 
+     * alleviate the time complexity of the bandwidth sharing algorithm, 
+     * at the expense of some loss in terms of optimal resource allocation. 
+     * No individual flow is allowed to receive more than MAX_FLOW_SPEED of 
+     * bandwidth, in an attempt to model both network operators constraints on 
+     * maximum available capacity per user and the limits imposed by TCP 
+     * mechanisms (e.g., due to the congestion control mechanisms, as we do not 
+     * simulate packet loss). 
+     * @param flow The data flow that has been just added or removed.
+     * @param scheduler A pointer to the Scheduler, which will ensure that any change to the ETA of some Flow will be reflected in the ordering of the queued events.
+     * @param addNotRemove True if the flow is a new transfer being added, false if it is a completed flow that needs to be removed.
+     */
     void updateCapacity(Flow* flow, Scheduler* scheduler, 
           bool addNotRemove);
+    /**
+     * Computes the traffic statistics for the round that just ended, stores them 
+     * in the NetworkStats structures, and prints them to screen.
+     * @param currentRound The simulation round that just ended.
+     * @param roundDuration The length in seconds of the simulation round that just ended.
+     */
     void printNetworkStats(uint currentRound, uint roundDuration);
+    /**
+     * Removes all the Flows from the network edges, restoring their capacity
+     * to their original maximum. 
+     */
     void resetFlows();
+    /**
+     * Updates the LoadMap by adding the data transmitted through the specified 
+     * Flow to each of the Edges composing its route. Invoked by the TopologyOracle
+     * once the Flow has completed its transfer.
+     * @param flow The Flow that has just completed its data transfer.
+     */
     void updateLoadMap(Flow* flow);
+    /**
+     * Resets the content of LoadMap, setting the total transferred Mb for each
+     * Edge in the topology to 0.
+     */
     void resetLoadMap();
-    Vertex getCentralServer();
-    bool isLocal(Vertex source, Vertex dest);
-    Vertex getLocalCache(Vertex node);
-    VertexVec getLocalCacheNodes();
-    bool isCongested(PonUser source, PonUser destination);
+    /**
+     * Retrieves the Vertex where the central repository is located.
+     * @return The Vertex where the central repository is located.
+     */
+    Vertex getCentralServer() const;
+    /**
+     * Checks whether a Flow between source and dest would be local, i.e., if it
+     * could be completed without leaving the Access Section (AS) of the destination.
+     * @param source The proposed source for the Flow.
+     * @param dest The destination of the Flow, i.e., the requester of the video item.
+     * @return True if the transfer between source and dest would be local, false otherwise.
+     */
+    bool isLocal(Vertex source, Vertex dest) const;
+    /**
+     * Retrieves the Vertex hosting the local CDN cache for the AS of the specified node.
+     * @param node The Vertex for which we are seeking the local CDN.
+     * @return The Vertex hosting the local CDN cache for the AS of the specified node.
+     */
+    Vertex getLocalCache(Vertex node) const;
+    /**
+     * Retrieves a vector with all the Vertices hosting local CDN caches for some AS.
+     * @return A vector with all the Vertices hosting local CDN caches for some AS.
+     */
+    VertexVec getLocalCacheNodes() const;
+    /**
+     * Checks whether there is enough spare capacity in the network to serve a request
+     * from source to destination.
+     * @param source The proposed source for the item requested.
+     * @param destination The destination of the request.
+     * @return True if there is enough bandwidth to at least transfer the item at its encoding bitrate, false otherwise.
+     */
+    bool isCongested(PonUser source, PonUser destination) const;
+    /**
+     * Adds a new uni-directional Edge between two Vertices. Utility method that 
+     * is not currently used in the simulator.
+     * @deprecated
+     * @param src The origin Vertex of the new Edge.
+     * @param dest The destination Vertex of the new Edge.
+     * @param cap The maximum capacity available on the new Edge. If negative, it is assumed to be UNLIMITED.
+     * @param type The EdgeType of the new Edge.
+     * @return True if the new Edge was successfully added, false otherwise.
+     */
     bool addEdge(Vertex src, Vertex dest, Capacity cap, EdgeType type);
+    /**
+     * Prints a graphml snapshot of the current topology, including the available
+     * capacity on metro/core edges. Useful to visualize the traffic generated
+     * by the model being used.
+     * @param time The SimTime at which the snapshot is being taken.
+     * @param round The current round of simulation.
+     */
     void printTopology(SimTime time, uint round);
-    uint getAsid(PonUser node) {
+    /**
+     * Retrieves the index of the Access Section (AS) to which the specified user belongs.
+     * @param node The user we want to know the AS of.
+     * @return The index of the AS of the specified user.
+     */
+    uint getAsid(PonUser node) const {
       return topology[node.first].asid;
     }
+    /**
+     * Returns the type of the specified Edge, i.e., whether it is a core, metro,
+     * or access edge.
+     * @param e The Edge we want to know the type of.
+     * @return The EdgeType of the specified Edge.
+     * @see EdgeType
+     */
     EdgeType getEdgeType(Edge e) const;
+    /**
+     * Retrieves the number of customers attached to the specified Vertex.
+     * @param v The Vertex we want to know the number of customers attached to.
+     * @return The number of cusotmers attached to the specified Vertex.
+     */
     uint getPonCustomers(Vertex v) const;
 
   string getFileName() const {
     return fileName;
   }
-
+  /**
+   * Returns the total number of customers (or end-users) present in the network.
+   * @return The total number of customers present in the network.
+   */
   uint getNumCustomers() const {
     return numCustomers;
   }
-
+  /**
+   * Returns the total number of Access Sections (ASes) present in the network.
+   * @return The total number of ASes present in the network.
+   */
   uint getNumASes() const {
     return numASes;
   }
@@ -224,9 +357,11 @@ public:
     return this->stats;
   }
   
-  /* returns the number of customers for a given AS id
+  /**
+   * Retrieves the number of customers for a given Access Section (AS).
+   * @param asid The identifier of the AS we want to know the number of customers of.
    */
-  uint getASCustomers(uint asid) {
+  uint getASCustomers(uint asid) const {
     return ASCustomersMap.at(asid);
   }
 };
