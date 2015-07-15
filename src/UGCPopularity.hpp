@@ -1,9 +1,7 @@
 /* 
  * File:   UGCPopularity.hpp
- * Author: emanuele
+ * Author: Emanuele Di Pascale
  * 
- * Defines a Popularity Distribution which follows the model of Borghol et al.,
- * "Characterizing and Modeling Popularity of User-Generated Videos", 2011.
  * Created on 30 April 2012, 15:20
  */
 
@@ -101,23 +99,77 @@ namespace boost {
   }
 }
 
+/**
+ * Defines a Popularity Distribution which follows the model described in [1].
+ * This is used to generate requests that match those of a User Generated Content
+ * website (specifically YouTube). In short, each element is assigned a peek
+ * popularity week; the number of views it receives each week only depends on
+ * whether it is before, at or after this peek popularity week. 
+ * 
+ * [1] Y. Borghol, S. Mitra, S. Ardon, N. Carlsson, D. Eager, and A. Mahanti, 
+ * “Characterizing and modelling popularity of user-generated videos,” 
+ * Perform. Eval., vol. 68, no. 11, pp. 1037–1055, Nov. 2011.
+ * 
+ * @deprecated
+ */
 class UGCPopularity {
 protected:
-  unsigned short int totalRounds;
-  boost::math::ttpDistribution* ttpDist;
-  bool perturbations;
+  unsigned short int totalRounds; /**< Total number of rounds in this simulation run. */
+  boost::math::ttpDistribution* ttpDist; /**< Composite distribution used to model the popularity of objects, as described in Borghol's paper. */
+  bool perturbations; /**< Boolean parameter indicating whether we are using the optional permutation of views to better fit the real traces, as described in Borghol's paper. */
   
 public:
+  /**
+   * Simple constructor.
+   * @param totalRounds The total number of rounds (i.e., weeks) of the current simulation run.
+   * @param perturbations A boolean parameter indicating whether we are using the optional permutation of views to better fit the real traces.
+   */
   UGCPopularity(unsigned int totalRounds, bool perturbations);
   ~UGCPopularity();
+  /**
+   * Assigns the number of view that each of the ContentElements in the list will
+   * receive during the current round. All the elements in the list are assumed
+   * to be in the same phase with respect to their peak week of popularity.
+   * @param contentList The list of ContentElements for which we need to generate views.
+   * @param phase An indicator of whether the elements in the list are before their popularity peak, at the peak, or after it.
+   * @return The total number of views generated collectively for all the elements in the list.
+   */
   unsigned int generateViews(std::list<ContentElement*> contentList, 
     peakingPhase phase);
+  /**
+   * Extracts a peak popularity round from the distribution defined in Borghol's paper.
+   * @return The index of the simulation round at which a ContentElement will see its peak in popularity.
+   */
   unsigned int generatePeakRound();
+  /**
+   * Generates the weekly views for an element which is in the body of the distribution and before the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getBeforePeakViews();
+  /**
+   * Generates the weekly views for an element which is in the tail of the distribution and before the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getBeforePeakTailViews();
+  /**
+   * Generates the weekly views for an element which is in the body of the distribution and at the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getAtPeakViews();
+  /**
+   * Generates the weekly views for an element which is in the tail of the distribution and at the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getAtPeakTailViews();
+  /**
+   * Generates the weekly views for an element which is in the body of the distribution and after the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getAfterPeakViews();
+  /**
+   * Generates the weekly views for an element which is in the tail of the distribution and after the peak popularity.
+   * @return The weekly number of views received by the element.
+   */
   unsigned int getAfterPeakTailViews();
 
   unsigned short int getTotalRounds() const {
