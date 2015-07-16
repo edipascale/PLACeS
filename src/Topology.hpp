@@ -207,8 +207,8 @@ public:
     /**
      * Retrieves the shortest path between a source and a destination user.
      * @param source The source user of the route.
-     * @param dest The destination user of the route.
-     * @return A vector of Edges that constitute the shortest route between source and dest.
+     * @param destination The destination user of the route.
+     * @return A vector of Edges that constitute the shortest route between source and destination.
      */
     std::vector<Edge> getRoute(PonUser source, PonUser destination) const {
       return this->getRoute(source.first, destination.first);

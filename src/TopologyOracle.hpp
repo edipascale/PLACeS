@@ -119,7 +119,7 @@ typedef std::map<PonUser, UserWatchingInfo> UserWatchingMap;
  * 
  * This is an abstract class, which acts as the aggregator for the common
  * functionalities of the two derived classes IPTVTopologyOracle and 
- * VodTopologyOracle. The appropriate methods are overridden in the derived
+ * VoDTopologyOracle. The appropriate methods are overridden in the derived
  * classes to specialize their behaviour. 
  */
 class TopologyOracle{
